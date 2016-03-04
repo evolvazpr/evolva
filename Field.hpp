@@ -12,7 +12,7 @@ class Field {
 		const	int y_max_;
 		const std::unique_ptr<FieldCell[]> cells_;
 
-    static Field * instance_;
+    static std::shared_ptr<Field> instance_;
 
 		Field(const int x, const int y);
 		Field() = delete;
@@ -22,6 +22,7 @@ class Field {
 	public:
 	
 		static Field & getInstance(const int x = 0, const int y = 0);
+		~Field() { std::cout << "~Field() called\n"; }
 		FieldCell & getCell(int x, int y); 
 
 };
