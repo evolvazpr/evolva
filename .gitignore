@@ -1,0 +1,6 @@
+main
+*.dblite
+*.o
+*.swp
+*.py
+*.pyc
