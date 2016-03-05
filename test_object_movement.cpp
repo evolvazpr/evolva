@@ -1,79 +1,81 @@
 #include "Field.hpp"
+#include "CellObject.hpp"
 
-/*
- * TEST SCENARIO:
- * 1. Two objects on a map. First on (4, 4) coordinate, second on (5, 5).
- * 2. Moving first object to (5, 6), checking everything.
- * 3. Moving first object to (5, 5), checking eveyrthing, should fail.
- * 4. Moving second object to (6, 6), checking everything.
- * 5. Moving first object to (5, 5), checking everything.
- *
- * Testing if not movable object is moved is not implemented yet.
- */
 int main(void) {
 	bool ret;
 	int rt;
 
-	std::shared_ptr<CellObject> first_obj = std::make_shared<Tree>();
-	std::shared_ptr<CellObject> second_obj = std::make_shared<Tree>();
+	std::shared_ptr<CellObject> tree = std::make_shared<Plant>(5, false);
+	std::shared_ptr<CellObject> human = std::make_shared<test>();
+	std::shared_ptr<CellObject> cat = std::make_shared<test>();
 	Field &field = Field::getInstance(10, 10);
-	std::shared_ptr<FieldCell> cell1(field.getCell(4, 4));
-	std::shared_ptr<FieldCell> cell2(field.getCell(5, 5));
 
-	field.addObjectToVector(first_obj, 4, 4);
-	field.addObjectToVector(second_obj, 5, 5);
-
-	if (!cell1) { 
+	ret = field.addObjectToWorld(tree, 4, 4);
+	if (!ret) {
 		rt = 1;
-		goto err;
+		goto err;//just temporary goto
 	}
 
-	if (!cell2) {
+	ret = field.addObjectToWorld(human, 5, 5);
+	if (!ret) {
 		rt = 2;
 		goto err;
 	}
 
-	ret = cell1->insertObject(first_obj);
-	if (!ret) {
+	ret = field.addObjectToWorld(cat, 6, 6);
+		if (!ret) {
 		rt = 3;
 		goto err;
 	}
 
-	ret = cell2->insertObject(second_obj);
-	if (!ret) {
+	ret = field.moveObjectWithRelativeStep(tree, 1, 2);
+	if (ret) {
 		rt = 4;
-		goto err;
+		goto err; 
 	}
 	
-	ret = field.moveObjectWithRelativeStep(first_obj, 1, 2);
+	ret = field.moveObjectWithRelativeStep(human, -2, -2);
 	if (!ret) {
 		rt = 5;
 		goto err;
 	}
-	
-	ret = field.moveObjectWithRelativeStep(first_obj, 0, -1);
+
+	ret = field.moveObjectWithRelativeStep(cat, -3, -3);
 	if (ret) {
 		rt = 6;
 		goto err;
 	}
 
-	ret = field.moveObjectWithRelativeStep(second_obj, 1, 1);
+	ret = field.moveObjectWithRelativeStep(human, 1, -1);
 	if (!ret) {
 		rt = 7;
 		goto err;
 	}
-
-	ret = field.moveObjectWithRelativeStep(first_obj, 0, -1);
+	ret = field.moveObjectWithRelativeStep(cat, -3, -3);
 	if (!ret) {
 		rt = 8;
 		goto err;
 	}
 
-	cell1->removeObject();
-	cell2->removeObject();
+	field.removeObjectFromWorld(tree);
 
+	field.removeObjectFromWorld(cat);
+
+	ret = field.moveObjectWithRelativeStep(cat, -2, -2);
+	if (ret) {
+		rt = 9;
+		goto err;
+	}
+
+	field.removeObjectFromWorld(human);
+	
+	std::cout << "No error.\n";
 	return 0;
 err:
+
+	field.removeObjectFromWorld(tree);
+	field.removeObjectFromWorld(cat);
+	field.removeObjectFromWorld(human);
 	std::cout << "Error: " << rt << "\n";
 	return rt;
 }

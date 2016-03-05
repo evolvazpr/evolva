@@ -1,4 +1,4 @@
-env=Environment(CPPPATH=[],
+env=Environment(CPPPATH=['/usr/include/boost/'],
 		CPPDEFINES=[],
 		LIBS=[],
 		CXXFLAGS="-std=c++11 -g3 -O0"

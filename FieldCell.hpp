@@ -11,16 +11,16 @@ enum GroundType {Sand, Grass, Water};
 /*
  * Field cell class
  * bool insertObject(std::shared_ptr<Object> obj):
- *		Funkcja wprowadza wskaźnik obiektu do komórki.
+ *		Method enters object to cell.
  *		RETURN VALUE:
- *			 false gdy komórka jest już zajmowana przez jakiś obiekt.
- *			 true gdy komórka była pusta i obiekt został wprowadzony.
+ *			 On success returns true.
+ *			 On failure (when already there is object in cell) returns false.
  *
  *void removeObject():
- *		Funkcja usuwa wskaźnik z komórki. Komórka staje się pusta.
+ *		Method removes object from cell.
  *
  *GroundType getGroundType():
- *		Zwraca typ podłoża - TODO: możliwość dalszej implementacji.
+ *		Returns type of ground.
  */ 
 
 class FieldCell {
