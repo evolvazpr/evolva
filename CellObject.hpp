@@ -2,6 +2,7 @@
 #define _CELLOBJECT_H_
 
 #include <iostream>
+
 /*
  * Abstract base class for objects.
  * bool isMovable() - needs to be implemented in inheriting classes.
@@ -24,11 +25,12 @@ class Plant : public CellObject {
 		bool isToxic() { return toxic_; }
 		int getEnergyValue() { return energy_; }
 		virtual bool isMovable() { return false; }
-		virtual ~Plant(){}
+		virtual ~Plant() {}
 };
 
-class test : public CellObject {
+class TestUnit : public CellObject {
 	public:
+		TestUnit() : CellObject() {}
 		virtual bool isMovable() { return true; }
 };
 

@@ -12,6 +12,9 @@
 /*
  * class Field - represents "world".
  *
+ * To set size of field you MUST pass arguments to static getInstance method. Also it must be the first
+ * call to this method.
+ *
  * Public methods:
  * std::shared_ptr<FieldCell> getCell(int x, int y):
  *		Parameters: 
@@ -71,12 +74,12 @@ class Field {
 		Field(const int x, const int y);
 		Field() = delete;
 		Field(const Field&) = delete;
-		Field & operator=(const Field &) = delete;
+		Field& operator=(const Field &) = delete;
 	
 		void calculateNewPositionOfObject(std::shared_ptr<ListElement> list_element, int x_relative, int y_relative);		
 	public:
 
-		static Field & getInstance(const int x = 0, const int y = 0);
+		static Field& getInstance(const int x = 0, const int y = 0);
 
 		std::shared_ptr<FieldCell> getCell(int x, int y); 
 		std::shared_ptr<FieldCell> getCellWithRelativeCoords(std::shared_ptr<CellObject> object, int x_relative,

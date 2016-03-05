@@ -11,10 +11,10 @@ enum GroundType {Sand, Grass, Water};
 /*
  * Field cell class
  * bool insertObject(std::shared_ptr<Object> obj):
- *		Method enters object to cell.
+ *		Method inserts object in cell.
  *		RETURN VALUE:
  *			 On success returns true.
- *			 On failure (when already there is object in cell) returns false.
+ *			 On failure (when there is already an object in cell) returns false.
  *
  *void removeObject():
  *		Method removes object from cell.
