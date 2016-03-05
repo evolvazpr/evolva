@@ -6,11 +6,12 @@ GroundType FieldCell::getGroundType() {
 	return ground_type_;
 }
 
-bool FieldCell::insertObject(std::shared_ptr<Object> obj){
-	if (object_.lock())
-		return true;
-		object_ = obj;
+bool FieldCell::insertObject(std::shared_ptr<CellObject> obj){
+	if (object_.lock()) {
 		return false;
+	} 
+	object_ = obj;
+	return true;
 }
 
 void FieldCell::removeObject(void){
