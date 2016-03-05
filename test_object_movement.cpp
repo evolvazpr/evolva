@@ -10,19 +10,19 @@ int main(void) {
 	std::shared_ptr<CellObject> cat = std::make_shared<test>();
 	Field &field = Field::getInstance(10, 10);
 
-	ret = field.addObjectToWorld(tree, 4, 4);
+	ret = field.addObject(tree, 4, 4);
 	if (!ret) {
 		rt = 1;
 		goto err;//just temporary goto
 	}
 
-	ret = field.addObjectToWorld(human, 5, 5);
+	ret = field.addObject(human, 5, 5);
 	if (!ret) {
 		rt = 2;
 		goto err;
 	}
 
-	ret = field.addObjectToWorld(cat, 6, 6);
+	ret = field.addObject(cat, 6, 6);
 		if (!ret) {
 		rt = 3;
 		goto err;
@@ -57,9 +57,9 @@ int main(void) {
 		goto err;
 	}
 
-	field.removeObjectFromWorld(tree);
+	field.removeObject(tree);
 
-	field.removeObjectFromWorld(cat);
+	field.removeObject(cat);
 
 	ret = field.moveObjectWithRelativeStep(cat, -2, -2);
 	if (ret) {
@@ -67,15 +67,15 @@ int main(void) {
 		goto err;
 	}
 
-	field.removeObjectFromWorld(human);
+	field.removeObject(human);
 	
 	std::cout << "No error.\n";
 	return 0;
 err:
 
-	field.removeObjectFromWorld(tree);
-	field.removeObjectFromWorld(cat);
-	field.removeObjectFromWorld(human);
+	field.removeObject(tree);
+	field.removeObject(cat);
+	field.removeObject(human);
 	std::cout << "Error: " << rt << "\n";
 	return rt;
 }

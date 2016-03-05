@@ -80,11 +80,11 @@ class Field {
 
 		std::shared_ptr<FieldCell> getCell(int x, int y); 
 		std::shared_ptr<FieldCell> getCellWithRelativeCoords(std::shared_ptr<CellObject> object, int x_relative,
-																											 int y_relative);
+																											   int y_relative);
 
 		bool moveObjectWithRelativeStep(std::shared_ptr<CellObject> object, int x_relative, int y_relative);
-		bool addObjectToWorld(std::shared_ptr<CellObject> object, int x, int y);
-		bool removeObjectFromWorld(std::shared_ptr<CellObject> object);
+		bool addObject(std::shared_ptr<CellObject> object, int x, int y);
+		bool removeObject(std::shared_ptr<CellObject> object);
 };
 
 #endif /* _FIELD_HPP_ */

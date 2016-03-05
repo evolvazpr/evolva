@@ -89,7 +89,7 @@ bool Field::moveObjectWithRelativeStep(std::shared_ptr<CellObject> object, int x
 	return false;
 }
 
-bool Field::addObjectToWorld(std::shared_ptr<CellObject> object, int x, int y) {
+bool Field::addObject(std::shared_ptr<CellObject> object, int x, int y) {
 			bool ret = false;
 			std::shared_ptr<FieldCell> cell = getCell(x, y);
 
@@ -105,7 +105,7 @@ bool Field::addObjectToWorld(std::shared_ptr<CellObject> object, int x, int y) {
 			return true;
 }
 
-bool Field::removeObjectFromWorld(std::shared_ptr<CellObject> object){
+bool Field::removeObject(std::shared_ptr<CellObject> object){
 	std::shared_ptr<FieldCell> cell;
 	for (auto it = std::begin(object_list_); it < std::end(object_list_); ++it) {	
 		if (object == (*it)->object_) {
