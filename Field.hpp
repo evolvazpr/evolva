@@ -22,7 +22,7 @@ class Field {
 	public:
 	
 		static Field & getInstance(const int x = 0, const int y = 0);
-		~Field() { std::cout << "~Field() called\n"; }
+		~Field() {}
 		FieldCell & getCell(int x, int y); 
 
 };

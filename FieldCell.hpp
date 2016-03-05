@@ -15,18 +15,14 @@ class Object {
 	public:
 		Object(){};
 		virtual bool isMovable() = 0;
-		virtual ~Object(){
-			std::cout << "~Object() called\n";
-		}
+		virtual ~Object(){}
 };
 
 class Tree : public Object {
 	public:
 		Tree() : Object() {};
 		virtual bool isMovable() { return false; };
-		virtual ~Tree(){
-			std::cout << "~Three() called\n";
-		}
+		virtual ~Tree(){}
 };
 
 /*
@@ -53,7 +49,7 @@ class FieldCell {
 		bool insertObject(std::shared_ptr<Object> obj);
 		void removeObject();
 		GroundType getGroundType();
-		~FieldCell() { std::cout << "~FieldCell called\n"; }
+		~FieldCell() {}
 };
 
 #endif /* _FIELD_CELL_HPP_ */
