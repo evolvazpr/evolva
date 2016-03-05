@@ -20,11 +20,11 @@ class Object {
 		}
 };
 
-class Three : public Object {
+class Tree : public Object {
 	public:
-		Three() : Object() {};
+		Tree() : Object() {};
 		virtual bool isMovable() { return false; };
-		virtual ~Three(){
+		virtual ~Tree(){
 			std::cout << "~Three() called\n";
 		}
 };

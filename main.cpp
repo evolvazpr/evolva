@@ -2,7 +2,7 @@
 
 int main(void) {
 	bool ret;
-	std::shared_ptr<Object> sh_obj = std::make_shared<Three>();
+	std::shared_ptr<Object> sh_obj = std::make_shared<Tree>();
 	Field &field = Field::getInstance(10, 10);
 	FieldCell &cell = field.getCell(4, 4);
 
