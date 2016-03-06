@@ -3,41 +3,35 @@
 
 #include <iostream>
 
+/*
+ * Abstract base class for objects.
+ * bool isMovable() - needs to be implemented in inheriting classes.
+ */
 
-class RealCoordinates {
-	private:
-	
-		int x_;
-		int y_;
-	
+class CellObject {
 	public:
-		
-		RealCoordinates(int x, int y) : x_ (x), y_(y) {}
-		virtual ~RealCoordinates() = 0;
-		int get_real_x() { return x_; }
-		int get_real_y() { return y_; }
-		void get_real_coordinates(int *x, int *y) { *x = x_; *y = y_; }
-
-
-		virtual void set_real_x(int x) { x_ = x; }
-		virtual void set_real_y(int y) { y_ = y; }
-		virtual void set_real_coordinates(int x, int y) { x_ = x; y_ = y; };
-};
-
-class CellObject : public RealCoordinates {
-	public:
-		CellObject(int x, int y) : RealCoordinates(x, y) {};
+		CellObject(){};
 		virtual bool is_movable() = 0;
-		virtual ~CellObject(){};	
+		virtual ~CellObject(){}
 };
 
-class MovableObject : public CellObject {
+class Plant : public CellObject {
+	private:
+		const int energy_;
+		const bool toxic_;
 
+	public:
+		Plant(int energy, bool toxic) : CellObject(), energy_(energy), toxic_(toxic) {}
+		bool is_toxic() { return toxic_; }
+		int get_energy_value() { return energy_; }
+		virtual bool is_movable() { return false; }
+		virtual ~Plant() {}
 };
 
-class NonMovableObject : public CellObject {
-
+class TestUnit : public CellObject {
+	public:
+		TestUnit() : CellObject() {}
+		virtual bool is_movable() { return true; }
 };
-
 
 #endif //_CELLOBJECT_H_

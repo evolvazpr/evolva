@@ -1,28 +1,73 @@
 #ifndef _FIELD_HPP_
 #define _FIELD_HPP_
 
-#include <queue>
 
 #include <memory>
 #include <vector>
-#include <map>
 
 #include <boost/multi_array.hpp>
 #include "FieldCell.hpp"
 #include "CellObject.hpp"
 
+/*
+ * class Field - represents "world".
+ *
+ * To set size of field you MUST pass arguments to static getInstance method. Also it must be the first
+ * call to this method.
+ *
+ * Public methods:
+ * std::shared_ptr<FieldCell> getCell(int x, int y):
+ *		Parameters: 
+ *			x, y coordinates of Field.
+ *		Return value:
+ *			Method returns shared pointer to FieldCell object located at (x, y) or nullptr, if x or y does not 
+ *			exceed field limits.
+ 
+ * std::shared_ptr<FieldCell> getCellWithRelativeCoords(std::shared_ptr<CellObject> object, int x_relative,
+ * int y_relative):
+ *		Parameters:
+ *			object - object which is the reference for x and y relative cooridantes.
+ *			x_relative, y_relative - relative coordinates.
+ *		Return value:
+ *			Method returns shared pointer to FieldCell cell located at x_relative, y_relative coordinates, 
+ *			which are in relation to first parameter - object.
+ *
+ * bool moveObjectWithRelativeStep(std::shared_ptr<CellObject> object, int x_relative, int y_relative):
+ *		Method moves movable object.
+ *		Parameters:
+ *			object - object to move.
+ *			x_relative, y_relative - relative coordinates of final position in relation to initial position.
+ *		Return value:
+ *			True on success, false on fail. Failure is possible when cell is already occupied, or object not
+ *			movable.
+ *
+ * bool addObjectToWorld(std::shared_ptr<CellObject> object, int x, int y)
+ *		adds ListElement to std::vector<std::shared_ptr<ListElement>> object_list_ and updates proper 
+ *		FieldCell if this cell is not occupied yet.
+ *		Parameters:
+ *			object - pointer to object which will be inserted.
+ *			x and	y - location of object on field.
+ *		Return value:
+ *			True on success, false on fail. Failure is possible when location on field is already occupied.
+ *
+ */
+
 class Field {
   private:
+
+		struct ListElement {
+			std::shared_ptr<CellObject> object_;
+			int x_physical_;
+			int y_physical_;
+
+			ListElement(std::shared_ptr<CellObject> object, int x, int y);
+		};
 
 		const int x_max_;
 		const	int y_max_;
 		
-		boost::multi_array<std::shared_ptr<FieldCell>, 2> cells_;	
-		//std::priority_queue<std::shared_ptr<CellObject>,
-		//	std::list<std::shared_ptr<CellObject>>, XXX> movable_objects_;
-		std::list<std::shared_ptr<CellObject>> non_movable_objects_;
-
-		std::map<std::shared_ptr<CellObject>, std::pair<int, int>> map_;
+		boost::multi_array<std::shared_ptr<FieldCell>, 2> cells_;		
+		std::vector<std::shared_ptr<ListElement>> object_list_;		
 
     static std::shared_ptr<Field> instance_;
 
@@ -30,51 +75,18 @@ class Field {
 		Field() = delete;
 		Field(const Field&) = delete;
 		Field& operator=(const Field &) = delete;
-
-		/*
-		 * Method changes real coordinates of object in map_ contener.
-		 */	
-		void CalculateNewPositionOfObject(std::shared_ptr<CellObject> object, int x_relative, int y_relative);		
 	
-		/*
-		 * Method returns cell related to (x, y) real cooridantes.
-		 */
+		void CalculateNewPositionOfObject(std::shared_ptr<ListElement> list_element, int x_relative, int y_relative);		
+	public:
+
+		static Field& GetInstance(const int x = 0, const int y = 0);
+
 		std::weak_ptr<FieldCell> GetCell(int x, int y); 
-		
-		/*
-		 * Method returns cell related to coordinates wich are in relation to given object.
-		 * Method searches for object's coordinates in map_ contener, then adds x_relative and y_relative to real object's coordinates
-		 * and uses getCell method to retrive cell.
-		 */
 		std::weak_ptr<FieldCell> GetCellWithRelativeCoords(std::shared_ptr<CellObject> object, 
 																											 int x_relative, int y_relative);
 
-
-	public:
-
-		/*
-		 * Singleton method, which is used to get instace of Field.
-		 */
-		static Field& GetInstance(const int x = 0, const int y = 0);
-
-		/*
-		 * Method changes coordinates of object in map_ contener.
-		 * Method seraches for object's coordinates in map_ contener, calls GetCell twice: for present object's cell, and for future cell.
-		 * Inserts object in future cell (if it is possible. If not, method return false), removes object from present cell, updates object's
-		 * coordinates in map_ contener. 
-		 */
 		bool MoveObjectWithRelativeStep(std::shared_ptr<CellObject> object, int x_relative, int y_relative);
-	
-		/*
-		 * Method adds object to world:
-		 * Inserts object in cell (if it is possible. If not, returns false), updates object's coordinates in map_ contener, updates all important
-		 * data structures.
-		 */
 		bool AddObject(std::shared_ptr<CellObject> object, int x, int y);
-		
-		/*
-		 * Method removes object from world.
-		 */
 		bool RemoveObject(std::shared_ptr<CellObject> object);
 };
 
