@@ -6,8 +6,6 @@
 
 #include "CellObject.hpp"
 
-enum GroundType {Sand, Grass, Water};
-
 /*
  * Field cell class
  * bool insertObject(std::shared_ptr<Object> obj):
@@ -26,14 +24,14 @@ enum GroundType {Sand, Grass, Water};
 class FieldCell {
 	private:
 		std::weak_ptr<CellObject> object_;
-		GroundType ground_type_;
+		size_t ground_type_;
   public:
 		FieldCell(const FieldCell& field_cell) 
 			: object_(field_cell.object_), ground_type_(field_cell.ground_type_) {}
-		FieldCell(GroundType g_type = Sand) : ground_type_(g_type){}
-		bool insertObject(std::shared_ptr<CellObject> obj);
-		void removeObject();
-		GroundType getGroundType();
+		FieldCell(size_t g_type = 0) : ground_type_(g_type){}
+		bool InsertObject(std::shared_ptr<CellObject> obj);
+		void RemoveObject();
+		size_t get_ground_type() { return ground_type_; }
 };
 
 #endif /* _FIELD_CELL_HPP_ */

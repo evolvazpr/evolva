@@ -11,7 +11,7 @@
 class CellObject {
 	public:
 		CellObject(){};
-		virtual bool isMovable() = 0;
+		virtual bool is_movable() = 0;
 		virtual ~CellObject(){}
 };
 
@@ -22,16 +22,16 @@ class Plant : public CellObject {
 
 	public:
 		Plant(int energy, bool toxic) : CellObject(), energy_(energy), toxic_(toxic) {}
-		bool isToxic() { return toxic_; }
-		int getEnergyValue() { return energy_; }
-		virtual bool isMovable() { return false; }
+		bool is_toxic() { return toxic_; }
+		int get_energy_value() { return energy_; }
+		virtual bool is_movable() { return false; }
 		virtual ~Plant() {}
 };
 
 class TestUnit : public CellObject {
 	public:
 		TestUnit() : CellObject() {}
-		virtual bool isMovable() { return true; }
+		virtual bool is_movable() { return true; }
 };
 
 #endif //_CELLOBJECT_H_
