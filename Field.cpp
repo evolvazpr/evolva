@@ -2,9 +2,6 @@
 
 std::shared_ptr<Field> Field::instance_ = std::shared_ptr<Field>(nullptr);
 
-Field::ListElement::ListElement(std::shared_ptr<CellObject> object, int x, int y) 
-	: object_(object), x_physical_(x), y_physical_(y) {};
-
 Field::Field(const int x, const int y) : x_max_(x), y_max_(y), cells_(boost::extents[x][y]) {
 	for (int x_i = 0; x_i < x; x_i++) {
 		for (int y_i = 0; y_i < y; y_i++) {
