@@ -76,18 +76,18 @@ class Field {
 		Field(const Field&) = delete;
 		Field& operator=(const Field &) = delete;
 	
-		void calculateNewPositionOfObject(std::shared_ptr<ListElement> list_element, int x_relative, int y_relative);		
+		void CalculateNewPositionOfObject(std::shared_ptr<ListElement> list_element, int x_relative, int y_relative);		
 	public:
 
-		static Field& getInstance(const int x = 0, const int y = 0);
+		static Field& GetInstance(const int x = 0, const int y = 0);
 
-		std::shared_ptr<FieldCell> getCell(int x, int y); 
-		std::shared_ptr<FieldCell> getCellWithRelativeCoords(std::shared_ptr<CellObject> object, int x_relative,
-																											   int y_relative);
+		std::weak_ptr<FieldCell> GetCell(int x, int y); 
+		std::weak_ptr<FieldCell> GetCellWithRelativeCoords(std::shared_ptr<CellObject> object, 
+																											 int x_relative, int y_relative);
 
-		bool moveObjectWithRelativeStep(std::shared_ptr<CellObject> object, int x_relative, int y_relative);
-		bool addObject(std::shared_ptr<CellObject> object, int x, int y);
-		bool removeObject(std::shared_ptr<CellObject> object);
+		bool MoveObjectWithRelativeStep(std::shared_ptr<CellObject> object, int x_relative, int y_relative);
+		bool AddObject(std::shared_ptr<CellObject> object, int x, int y);
+		bool RemoveObject(std::shared_ptr<CellObject> object);
 };
 
 #endif /* _FIELD_HPP_ */

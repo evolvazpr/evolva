@@ -28,6 +28,8 @@ class FieldCell {
 		std::weak_ptr<CellObject> object_;
 		GroundType ground_type_;
   public:
+		FieldCell(const FieldCell& field_cell) 
+			: object_(field_cell.object_), ground_type_(field_cell.ground_type_) {}
 		FieldCell(GroundType g_type = Sand) : ground_type_(g_type){}
 		bool insertObject(std::shared_ptr<CellObject> obj);
 		void removeObject();

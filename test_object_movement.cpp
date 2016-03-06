@@ -8,56 +8,55 @@ void test(int rt) {
 
 int main(void) {
 	bool ret;
-	int rt;
 
 	std::shared_ptr<CellObject> tree = std::make_shared<Plant>(5, false);
 	std::shared_ptr<CellObject> human = std::make_shared<TestUnit>();
 	std::shared_ptr<CellObject> cat = std::make_shared<TestUnit>();
 
-	Field &field = Field::getInstance(10, 10);
+	Field &field = Field::GetInstance(10, 10);
 
 
-	ret = field.addObject(tree, 4, 4);
+	ret = field.AddObject(tree, 4, 4);
 	if (!ret) 
 		test(1);
 
-	ret = field.addObject(human, 5, 5);
+	ret = field.AddObject(human, 5, 5);
 	if (!ret)
 		test(2);
 
-	ret = field.addObject(cat, 6, 6);
+	ret = field.AddObject(cat, 6, 6);
 		if (!ret)
 			test(3);
 
-	ret = field.moveObjectWithRelativeStep(tree, 1, 2);
+	ret = field.MoveObjectWithRelativeStep(tree, 1, 2);
 	if (ret)
 		test(4);
 	
-	ret = field.moveObjectWithRelativeStep(human, -2, -2);
+	ret = field.MoveObjectWithRelativeStep(human, -2, -2);
 	if (!ret)
 		test(5);
 
-	ret = field.moveObjectWithRelativeStep(cat, -3, -3);
+	ret = field.MoveObjectWithRelativeStep(cat, -3, -3);
 	if (ret)
 		test(6);
 
-	ret = field.moveObjectWithRelativeStep(human, 1, -1);
+	ret = field.MoveObjectWithRelativeStep(human, 1, -1);
 	if (!ret)
 		test(7);
 
-	ret = field.moveObjectWithRelativeStep(cat, -3, -3);
+	ret = field.MoveObjectWithRelativeStep(cat, -3, -3);
 	if (!ret)
 		test(8);
 
-	field.removeObject(tree);
+	field.RemoveObject(tree);
 
-	field.removeObject(cat);
+	field.RemoveObject(cat);
 
-	ret = field.moveObjectWithRelativeStep(cat, -2, -2);
+	ret = field.MoveObjectWithRelativeStep(cat, -2, -2);
 	if (ret) 
 		test(9);
 
-	field.removeObject(human);
+	field.RemoveObject(human);
 	
 	std::cout << "No error.\n";
 	return 0;
