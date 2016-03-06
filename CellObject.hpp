@@ -3,35 +3,49 @@
 
 #include <iostream>
 
-/*
- * Abstract base class for objects.
- * bool isMovable() - needs to be implemented in inheriting classes.
- */
 
-class CellObject {
-	public:
-		CellObject(){};
-		virtual bool is_movable() = 0;
-		virtual ~CellObject(){}
-};
-
-class Plant : public CellObject {
+class RealCoordinates {
 	private:
-		const int energy_;
-		const bool toxic_;
-
+		int x_;
+		int y_;
+	
 	public:
-		Plant(int energy, bool toxic) : CellObject(), energy_(energy), toxic_(toxic) {}
-		bool is_toxic() { return toxic_; }
-		int get_energy_value() { return energy_; }
-		virtual bool is_movable() { return false; }
-		virtual ~Plant() {}
+		RealCoordinates(int x, int y) : x_ (x), y_(y) {}
+		virtual ~RealCoordinates() = 0;
+		
+		int get_real_x() { return x_; }
+		int get_real_y() { return y_; }
+		void get_real_coordinates(int *x, int *y) { *x = x_; *y = y_; }
+
+		void set_real_x(int x) { x_ = x; }
+		void set_real_y(int y) { y_ = y; }
+	  void set_real_coordinates(int x, int y) { x_ = x; y_ = y; };
 };
 
-class TestUnit : public CellObject {
+class CellObject : protected RealCoordinates {
 	public:
-		TestUnit() : CellObject() {}
-		virtual bool is_movable() { return true; }
+		CellObject(int x, int y) : RealCoordinates(x, y) {};
+		virtual ~CellObject() = 0;	
+};
+
+class MovableObject : public CellObject {
+	int move_priority_;
+	public:
+		MovableObject(int x, int y, int move_priority) 
+			: CellObject(x, y), move_priority_(move_priority) {};
+		virtual ~MovableObject() = 0;
+
+		bool MoveWithRealtiveStep(int x, int y);
+		
+		bool operator <(const MovableObject& rhs) {
+			return move_priority_ < rhs.move_priority_;
+		}	
+};
+
+class NonMovableObject : public CellObject {
+	public:
+		virtual ~NonMovableObject();
+		NonMovableObject(int x, int y) : CellObject(x, y) {};
 };
 
 #endif //_CELLOBJECT_H_
