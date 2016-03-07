@@ -6,9 +6,9 @@
 #include <memory>
 #include <list>
 #include <queue>
+#include <map>
 
 #include "FieldCell.hpp"
-#include "CellObject.hpp"
 
 class Field {
   private:
@@ -17,13 +17,9 @@ class Field {
 		const	int y_max_;
 	
 		boost::multi_array<std::shared_ptr<FieldCell>, 2> cells_;	
-	//	std::priority_queue<std::shared_ptr<MovableObject>,
-	//		std::list<std::shared_ptr<MovableObject>>, 
-	//		std::less<MovableObject> > movable_objects_;
-		
-		std::list<std::shared_ptr<MovableObject>> movable_objects_;
-		std::list<std::shared_ptr<NonMovableObject>> non_movable_objects_;
-	 
+
+		std::map<int, std::pair<int, int>> movable_objects_;
+
 	 	static std::shared_ptr<Field> instance_;
 
 		Field(const int x, const int y);
@@ -32,9 +28,12 @@ class Field {
 		Field& operator=(const Field &) = delete;
 
 		public:
-		std::weak_ptr<FieldCell> GetCell(int x, int y); 
 		static Field& GetInstance(const int x = 0, const int y = 0);
 
+		std::weak_ptr<FieldCell> GetCell(int x_real, int y_real); 
+		bool InsertObject(std::shared_ptr<MovableObject> object, int x_real, int y_real);
+		bool InsertObject(std::shared_ptr<NonMovableObject> object, int x_real, int y_real);
+		bool MoveObject(std::shared_ptr<MovableObject> object, int x_steps, int y_steps);
 };
 
 #endif /* _FIELD_HPP_ */
