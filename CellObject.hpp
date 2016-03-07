@@ -2,6 +2,10 @@
 #define _CELLOBJECT_H_
 
 #include <iostream>
+#include <utility>
+
+#include "Field.hpp"
+
 
 
 class RealCoordinates {
@@ -19,7 +23,7 @@ class RealCoordinates {
 
 		void set_real_x(int x) { x_ = x; }
 		void set_real_y(int y) { y_ = y; }
-	  void set_real_coordinates(int x, int y) { x_ = x; y_ = y; };
+	  void set_real_coordinates(std::pair<int, int>& coords) { x_ = coords.first; y_ = coords.second; };
 };
 
 class CellObject : protected RealCoordinates {
@@ -29,13 +33,15 @@ class CellObject : protected RealCoordinates {
 };
 
 class MovableObject : public CellObject {
+	private:
 	int move_priority_;
+
 	public:
 		MovableObject(int x, int y, int move_priority) 
 			: CellObject(x, y), move_priority_(move_priority) {};
 		virtual ~MovableObject() = 0;
 
-		bool MoveWithRealtiveStep(int x, int y);
+		bool MoveWithRelativeStep(int x, int y);
 		
 		bool operator <(const MovableObject& rhs) {
 			return move_priority_ < rhs.move_priority_;

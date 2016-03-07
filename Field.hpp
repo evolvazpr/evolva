@@ -1,7 +1,8 @@
 #ifndef _FIELD_HPP_
 #define _FIELD_HPP_
 
-#include <boost/multi_array.h>
+#include <boost/multi_array.hpp>
+#include <utility>
 #include <memory>
 #include <list>
 #include <queue>
@@ -32,11 +33,8 @@ class Field {
 
 		public:
 		std::weak_ptr<FieldCell> GetCell(int x, int y); 
-		std::weak_ptr<FieldCell> GetCellWithRelativeCoords(std::shared_ptr<CellObject> object, 
-																											 int x_relative, int y_relative)
 		static Field& GetInstance(const int x = 0, const int y = 0);
-		bool AddObject(std::shared_ptr<CellObject> object, int x, int y);
-		bool RemoveObject(std::shared_ptr<CellObject> object);
+
 };
 
 #endif /* _FIELD_HPP_ */
