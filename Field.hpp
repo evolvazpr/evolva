@@ -28,7 +28,8 @@ class Field {
 	
 		boost::multi_array<std::shared_ptr<FieldCell>, 2> cells_;	
 		
-		std::map<int, std::pair<int, int>> movable_objects_;
+		std::map<std::shared_ptr<MovableObject>, std::pair<int, int>> movable_objects_;
+		std::list<std::shared_ptr<NonMovableObject>> non_movable_objects_;
 
 	 	static std::shared_ptr<Field> instance_;
 

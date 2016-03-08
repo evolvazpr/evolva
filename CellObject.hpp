@@ -23,6 +23,7 @@ class MovableObject : public CellObject {
 		MovableObject(int id, int move_priority);
 		virtual ~MovableObject();
 		bool MoveWithRelativeStep(int x, int y);
+		void Think(){} //Example, this should be virtual void
 };
 
 class NonMovableObject : public CellObject {

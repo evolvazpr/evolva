@@ -27,7 +27,7 @@ bool Field::InsertObject(std::shared_ptr<MovableObject> object, int x, int y) {
 	bool ret = cell->InsertObject(std::shared_ptr<CellObject>(object));
 	if (ret == false)
 		return false;
-	movable_objects_.insert(std::make_pair(object->GetId(), std::make_pair(x, y)));
+	movable_objects_.insert(std::make_pair(object, std::make_pair(x, y)));
 	return true;
 }
 
@@ -36,13 +36,13 @@ bool Field::InsertObject(std::shared_ptr<NonMovableObject> object, int x, int y)
 	bool ret = cell->InsertObject(std::shared_ptr<CellObject>(object));
 	if (ret == false)
 		return false;
-	else
+	non_movable_objects_.push_back(object);
 	return true;
 }
 
 bool Field::MoveObject(std::shared_ptr<MovableObject> object, int x_steps, int y_steps) {
 	std::shared_ptr<FieldCell> initial_cell, final_cell;
-	std::pair<int, int> initial_real_coordinates = movable_objects_[object->GetId()];
+	std::pair<int, int> initial_real_coordinates = movable_objects_[object];
 	std::pair<int, int> final_real_coordinates = std::make_pair(initial_real_coordinates.first + x_steps,
 																															initial_real_coordinates.second + y_steps);
 	final_real_coordinates.first %= x_max_;
@@ -55,7 +55,7 @@ bool Field::MoveObject(std::shared_ptr<MovableObject> object, int x_steps, int y
 	if (!final_cell->IsEmpty()) return false;
 
 	final_cell->InsertObject(std::dynamic_pointer_cast<CellObject>(object));
-	movable_objects_[object->GetId()] = final_real_coordinates;
+	movable_objects_[object] = final_real_coordinates;
 	
 	initial_cell->RemoveObject();
 
@@ -71,7 +71,7 @@ void Field::IterateOverMovableObjects() {
 		cell = std::shared_ptr<FieldCell>(GetCell(it.second.first, it.second.second));
 		object = std::shared_ptr<CellObject>(cell->CopyObject());
 		std::cout << object->GetId() << std::endl;
-		if (it.first != object->GetId())
+		if (it.first->GetId() != object->GetId())
 			std::cout << "ERROR!\n";
 	}
 }
