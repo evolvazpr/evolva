@@ -10,6 +10,16 @@
 
 #include "FieldCell.hpp"
 
+/*
+ * Class declarations solve problem with recursive header include.
+ */
+
+class FieldCell;
+class MovableObject;
+class NonMovableObject;
+class CellObject;
+
+
 class Field {
   private:
 	
@@ -28,7 +38,7 @@ class Field {
 		Field& operator=(const Field &) = delete;
 
 		public:
-		static Field& GetInstance(const int x = 0, const int y = 0);
+		static std::shared_ptr<Field> GetInstance(const int x = 0, const int y = 0);
 
 		std::weak_ptr<FieldCell> GetCell(int x_real, int y_real); 
 		bool InsertObject(std::shared_ptr<MovableObject> object, int x_real, int y_real);

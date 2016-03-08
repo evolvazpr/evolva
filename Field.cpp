@@ -10,12 +10,12 @@ Field::Field(const int x, const int y) : x_max_(x), y_max_(y), cells_(boost::ext
 	}	
 }	
 
-Field& Field::GetInstance(const int x, const int y) {
+std::shared_ptr<Field> Field::GetInstance(const int x, const int y) {
 	if (!instance_) {
 			//TODO: replace std;:shared_ptr with std::make_shared
 				instance_ = std::shared_ptr<Field>(new Field(x, y));
 			}
-			return *instance_; 
+			return instance_; 
 }
 
 std::weak_ptr<FieldCell> Field::GetCell(int x, int y) {
@@ -53,8 +53,13 @@ bool Field::MoveObject(std::shared_ptr<MovableObject> object, int x_steps, int y
 	final_cell = std::shared_ptr<FieldCell>(GetCell(final_real_coordinates.first,
 																					final_real_coordinates.second));
 	if (!final_cell->IsEmpty()) return false;
-	final_cell->InsertObject(std::shared_ptr<CellObject>(object));
+
+	final_cell->InsertObject(std::dynamic_pointer_cast<CellObject>(object));
+	movable_objects_[object->GetId()] = final_real_coordinates;
+	
 	initial_cell->RemoveObject();
-	//TODO? Call GUI method
+
+	//?TODO? Call GUI-update method
+
 	return true;
 }

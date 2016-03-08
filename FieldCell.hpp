@@ -6,6 +6,12 @@
 
 #include "CellObject.hpp"
 
+/*\
+ * Class declaration solves problem with recursive header include.
+ */
+
+class CellObject;
+
 class FieldCell {
 	private:
 		std::weak_ptr<CellObject> object_;

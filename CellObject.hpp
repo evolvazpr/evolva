@@ -4,12 +4,14 @@
 #include <iostream>
 #include <utility>
 
-class CellObject {
+#include "Field.hpp"
+
+class CellObject : public std::enable_shared_from_this<CellObject> {
 	private:
 		const int id_;
 	public:
-		CellObject(int id) : id_(id){}
-		int GetId(){ return id_; }
+		CellObject(int id);
+		int GetId();
 		virtual ~CellObject() = 0;	
 };
 
@@ -18,17 +20,15 @@ class MovableObject : public CellObject {
 	int move_priority_;
 
 	public:
-		MovableObject(int id, int move_priority) 
-			: CellObject(id), move_priority_(move_priority) {};
-		virtual ~MovableObject(){}
-
+		MovableObject(int id, int move_priority);
+		virtual ~MovableObject();
 		bool MoveWithRelativeStep(int x, int y);
 };
 
 class NonMovableObject : public CellObject {
 	public:
-		virtual ~NonMovableObject(){}
-		NonMovableObject(int id) : CellObject(id) {};
+		virtual ~NonMovableObject();
+		NonMovableObject(int id);
 };
 
 #endif //_CELLOBJECT_H_
