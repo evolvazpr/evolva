@@ -20,6 +20,7 @@ class FieldCell {
 		FieldCell(){}
 		bool InsertObject(std::shared_ptr<CellObject> obj);
 		void RemoveObject();
+		std::weak_ptr<CellObject> CopyObject();
 		bool IsEmpty();
 		~FieldCell() {}
 };

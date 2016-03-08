@@ -63,3 +63,15 @@ bool Field::MoveObject(std::shared_ptr<MovableObject> object, int x_steps, int y
 
 	return true;
 }
+
+void Field::IterateOverMovableObjects() {
+	std::shared_ptr<FieldCell> cell;
+	std::shared_ptr<CellObject> object;
+	for(auto& it : movable_objects_) {	
+		cell = std::shared_ptr<FieldCell>(GetCell(it.second.first, it.second.second));
+		object = std::shared_ptr<CellObject>(cell->CopyObject());
+		std::cout << object->GetId() << std::endl;
+		if (it.first != object->GetId())
+			std::cout << "ERROR!\n";
+	}
+}

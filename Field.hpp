@@ -27,7 +27,7 @@ class Field {
 		const	int y_max_;
 	
 		boost::multi_array<std::shared_ptr<FieldCell>, 2> cells_;	
-
+		
 		std::map<int, std::pair<int, int>> movable_objects_;
 
 	 	static std::shared_ptr<Field> instance_;
@@ -44,6 +44,8 @@ class Field {
 		bool InsertObject(std::shared_ptr<MovableObject> object, int x_real, int y_real);
 		bool InsertObject(std::shared_ptr<NonMovableObject> object, int x_real, int y_real);
 		bool MoveObject(std::shared_ptr<MovableObject> object, int x_steps, int y_steps);
+
+		void IterateOverMovableObjects();
 };
 
 #endif /* _FIELD_HPP_ */

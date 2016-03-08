@@ -14,3 +14,7 @@ bool FieldCell::IsEmpty() {
 	if (object_.lock()) return false;
 	else return true;
 }
+
+std::weak_ptr<CellObject> FieldCell::CopyObject() {
+	return object_;
+}

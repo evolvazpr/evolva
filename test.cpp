@@ -49,7 +49,7 @@ int main(void) {
 	ret = cat->MoveWithRelativeStep(3, 0);
 	if (!ret)
 		print_error(10);	
-
+	field->IterateOverMovableObjects();
 	std::cout << "No errors!\n";
 	return 0;
 }
