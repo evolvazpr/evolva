@@ -14,7 +14,10 @@ class CellObject : public std::enable_shared_from_this<CellObject> {
 	public:
 		CellObject(const size_t id);
 		inline size_t GetId() const { return id_; }
-		virtual ~CellObject() = 0;	
+		virtual ~CellObject() = 0;
+
+		friend class Field;
+		friend class TUI;
 };
 
 class MovableObject : public CellObject {
@@ -22,9 +25,10 @@ private:
 	size_t move_priority_;
 public:
 	MovableObject(const size_t id, const size_t move_priority);
+	bool MoveWithRelativeStep(int x, int y);
 	virtual ~MovableObject();
-	bool MoveWithRelativeStep(int x, int y); //????
-	void Think(){} //Example, this should be virtual void <- po co to tutaj? Think bedize hen daleko potem
+	friend class Field;
+	friend class TUI;
 };
 
 class NonMovableObject : public CellObject {
