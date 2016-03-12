@@ -1,7 +1,6 @@
-test_object_movement
-main
+test
 *.dblite
 *.o
 *.swp
-*.py
 *.pyc
+*.py

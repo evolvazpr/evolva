@@ -1,6 +1,6 @@
 env=Environment(CPPPATH=['/usr/include/boost/'],
 		CPPDEFINES=[],
 		LIBS=[],
-		CXXFLAGS="-std=c++11 -g3 -O0"
+		CXXFLAGS="-std=c++11 -g3 -O0 -Wall -Wextra"
 		)
-env.Program(['test2.cpp', 'CellObject.cpp', 'FieldCell.cpp', 'Field.cpp'])
+env.Program(['test.cpp', 'CellObject.cpp', 'FieldCell.cpp', 'Field.cpp', 'Tui.cpp'])

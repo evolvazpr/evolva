@@ -1,14 +1,23 @@
 #include "CellObject.hpp"
 
-CellObject::~CellObject(){}
-MovableObject::~MovableObject(){}
-NonMovableObject::~NonMovableObject(){}
 
-CellObject::CellObject(int id) : id_(id) {}
-MovableObject::MovableObject(int id, int move_priority) : CellObject(id), move_priority_(move_priority) {}
-NonMovableObject::NonMovableObject(int id) : CellObject(id) {}
+CellObject::~CellObject() {
+}
 
-int CellObject::GetId() { return id_; }
+MovableObject::~MovableObject() {
+}
+
+NonMovableObject::~NonMovableObject() {
+}
+
+CellObject::CellObject(const size_t id) : id_(id) {
+}
+
+MovableObject::MovableObject(const size_t id, const size_t move_priority) : CellObject(id), move_priority_(move_priority) {
+}
+
+NonMovableObject::NonMovableObject(const size_t id) : CellObject(id) {
+}
 
 bool MovableObject::MoveWithRelativeStep(int x, int y) {
 	std::shared_ptr<Field> field = Field::GetInstance();

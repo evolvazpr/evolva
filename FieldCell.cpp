@@ -1,20 +1,11 @@
 #include "FieldCell.hpp"
 
-bool FieldCell::InsertObject(std::shared_ptr<CellObject> obj) {
-	if (!IsEmpty()) return false; 
-	object_ = obj;
-	return true;
-}
+//implement Field()
 
-void FieldCell::RemoveObject() {
-	object_.reset();
-}
+//implement ~Field
 
-bool FieldCell::IsEmpty() {
-	if (object_.lock()) return false;
-	else return true;
-}
-
-std::weak_ptr<CellObject> FieldCell::CopyObject() {
-	return object_;
+std::shared_ptr<CellObject> FieldCell::SetObject(std::shared_ptr<CellObject> object) {
+	std::shared_ptr<CellObject> output(std::move(object_));
+	object_ = object;
+	return std::move(output);
 }
