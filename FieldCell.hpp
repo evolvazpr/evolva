@@ -7,7 +7,7 @@ class CellObject;
 class Field;
 
 class FieldCell {
-	friend class Field; //what for? I don't remember.
+	friend class Field; 
 private:
 	std::shared_ptr<CellObject> object_;
 public:
