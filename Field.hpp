@@ -5,14 +5,9 @@
 #include <memory>
 #include <list>
 
-#include "FieldCell.hpp"
-#include "CellObject.hpp"
 #include "TUI.hpp"
-
-class CellObject;
-class MovableObject;
-class NonMovableObject;
-class FieldCell;
+#include "CellObject.hpp"
+#include "FieldCell.hpp"
 
 class Field {
 
@@ -36,12 +31,13 @@ private:
 
 public:
 	static std::shared_ptr<Field> GetInstance(const size_t x = 0, const size_t y = 0);
-	inline bool IsCorrect(const size_t x, const size_t y) const ;
-	inline std::shared_ptr<FieldCell> GetCell(const size_t x, const size_t y);
-	bool InsertObject(std::shared_ptr<CellObject> object, const size_t x, const size_t y);
+	inline bool IsCorrect(const size_t x, const size_t y) const { return (x < width_ && y < height_); }
+	inline std::shared_ptr<FieldCell> GetCell(const size_t x, const size_t y) { return cells_[x][y]; }
+	inline bool InsertObject(std::shared_ptr<CellObject> object, const size_t x, const size_t y);
 	bool InsertObject(std::shared_ptr<MovableObject> object, const size_t x, const size_t y);
 	bool InsertObject(std::shared_ptr<NonMovableObject> object, const size_t x, const size_t y);
-	bool MoveObject(std::shared_ptr<MovableObject> object, const long x_steps, const long y_steps);
+	inline bool MoveObject(std::shared_ptr<MovableObject> object, const long x_steps, const long y_steps)
+	{ return MoveObjectTo(object, object->x_ + x_steps, object->y_ + y_steps); } 
 	bool MoveObjectTo(std::shared_ptr<MovableObject> object, const size_t x, const size_t y);
 };
 

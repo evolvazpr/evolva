@@ -1,15 +1,11 @@
 #ifndef _TUI_H_
 #define _TUI_H_
 #include <iostream>
+#include <memory>
 
 #include "Field.hpp"
 #include "FieldCell.hpp"
 #include "CellObject.hpp"
-
-class CellObject;
-class FieldCell;
-class MovableObject;
-class NonMovableObject;
 
 class TUI {
 private:

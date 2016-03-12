@@ -62,6 +62,3 @@ bool Field::MoveObjectTo(std::shared_ptr<MovableObject> object, const size_t x, 
 	return true;
 }
 
-bool Field::IsCorrect(const size_t x, const size_t y) const { return (x < width_ && y < height_); }
-std::shared_ptr<FieldCell> Field::GetCell(const size_t x, const size_t y) { return cells_[x][y]; }
-bool Field::MoveObject(std::shared_ptr<MovableObject> object, const long x_steps, const long y_steps)  { return MoveObjectTo(object, object->x_ + x_steps, object->y_ + y_steps); } 

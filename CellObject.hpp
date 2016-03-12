@@ -2,9 +2,9 @@
 #define _CELLOBJECT_H_
 
 #include <iostream>
-#include <utility>
+#include <memory>
 
-#include "Field.hpp"
+class Field;
 
 class CellObject : public std::enable_shared_from_this<CellObject> {
 	private:
@@ -15,7 +15,6 @@ class CellObject : public std::enable_shared_from_this<CellObject> {
 		CellObject(const size_t id);
 		inline size_t GetId() const { return id_; }
 		virtual ~CellObject() = 0;
-
 		friend class Field;
 		friend class TUI;
 };
@@ -36,5 +35,8 @@ public:
 	NonMovableObject(const size_t id);
 	virtual ~NonMovableObject();
 };
+
+#include "Field.hpp" /* Include on bottom of header due to problem with Field::MoveObject inline method:
+												definition of Field::MoveObject needs complete CellObject declaration. */
 
 #endif //_CELLOBJECT_H_
