@@ -1,13 +1,17 @@
 #include "Field.hpp"
 #include "Unit.hpp"
 
-Unit::Unit() : DnaUnit() {
+double Heaviside(const double x) { return (x <= 0.0 ? 0.0 : x); }
+
+Unit::Unit() : DnaUnit(), Creature() {
+	SetType(Type::UNIT, true);
 	//std::cout << "UNIT!\n";
 	// Death time calculating.
 	//CalculateDeathTime();
 }
 
-Unit::Unit(std::shared_ptr<DnaCode> dna_code) : DnaUnit(dna_code) {
+Unit::Unit(std::shared_ptr<DnaCode> dna_code) : DnaUnit(dna_code), Creature() {
+	SetType(Type::UNIT, true);
 	CalculateDeathTime();
 	energy_ = dna_["normal_weight"];
 	UpdateSpeed();
@@ -23,6 +27,7 @@ void Unit::CalculateDeathTime() {
 }
 
 void Unit::Update() {
+	UpdateSpeed();
 	++turns_;
 	if (turns_ >= death_) field->Kill(this);
 	if (fatigue_ >= dna_["fatigue_death_treshold"]) field->Kill(this);
@@ -39,9 +44,8 @@ void Unit::Update() {
 			if (health_ > 100.0) health_ = 100.00;
 		}
 		fatigue_ -= dna_["fatigue_regeneration"];
-		if (fatigue_ <= dna_["wakeup_treshold"]) Think();
-		else if (fatigue_ <= 0.0) {
-			fatigue_ = 0.0;
+		if (fatigue_ <= dna_["wakeup_treshold"]) {
+			if (fatigue_ <= 0.0) fatigue_ = 0.0;
 			WakeUp();
 			Think();
 			fatigue_ += dna_["fatigue_turn_increase"];
@@ -77,11 +81,16 @@ void Unit::UpdateSpeed() {
 }
 
 size_t Unit::Think(const double intelligence, std::shared_ptr<Unit> attacker) {
-//	speed_ = 0.5 * dna_["speed"] + 0.25 * dna_["agility"] + 0.125 * dna_["intelligence"] + 0.125 * dna_["strength"];
-//	double steps =
+	// Calculate steps the unit can move. C. speed is <0, 100> (can be lower),
+	// so when c. speed is 100, the unit is able to move 25 steps.
+	double steps = static_cast<size_t>(Heaviside(speed_ / 4.0));
+	// If intelligence is specified, method uses "swarm intelligence".
 	const double pushed_intelligence = dna_["intelligence"];
 	if (!isnan(intelligence)) dna_["intelligence"] = intelligence;
+	// For ergonomy.
 	DnaCode &dna = dna_;
+	// Think in danger. Fight or run.
+	// TODO: is UpdateSpeed() necessary here?
 	if (!!attacker) {
 		double target_speed = 0.45 * speed_ + 0.45 * dna["agility"] + 0.1 * dna["intelligence"];
 		double attacker_speed = 0.45 * attacker->speed_ + 0.45 * attacker->dna_["agility"] + 0.1 * attacker->dna_["intelligence"];
@@ -89,12 +98,15 @@ size_t Unit::Think(const double intelligence, std::shared_ptr<Unit> attacker) {
 		double attacker_strength = 0.1 *(0.45 * attacker->dna_["strength"] + 0.45 * attacker->dna_["agility"] + 0.1 * attacker->speed_);
 		if (target_speed >= attacker_speed) { //can run
 			if (target_strength < attacker_strength) {
-				// run and return
+				// Run and return
 				if (!isnan(intelligence)) dna_["intelligence"] = pushed_intelligence;
 				return 0;
 			}
 		}
-		// fight
+		// Fight: damage inflicted by opponents are calculated using gamma
+		// distribution. It gives nice "real-like" damages. Here, the intelligence
+		// is important. An unit can be strong and quick, but without intelligence
+		// its damages would be unpredictable and weak.
 		double target_health = health_;
 		double attacker_health = attacker->health_;
 		std::gamma_distribution<double> target_distribution(2.0, pow(dna["intelligence"] / 100.0, 1.2));
@@ -103,10 +115,12 @@ size_t Unit::Think(const double intelligence, std::shared_ptr<Unit> attacker) {
 			attacker_health -= target_distribution(field->Random());
 			target_health -= attacker_distribution(field->Random());
 		}
+		// Kill two opponents if both should die in this battle.
 		if (target_health < 0.0) field->Kill(this);
 		else health_ = target_health;
-		if (attacker_health < 0.0) field->Kill(attacker)/**/;
+		if (attacker_health < 0.0) field->Kill(attacker);
 		else attacker->health_ = attacker_health;
+		// Back to original intelligence, and then return.
 		if (!isnan(intelligence)) dna_["intelligence"] = pushed_intelligence;
 		return 0;
 	}
@@ -114,39 +128,6 @@ size_t Unit::Think(const double intelligence, std::shared_ptr<Unit> attacker) {
 	// An unit has to decide: eat or mate? If mate.
 	// If mate, it has to decide which unit it wants to mate with.
 	// Else it has to decide what to eat (what to attack).
-
-	// steps to move
-	//double steps = ;
-
-/*
-	double *first_need;
-	double *second_need
-	double *third_need;
-	double hunger_normal = energy_ / dna["requirements.normal_turn"];
-	double hunger_sleep = energy_ / dna["requirements.sleep_turn"];
-	double fatigue = fatigue_ / dna["fatigue_turn_increase"];
-	double fatigue_factor = dna["fatigue_turn_increase"] / 100.0;
-
-	double predicting_factor = 0.8 * dna["intelligence"] + 0.2 * dna["speed"];
-	double desired_calculated_speed = 110.0 / predicted_factor;
-	double maximum_weight = desired_calculated_speed * dna["normal_weight"];
-	double maximum_energy = maximum_weight - dna["normal_weight"];
-	if (fatigue_ + dna["fatigue_turn_increase"] >= dna["fatigue_death_treshold"]) Sleep();
-	else {
-        if (energy_ < dna["normal_weight"]) {
-			//find food
-        }
-        else {
-			//find partner
-        }
-	}
-
-
-	std::list<std::pair<size_t, double>> priority;
-	//hunger
-	priority.push_back(std::make_pair(UnitAction::Eating, energy_ / dna["requirements.normal_turn"])); // * some factor?
-	//mating
-	priority.push_back();/**/
 }
 
 

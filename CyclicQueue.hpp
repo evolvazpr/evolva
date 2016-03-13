@@ -20,6 +20,7 @@ public:
 	void Insortion (std::shared_ptr<MovableObject> new_object);
 	void Remove();
 	void Sort();
+	inline bool IsEnd() const { return end_; };
 private:
 	iterator previous_position_;
 	iterator position_;

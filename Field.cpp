@@ -2,6 +2,7 @@
 #include "FieldCell.hpp"
 #include "CellObject.hpp"
 #include "CyclicQueue.hpp"
+#include "Unit.hpp"
 #include <vector>
 #include <boost/multi_array.hpp>
 
@@ -21,11 +22,15 @@ private:
 
 	FieldPimpl(const size_t x, const size_t y);
 	FieldPimpl() = delete;
+	bool pause_;
+	size_t global_turns_;
 public:
 	~FieldPimpl();
 };
 
 FieldPimpl::FieldPimpl(const size_t x, const size_t y) : width_(x), height_(y), cells_(boost::extents[x][y]) {
+	pause_ = true;
+	global_turns_ = 0;
 }
 
 FieldPimpl::~FieldPimpl() {
@@ -56,7 +61,7 @@ size_t Field::GetHeight() const {
 	return pimpl_->height_;
 }
 
-bool Field::InsertObject(std::shared_ptr<CellObject> object, const size_t x, const size_t y) {
+bool Field::InsertCellObject(std::shared_ptr<CellObject> object, const size_t x, const size_t y) {
 	std::shared_ptr<FieldCell> cell = GetCell(x, y);
 	if (cell->IsEmpty()){
 		cell->SetObject(object);
@@ -68,7 +73,7 @@ bool Field::InsertObject(std::shared_ptr<CellObject> object, const size_t x, con
 }
 
 bool Field::InsertObject(std::shared_ptr<MovableObject> object, const size_t x, const size_t y) {
-	bool insertion = InsertObject(static_cast<std::shared_ptr<CellObject>>(object), x, y);
+	bool insertion = InsertCellObject(static_cast<std::shared_ptr<CellObject>>(object), x, y);
 	if (insertion){
 		pimpl_->movable_objects_.Insortion(object);
 		return true;
@@ -77,7 +82,7 @@ bool Field::InsertObject(std::shared_ptr<MovableObject> object, const size_t x, 
 }
 
 bool Field::InsertObject(std::shared_ptr<NonMovableObject> object, const size_t x, const size_t y) {
-	bool insertion = InsertObject(static_cast<std::shared_ptr<CellObject>>(object), x, y);
+	bool insertion = InsertCellObject(static_cast<std::shared_ptr<CellObject>>(object), x, y);
 	if (insertion){
 		pimpl_->non_movable_objects_.push_back(object);
 		return true;
@@ -129,6 +134,54 @@ bool Field::BeginCycle() {
 	return true;
 }
 
-bool Field::Next() {
-	return pimpl_->movable_objects_.Next();
+std::shared_ptr<MovableObject> Field::GetCurrentObject() {
+	return pimpl_->movable_objects_.Get();
+}
+
+std::shared_ptr<Unit> Field::GetCurrentUnit() {
+	return std::dynamic_pointer_cast<Unit>(GetCurrentObject());
+}
+
+std::shared_ptr<MovableObject> Field::Next() {
+	// Take next turn. Then check whether the field is paused. Only non-paused
+	// field pass methods such Update() and Think().
+	pimpl_->movable_objects_.Next();
+	if (!pimpl_->pause_) {
+		// If loop reaches its end, then increment global turn counter,
+		// then sort (new turn, new order) and back to square one.
+		if (pimpl_->movable_objects_.IsEnd()) {
+			pimpl_->global_turns_++;
+			pimpl_->movable_objects_.Sort();
+			pimpl_->movable_objects_.Begin();
+		}
+		// First, check is object an unit, then update object (body-related
+		// issues, recalculating movement priority. Then, let an unit think.
+		if (pimpl_->movable_objects_.Get()->GetType(CellObject::Type::UNIT)) {
+			auto unit = std::dynamic_pointer_cast<Unit>(pimpl_->movable_objects_.Get());
+			unit->Update();
+			unit->Think();
+		}
+	}
+	// Method returns next object.
+	return field->GetCurrentObject();
+}
+
+std::shared_ptr<Unit> Field::NextUnit() {
+	return std::dynamic_pointer_cast<Unit>(Next());
+}
+
+void Field::Play() {
+	pimpl_->pause_ = false;
+}
+
+void Field::Pause() {
+	pimpl_->pause_ = true;
+}
+
+size_t Field::GetGlobalTurnCounter() const {
+	return pimpl_->global_turns_;
+}
+
+bool Field::IsCycleEnd() const {
+	return pimpl_->movable_objects_.IsEnd();
 }

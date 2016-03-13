@@ -5,7 +5,8 @@
 #include "DnaUnit.hpp"
 #include <cmath>
 
-class Unit : public DnaUnit, public NonPlant {
+class Unit : public DnaUnit, public Creature {
+friend class Field;
 public:
 	Unit();
 	Unit(std::shared_ptr<DnaCode> dna_code);

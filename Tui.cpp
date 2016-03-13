@@ -19,19 +19,13 @@ void Tui::PrintField() {
 		for (size_t j = 0; j < field->GetHeight(); j++) {
 			if (field->GetCell(i, j)->IsEmpty()) {
 				std::cout << "|   ";
-			}	else {
+			}
+			else {
 				object = field->GetCell(i, j)->CopyPtr();
-				switch(object->GetType()) {
-					case(CellObject::Type::MOVABLE):
-						std::cout << "| O ";
-						break;
-						case(CellObject::Type::NONMOVABLE):
-						std::cout << "| X ";
-						break;
-					default:
-						std::cout << "| ? ";
-						break;
+				if (object->GetType(CellObject::Type::MOVABLE)) {
+					std::cout << "| O ";
 				}
+				else std::cout << "| O ";
 			}
 		}
 		std::cout << "|\n";

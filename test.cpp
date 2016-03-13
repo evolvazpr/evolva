@@ -12,6 +12,7 @@
 std::shared_ptr<Field> field;
 
 int main(void) {
+
 	field = Field::GetInstance(25, 25);
 
 	std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();
@@ -32,18 +33,23 @@ int main(void) {
 
 	DnaGenerator gen(dna_ptr);
 	gen.variability_ = 30.0;
-	std::vector<std::shared_ptr<Unit>> u;
 	for (size_t i = 0; i < 10; ++i) {
-		u.push_back(std::make_shared<Unit>(gen.Generate()));
+		auto unit = std::make_shared<Unit>(gen.Generate());
+		Unit *u = unit.get();
+		while(!field->InsertObject(std::move(unit), field->Random()() % field->GetWidth(), field->Random()() % field->GetHeight()));
+	}
+	field->BeginCycle();
+	field->Pause();
+	size_t i = 0;
+	for (auto u = field->GetCurrentUnit(); !field->IsCycleEnd(); u = field->NextUnit(), ++i) {
+		if (!u->GetType(CellObject::Type::UNIT)) continue;
 		std::cout << "u " << i << ":\n";
-		for (auto j = u.back()->dna_.begin();
-		j != u.back()->dna_.end();
-		++j) {
+		for (auto j = u->dna_.begin(); j != u->dna_.end(); ++j) {
             std::cout << j->first << ": " << j->second << "\n";
 		}
-		std::cout << "death: " << u.back()->death_ << "\n";
-		std::cout << "energy: " << u.back()->energy_ << "\n";
-		std::cout << "c. speed: " << u.back()->speed_ << "\n";
+		std::cout << "death: " << u->death_ << "\n";
+		std::cout << "energy: " << u->energy_ << "\n";
+		std::cout << "c. speed: " << u->speed_ << "\n";
 		std::cout << "\n";
 	}
 
@@ -52,21 +58,6 @@ int main(void) {
 	char c = 0;
 	std::cin >> c;
 	Tui tui;
-	std::shared_ptr<MovableObject> movable = std::make_shared<MovableObject>();
-	std::shared_ptr<NonMovableObject> non_movable = std::make_shared<NonMovableObject>();
-	field->InsertObject(movable, 2, 2);
-	field->InsertObject(non_movable, 3, 3);
-	tui.PrintField();
-	tui.PresentCellObject(movable);
-	tui.PresentCellObject(non_movable);
-	tui.PresentFieldCell(2, 2);
-	tui.PresentFieldCell(1, 1);
-	std::cout << "Moving movable to (4, 4)\n";
-	try {
-		field->MoveObjectTo(movable, 4, 4);
-	} catch(EvolvaException &error) {
-		std::cout << error.what() << std::endl;
-	}
 	tui.PrintField();
 	return 0;
 }

@@ -4,8 +4,6 @@
 #include <memory>
 #include <random>
 
-//#include "CellObject.hpp"
-//#include "FieldCell.hpp"
 #include "EvolvaException.hpp"
 
 class CellObject;
@@ -35,6 +33,7 @@ private:
 
 	mutable std::default_random_engine random_generator_;
 	double mutability_;
+	bool InsertCellObject(std::shared_ptr<CellObject> object, const size_t x, const size_t y);
 
 public:
 	inline const size_t GetFfid() const { return ++ffid_; };
@@ -43,7 +42,6 @@ public:
 	size_t GetHeight() const;
 	bool IsCorrect(const size_t x, const size_t y) const;
 	std::shared_ptr<FieldCell> GetCell(const size_t x, const size_t y);
-	bool InsertObject(std::shared_ptr<CellObject> object, const size_t x, const size_t y);
 	bool InsertObject(std::shared_ptr<MovableObject> object, const size_t x, const size_t y);
 	bool InsertObject(std::shared_ptr<NonMovableObject> object, const size_t x, const size_t y);
 	bool MoveObject(std::shared_ptr<MovableObject> object, const long x_steps, const long y_steps);
@@ -53,7 +51,14 @@ public:
 	bool Kill(Unit *unit);
 	bool Kill(std::shared_ptr<Unit> unit);
 	bool BeginCycle();
-	bool Next();
+	void Pause();
+	void Play();
+	size_t GetGlobalTurnCounter() const;
+	std::shared_ptr<MovableObject> GetCurrentObject();
+	std::shared_ptr<Unit> GetCurrentUnit();
+	std::shared_ptr<MovableObject> Next();
+	std::shared_ptr<Unit> NextUnit();
+	bool IsCycleEnd() const;
 };
 
 extern std::shared_ptr<Field> field;
