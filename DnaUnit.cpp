@@ -1,5 +1,5 @@
-//TODO: include field
-#inculde "DnaUnit.hpp"
+#include "Field.hpp"
+#include "DnaUnit.hpp"
 
 DnaUnit::DnaUnit() : dna_code_(std::make_shared<DnaCode>()), dna_(*dna_code_.get()) {
 }
@@ -22,8 +22,8 @@ std::shared_ptr<DnaCode> DnaUnit::Mating(const std::shared_ptr<const DnaCode> dn
 		if (i->first == "mutability" || i->first == "mutation_stability") continue;
 		dna->insert(std::make_pair(i->first, 0.5 * (i->second + dna_in->at(i->first))));
 		// mutating
-		std::normal_distribution<double> mutation(100.0, world->mutability_ * dna->at("mutability"));
-		double mutation_factor = mutation(world->generator) * 0.01;
+		std::normal_distribution<double> mutation(100.0, field->Mutability() * dna->at("mutability"));
+		double mutation_factor = mutation(field->Random()) * 0.01;
 		if (mutation_factor < 0.0) mutation_factor *= -1.0;
 		if (mutation_factor >= dna->at("mutation_stability")) dna->at(i->first) = dna->at(i->first) * mutation_factor;
 	}

@@ -1,4 +1,5 @@
 #include "CyclicQueue.hpp"
+#include "CellObject.hpp"
 
 bool CyclicQueue::Next() {
 	previous_position_ = position_++;
@@ -8,7 +9,7 @@ bool CyclicQueue::Next() {
 			position_ = begin();
 			end_ = true;
 		}
-		if ((*position_)->dead_) Remove();
+		if ((*position_)->IsRemoved()) Remove();
 		else return end_;
 	}
 	return end_;
@@ -16,6 +17,7 @@ bool CyclicQueue::Next() {
 
 void CyclicQueue::Begin() {
 	position_ = begin();
+	end_ = false;
 }
 
 void CyclicQueue::Begin(CyclicQueue::iterator beggining) {
@@ -23,16 +25,16 @@ void CyclicQueue::Begin(CyclicQueue::iterator beggining) {
 	Begin();
 }
 
-void CyclicQueue::Insortion(std::shared_ptr<Unit> new_element) {
+void CyclicQueue::Insortion(std::shared_ptr<MovableObject> new_object) {
 	iterator j = before_begin();
 	for (iterator i = begin(); i != end(); ++i) {
-		if (!new_element->operator <= (**i)) {
-			insert_after(j, new_element);
+		if (!new_object->operator <= (**i)) {
+			insert_after(j, new_object);
 			return;
 		}
 		j = i;
 	}
-	insert_after(j, new_element);
+	insert_after(j, new_object);
 }
 
 void CyclicQueue::Remove() {
@@ -52,8 +54,8 @@ void CyclicQueue::Sort() {
 	CyclicQueue queue;
 	Begin();
 	do {
-		std::shared_ptr<Unit> unit = *position_;
-		queue.Insortion(unit);
+		std::shared_ptr<MovableObject> object = *position_;
+		queue.Insortion(object);
 	} while(!Next());
 	clear();
 	operator = (queue);

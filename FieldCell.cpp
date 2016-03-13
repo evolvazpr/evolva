@@ -1,11 +1,14 @@
 #include "FieldCell.hpp"
 
-//implement Field()
+FieldCell::FieldCell() {
+	object_ = nullptr;
+}
 
-//implement ~Field
+FieldCell::~FieldCell() {
+}
 
-std::shared_ptr<CellObject> SetObject(std::shared_ptr<CellObject> object) {
+std::shared_ptr<CellObject> FieldCell::SetObject(std::shared_ptr<CellObject> object) {
 	std::shared_ptr<CellObject> output(std::move(object_));
-	if (!object.IsEmpty) object_ = object;
+	object_ = object;
 	return std::move(output);
 }

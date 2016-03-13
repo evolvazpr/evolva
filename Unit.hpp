@@ -1,9 +1,11 @@
-#ifndef _UNIT_HPP
-#define _UNIT_HPP
+#ifndef _UNIT_HPP_
+#define _UNIT_HPP_
 
+#include "CellObject.hpp"
 #include "DnaUnit.hpp"
+#include <cmath>
 
-class Unit : public DnaUnit /* : public NonPlant */{
+class Unit : public DnaUnit, public NonPlant {
 public:
 	Unit();
 	Unit(std::shared_ptr<DnaCode> dna_code);
@@ -26,18 +28,14 @@ private:
 		double energy_;										/*< Level stored in nutritions in organism. */
 		double poison_;										/*< Level of poison. */
 		size_t death_;
-		bool dead_;
 	/*< Updates current status, checks death time. */
 	void Update();
 	/*< Wakes up from sleep. */
 	void WakeUp();
+	void UpdateSpeed();
 	void CalculateDeathTime();
 	size_t Think(const double intelligence = NAN, std::shared_ptr<Unit> attacker = nullptr);
-	/*< Operator <= uses for sorting. It is used in custom class CyclingQueue.
-	It should be operator < (like in other sorting algorithms), but operator <=
-	provides new elements to be inserted AFTER old elements with the same comparing value. */
-	inline bool operator <= (const Unit &object) const { return speed_ <= object.speed_; };
-//	inline bool operator > (const Unit &object) const { return speed_ > object.speed_; };
+	virtual double GetMovePriority() const;
 };
 
-#endif // _UNIT_HPP
+#endif // _UNIT_HPP_

@@ -1,20 +1,23 @@
-#ifndef _CYCLIC_QUEUE_HPP
-#define _CYCLIC_QUEUE_HPP
+#ifndef _CYCLIC_QUEUE_HPP_
+#define _CYCLIC_QUEUE_HPP_
 
-#include "Unit.hpp"
+// includes
 #include <forward_list>
 
-class CyclicQueue : private std::forward_list<std::shared_ptr<Unit>> {
+// forward declarations
+class MovableObject;
+
+class CyclicQueue : private std::forward_list<std::shared_ptr<MovableObject>> {
 public:
-	using std::forward_list<std::shared_ptr<Unit>>::forward_list;
-	using empty;
+	using std::forward_list<std::shared_ptr<MovableObject>>::forward_list;
+	using std::forward_list<std::shared_ptr<MovableObject>>::empty;
 	void Begin();
 	void Begin(iterator beggining);
-	inline std::shared_ptr<Unit> Get() { return *position_; };
+	inline std::shared_ptr<MovableObject> Get() { return *position_; };
 	bool Next();
 	/*< Insortion means "insertion sort" or "insert with sorting". It provides
 	inserting elements with keeping list sorted. */
-	void Insortion (std::shared_ptr<Unit> new_element);
+	void Insortion (std::shared_ptr<MovableObject> new_object);
 	void Remove();
 	void Sort();
 private:
@@ -23,4 +26,4 @@ private:
 	bool end_;
 };
 
-#endif // _CYCLIC_QUEUE_HPP
+#endif // _CYCLIC_QUEUE_HPP_

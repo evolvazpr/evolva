@@ -1,5 +1,5 @@
-#ifndef _DNA_UNIT_HPP
-#define _DNA_UNIT_HPP
+#ifndef _DNA_UNIT_HPP_
+#define _DNA_UNIT_HPP_
 
 #include <string>
 #include <memory>
@@ -19,4 +19,4 @@ protected:
 	std::shared_ptr<DnaCode> Mating(const std::shared_ptr<const DnaCode> dna_in) const ;
 };
 
-#endif // _DNA_UNIT_HPP
+#endif // _DNA_UNIT_HPP_

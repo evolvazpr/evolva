@@ -1,5 +1,5 @@
-#ifndef _DNA_GENERATOR_HPP
-#define _DNA_GENERATOR_HPP
+#ifndef _DNA_GENERATOR_HPP_
+#define _DNA_GENERATOR_HPP_
 
 #include "DnaUnit.hpp"
 
@@ -13,4 +13,4 @@ public:
 };
 
 
-#endif // _DNA_GENERATOR_HPP
+#endif // _DNA_GENERATOR_HPP_

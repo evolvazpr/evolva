@@ -1,2 +1,1 @@
-##Evolva - game of life  
-DADA
+##Evolva - game of life
