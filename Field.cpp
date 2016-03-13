@@ -39,10 +39,6 @@ Field::Field(const size_t x, const size_t y) : pimpl_(new FieldPimpl(x, y)) {
 			pimpl_->cells_[i][j] = std::make_shared<FieldCell>();
 		}
 	}
-	random_generator_();
-	random_generator_();
-	random_generator_();
-	random_generator_();
 }
 
 std::shared_ptr<Field> Field::GetInstance(const size_t x, const size_t y) {
