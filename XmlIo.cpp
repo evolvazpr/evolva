@@ -1,28 +1,30 @@
 #include "XmlIo.hpp"
 
-XmlIo::XmlIo(std::string path) : doc_(path.c_str()) {
+XmlIo::XmlIo(std::string path) throw (EvolvaException) : doc_(path.c_str()) {
+	LoadFile();
 }
 
 bool XmlIo::LoadFile() throw (EvolvaException) {
 	bool ret = doc_.LoadFile();
-	if (!ret) throw EvolvaException( std::string("XmlIo fails: ") + std::string(doc_.ErrorDesc()));
+	if (!ret) throw EvolvaException("XmlIo fails: " + std::string(doc_.ErrorDesc()));
 	else return true;
 }
 
-TiXmlText* XmlIo::GetValue() {
-	LoadFile();
+std::string XmlIo::GetValue(std::string first, std::string second) {
 	TiXmlNode* root = doc_.RootElement();
 	TiXmlNode* xml_object = root->IterateChildren(nullptr);
 	TiXmlNode* xml_element;
 	while (xml_object) {
-		std::cout << "Object: " << xml_object->ValueStr() << std::endl;
-		xml_element = xml_object->IterateChildren(nullptr);
-		while (xml_element) {
-			std::cout<< "		Element: " << xml_element->ValueStr() << std::endl;
-			std::cout << "			Value: " << xml_element->FirstChild()->ValueStr() << std::endl;
-			xml_element = xml_object->IterateChildren(xml_element);
+		if (xml_object->ValueStr() == first) {
+			xml_element = xml_object->IterateChildren(nullptr);
+			while (xml_element) {
+				if (xml_element->ValueStr() == second) return xml_element->FirstChild()->ValueStr();
+				else xml_element = xml_object->IterateChildren(xml_element);
+			}
+			throw EvolvaException("XmlIo fails: Problem with element: \"" + second + "\" in element: \"" + first + "\".");
+		} else {
+			xml_object = root->IterateChildren(xml_object);
 		}
-		xml_object = root->IterateChildren(xml_object);
 	}
-	return nullptr;
+	return "\0";
 }

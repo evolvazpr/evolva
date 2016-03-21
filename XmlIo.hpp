@@ -12,8 +12,8 @@ class XmlIo {
 		TiXmlDocument doc_;
 		bool LoadFile() throw (EvolvaException); 
 	public:
-		XmlIo(std::string path);
-		TiXmlText* GetValue();
+		XmlIo(std::string path) throw (EvolvaException);
+		std::string GetValue(std::string first, std::string second);
 };
 
 #endif //_XMLIO_HPP_
