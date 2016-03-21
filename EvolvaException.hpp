@@ -7,13 +7,16 @@
 class EvolvaException : public std::exception
 {
 	private:
-		const char* warning_;
+		std::string warning_;
 	public:
-		EvolvaException(const char*&& warning) {
-			warning_ = warning;
+		EvolvaException(std::string warning) {
+			std::swap(warning_, warning);
 		}
 	virtual const char* what() const throw() {
-		return warning_;
+		return warning_.c_str();
+	}
+	~EvolvaException() {
+
 	}
 };
 

@@ -1,6 +1,6 @@
 env=Environment(CPPPATH=['/usr/include/boost/'],
-		CPPDEFINES=[],
+		CPPDEFINES=['TIXML_USE_STL'],
 		LIBS=[],
 		CXXFLAGS="-std=c++11 -g3 -O0 -Wall -Wextra"
 		)
-env.Program(['test.cpp', 'CellObject.cpp', 'FieldCell.cpp', 'Field.cpp', 'Tui.cpp', 'CyclicQueue.cpp', 'DnaGenerator.cpp', 'DnaUnit.cpp', 'Unit.cpp'])
+env.Program(['Xmltest.cpp', 'tinyxml/tinystr.o', 'tinyxml/tinyxmlerror.o', 'tinyxml/tinyxml.o', 'tinyxml/tinyxmlparser.o', 'XmlIo.cpp'])
