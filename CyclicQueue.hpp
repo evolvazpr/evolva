@@ -3,6 +3,7 @@
 
 // includes
 #include <forward_list>
+#include <memory>
 
 // forward declarations
 class MovableObject;
