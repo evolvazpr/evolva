@@ -1,14 +1,9 @@
 <Evolva>
     <Field>
-        <Width>35</Width>
+        <Width>555</Width>
         <Length>100</Length>
+        <TEST>2</TEST>
     </Field>
-    <NOWE>
-        <NOWSZE>EINZ ZWEI POLIZEI - MOBO</NOWSZE>
-    </NOWE>
-    <NOWE>
-        <NOWSZE>EINZ ZWEI POLIZEI - MOBO</NOWSZE>
-    </NOWE>
     <NOWE>
         <NOWSZE2>DODA SIE?</NOWSZE2>
     </NOWE>
