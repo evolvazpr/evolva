@@ -10,10 +10,11 @@ class XmlIo {
 	private:
 		XmlIo() = delete;
 		TiXmlDocument doc_;
-		bool LoadFile() throw (EvolvaException); 
+		void LoadFile() throw (EvolvaException); 
 	public:
-		XmlIo(std::string path) throw (EvolvaException);
-		std::string GetValue(std::string first, std::string second);
+		XmlIo(const std::string path) throw (EvolvaException);
+		const std::string GetData(const std::string first, const std::string second) const throw (EvolvaException);
+		void WriteData(const std::string first, const std::string second, const std::string text);
 };
 
 #endif //_XMLIO_HPP_

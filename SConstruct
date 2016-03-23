@@ -3,4 +3,4 @@ env=Environment(CPPPATH=['/usr/include/boost/'],
 		LIBS=[],
 		CXXFLAGS="-std=c++11 -g3 -O0 -Wall -Wextra"
 		)
-env.Program(['Xmltest.cpp', 'tinyxml/tinystr.o', 'tinyxml/tinyxmlerror.o', 'tinyxml/tinyxml.o', 'tinyxml/tinyxmlparser.o', 'XmlIo.cpp'])
+env.Program(['test_XML.cpp', 'tinyxml/tinystr.o', 'tinyxml/tinyxmlerror.o', 'tinyxml/tinyxml.o', 'tinyxml/tinyxmlparser.o', 'XmlIo.cpp'])

@@ -1,10 +1,15 @@
 <Evolva>
-	<Field>
-		<Width>35</Width>
-		<Length>100</Length>
-	</Field>
-
-	<CosInnego>
-		<jeszczeInnego>W ogole co innego</jeszczeInnego>
-	</CosInnego>
+    <Field>
+        <Width>35</Width>
+        <Length>100</Length>
+    </Field>
+    <NOWE>
+        <NOWSZE>EINZ ZWEI POLIZEI - MOBO</NOWSZE>
+    </NOWE>
+    <NOWE>
+        <NOWSZE>EINZ ZWEI POLIZEI - MOBO</NOWSZE>
+    </NOWE>
+    <NOWE>
+        <NOWSZE2>DODA SIE?</NOWSZE2>
+    </NOWE>
 </Evolva>
