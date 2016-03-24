@@ -4,14 +4,18 @@
 
 int main(void) {
 	try {
+		double test;
 		XmlIo xml("test.xml\0");
-		std::cout << "Field: Width: " << xml.GetData("Field", "Width") << std::endl;
-		std::cout << "Field: Length: " << xml.GetData("Field", "Length") << std::endl;
 		xml.WriteData("Field", "Width", "555");
 		xml.WriteData("Field", "TEST", "2");
 		xml.WriteData("NOWE", "NOWSZE2", "DODA SIE?");
-	} catch (EvolvaException& exception) {
-		std::cout << exception.what();
+		test = xml["Field"]["Width"];
+		std::cout << "Field width: " << test << "\n";
+		test = xml["Field"]["TEST"];
+		std::cout << "Field TEST: " << test << "\n";
+		test = xml["NOWE"];
+	} catch (std::exception& exception) {
+		std::cout << exception.what() << std::endl;
 	}
 		return 0;
 }
