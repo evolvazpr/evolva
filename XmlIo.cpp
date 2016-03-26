@@ -5,7 +5,7 @@ XmlIoElement::XmlIoElement(TiXmlNode *node) throw (EvolvaException) : actual_nod
 		throw EvolvaException("XmlIoElement error: tryied to create XmlIoElement pointing to null.\n");
 }
 
-XmlIoElement& XmlIoElement::operator[](const char *element) throw (EvolvaException) {
+XmlIoElement& XmlIoElement::operator[](const std::string element) throw (EvolvaException) {
 	TiXmlNode *temp;
 	temp = actual_node_->FirstChild(element);
 	if (temp == NULL)
@@ -23,18 +23,32 @@ XmlIo::~XmlIo() {
 	doc_.SaveFile();
 }
 
-XmlIoElement XmlIo::operator[](const char *element) throw (EvolvaException) {
+XmlIoElement XmlIo::operator[](const std::string element) throw (EvolvaException) {
 	XmlIoElement node_(doc_.RootElement()->FirstChild(element));
 	return node_; 
 }
 
-XmlIoElement::operator double() {
-	const std::string text = actual_node_->FirstChild()->ValueStr();	
-	try {
-	double ret = std::stod(text);
-	return ret;
-	} catch(std::exception& exception) {
-		throw EvolvaException("XmlIo fails: Tried to assign text to value of type double");
+/* 
+ * Creating elements. Example of usage:
+ * xml.CreateElements({"New_node", "Something_new"});
+ * Effect:
+ * <Evolva>
+ *	(...)
+ *	<New_node>
+ *		<Something_new />
+ *	</New_node>
+ *	(...)
+ *</Evolva>
+ * Method can not initialize element with value.
+ */
+void XmlIo::CreateElement(std::initializer_list<const std::string> name_path) {
+	TiXmlNode *node = doc_.RootElement();
+	TiXmlNode *temp = nullptr;
+	for (auto name : name_path) {
+		temp = node->FirstChild(name);
+		if(!temp) 
+			node = node->InsertEndChild(TiXmlElement(name));
+		else 
+			node = temp;
 	}
-}	
-
+}

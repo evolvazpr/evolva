@@ -8,12 +8,12 @@ int main(void) {
 		XmlIo xml("test.xml\0");
 		test = xml["Field"]["Width"];
 		std::cout << "Field width: " << test << "\n";
-		xml["Field"]["Width"] = 2;
+		xml["Field"]["Width"] = 2262;
 		test = xml["Field"]["Width"];
 		std::cout << "Field width: " << test << "\n";
-		test = xml["Field"]["TEST"];
-		std::cout << "Field TEST: " << test << "\n";
-		test = xml["DUPA_NIE_UDA"];
+		xml.CreateElement({"a", "b", "c", "d"});
+		xml.CreateElement({"empty"});
+		xml["empty"] = 5;
 	} catch (std::exception& exception) {
 		std::cout << exception.what() << std::endl;
 	}
