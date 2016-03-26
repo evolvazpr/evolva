@@ -1,11 +1,11 @@
 #include "XmlIo.hpp"
 
-XmlIoElement::XmlIoElement(TiXmlNode *node) throw (EvolvaException) : actual_node_(node) {
+XmlIo::Element::Element(TiXmlNode *node) throw (EvolvaException) : actual_node_(node) {
 	if (!actual_node_)
 		throw EvolvaException("XmlIoElement error: tryied to create XmlIoElement pointing to null.\n");
 }
 
-XmlIoElement& XmlIoElement::operator[](const std::string element) throw (EvolvaException) {
+XmlIo::Element& XmlIo::Element::operator[](const std::string element) throw (EvolvaException) {
 	TiXmlNode *temp;
 	temp = actual_node_->FirstChild(element);
 	if (temp == NULL)
@@ -23,8 +23,8 @@ XmlIo::~XmlIo() {
 	doc_.SaveFile();
 }
 
-XmlIoElement XmlIo::operator[](const std::string element) throw (EvolvaException) {
-	XmlIoElement node_(doc_.RootElement()->FirstChild(element));
+XmlIo::Element XmlIo::operator[](const std::string element) throw (EvolvaException) {
+	Element node_(doc_.RootElement()->FirstChild(element));
 	return node_; 
 }
 
