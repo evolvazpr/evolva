@@ -27,28 +27,3 @@ XmlIo::Element XmlIo::operator[](const std::string element) throw (EvolvaExcepti
 	Element node_(doc_.RootElement()->FirstChild(element));
 	return node_; 
 }
-
-/* 
- * Creating elements. Example of usage:
- * xml.CreateElements({"New_node", "Something_new"});
- * Effect:
- * <Evolva>
- *	(...)
- *	<New_node>
- *		<Something_new />
- *	</New_node>
- *	(...)
- *</Evolva>
- * Method can not initialize element with value.
- */
-void XmlIo::CreateElement(std::initializer_list<const std::string> name_path) {
-	TiXmlNode *node = doc_.RootElement();
-	TiXmlNode *temp = nullptr;
-	for (auto name : name_path) {
-		temp = node->FirstChild(name);
-		if(!temp) 
-			node = node->InsertEndChild(TiXmlElement(name));
-		else 
-			node = temp;
-	}
-}
