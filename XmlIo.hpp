@@ -7,11 +7,16 @@
 #include "tinyxml/tinyxml.h"
 #include "EvolvaException.hpp"
 
+/**\brief XML document representation.
+ *
+ * Gives access to XML file, allows to read, write and update it.
+*/
 class XmlIo {
 	private:
 		XmlIo() = delete;
 		TiXmlDocument doc_;	
 
+	public:
 		class Element {
 			private:
 				Element() = delete;
@@ -22,12 +27,22 @@ class XmlIo {
 				template <class T> operator T() const;
 				template <class T> Element& operator =(const T value);
 		};
-	public:
+
 		XmlIo(const std::string path) throw (EvolvaException);
 		~XmlIo();
 		Element operator[](const std::string element) throw (EvolvaException);
 		template <class T = int> void CreateElement(std::initializer_list<const std::string> name_path, T value = 0);
+		void SaveFile();
 };
+
+/**\brief Assign operator template. Works with all standard numeric types. 
+ *
+ * Method changes value in specific xml's element. If value is present, method will replace it.
+ * Example of usage:
+ *	xml["first_element"]["second_element"] = 5;
+ *
+ * \param const T value - value to be inserted into element.
+*/
 
 template <class T> XmlIo::Element& XmlIo::Element::operator =(const T value) {
 	TiXmlNode *old_value = actual_node_->FirstChild();
@@ -41,6 +56,12 @@ template <class T> XmlIo::Element& XmlIo::Element::operator =(const T value) {
 	return *this;
 }
 
+/**\brief Type operator template. Works with all standard types.
+ *
+ * Example of usage:
+ * int x = xml["first_element"]["second_element"];
+ * Template works for all basic types. 
+*/
 template <class T> XmlIo::Element::operator T() const {
 	std::string text = actual_node_->FirstChild()->ValueStr();
 	std::stringstream stream(std::move(text));
@@ -49,20 +70,28 @@ template <class T> XmlIo::Element::operator T() const {
 	return ret;
 }
 
-/* 
- * Creating elements. Example of usage:
- * xml.CreateElements({"New_node", "Something_new"}, 5);
- * Effect:
- * <Evolva>
- *	(...)
- *	<New_node>
- *		<Something_new>5</Something_new>
- *	</New_node>
- *	(...)
- *</Evolva>
+/**\brief Creates one or more elements.
+ * 
+ * Last element on list gets value, which may be passed parameter. If not passed default value is assigned. Method uses template to permit all basic types as second parameter.
+ * Example of usage:
  *
- * Method can be invoked without second argument (second argument is 0 as default)
- */
+ *	XmlIo xml("test.xml");
+ *	xml.CreateElements({"New_node", "Something_new"}, 5);
+ *
+ * Effect:
+ *
+ *	<evolva>
+ *		(...)
+ *		<New_node>
+ *			<Something_new>5</Something_new>
+ *		</New_node>
+ *		(...)
+ *	</evolva>
+ * 
+ * \param std::initializer_list<const std::string> name_path - list - relationship of elements in xml file to be (re)written. Elements, which do not exist in xml file right now, will be written now to XmlIo object, and saved to XML document related to XmlIo object after invoking XmlIo::SaveFile method, or after deconstruction of XmlIo object.
+ * 
+ * \param T value - value of last element passed in list. Basic types can be passed, because method is templated. If parameter is not passed, value defaults to 0. 
+*/	
 template <class T> void XmlIo::CreateElement(std::initializer_list<const std::string> name_path, T value) {
 	TiXmlNode *node = doc_.RootElement();
 	TiXmlNode *temp = nullptr;
@@ -76,9 +105,9 @@ template <class T> void XmlIo::CreateElement(std::initializer_list<const std::st
 		else 
 			node = temp;
 	}
-	/*If there was last element - replace values*/
-	if (temp) node->ReplaceChild(node->FirstChild(), std::move(text)); //To move or not to move, that is a question.
-	/*If there was no last element - insert new value*/
+	// If there was last element - replace values
+	if (temp) node->ReplaceChild(node->FirstChild(), text);
+	// If there was no last element - insert new value
 	else node->InsertEndChild(text);	
 }
 

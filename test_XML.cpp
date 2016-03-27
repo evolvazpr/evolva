@@ -14,6 +14,7 @@ int main(void) {
 		xml.CreateElement({"a", "b", "c", "d"});
 		xml.CreateElement({"empty"});
 		xml["empty"] = 5;
+		xml.SaveFile();
 	} catch (std::exception& exception) {
 		std::cout << exception.what() << std::endl;
 	}
