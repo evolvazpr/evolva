@@ -3,7 +3,7 @@
  * XmlIo::Element class, which objects are created in time of accessing xml's nodes via [] operator.
  * Method throws exception while passing nullptr as node parameter.
  *
- * \param TiXmlNode *node - pointer to node. It is needed by XmlIo::Element operator[] overload. If node is nullptr - exception will be thrown.
+ * \param node - pointer to node. It is needed by XmlIo::Element operator[] overload. If node is nullptr - exception will be thrown.
 */
 XmlIo::Element::Element(TiXmlNode *node) throw (EvolvaException) : actual_node_(node) {
 	if (!actual_node_)
@@ -15,7 +15,7 @@ XmlIo::Element::Element(TiXmlNode *node) throw (EvolvaException) : actual_node_(
  * 
  * Method throws exception in time of attempt to access not existing node.
  * 
- * \param const std::string element - name of element to be accessed.
+* \param element - name of element to be accessed.
 */
 XmlIo::Element& XmlIo::Element::operator[](const std::string element) throw (EvolvaException) {
 	TiXmlNode *temp;
@@ -28,8 +28,8 @@ XmlIo::Element& XmlIo::Element::operator[](const std::string element) throw (Evo
 
 
 /**
- * Constructor throws exception if opening of XML document fails. XML file must be prepared properly before constructing object of this class.
- * \param const std::string path - path to xml file.
+ * Constructor throws exception when open of XML document fails. XML file must be prepared properly before constructing object of this class.
+ * \param path - path to xml file.
 */
 XmlIo::XmlIo(const std::string path) throw (EvolvaException) : doc_(path.c_str()) {
 	bool ret = doc_.LoadFile();
@@ -48,7 +48,7 @@ XmlIo::~XmlIo() {
  *
  * Method throws exception in time of attempt to access not existing node.
  *
- * \param const std::string element - name of node to be accessed.
+ * \param element - name of node to be accessed.
 */
 XmlIo::Element XmlIo::operator[](const std::string element) throw (EvolvaException) {
 	Element node_(doc_.RootElement()->FirstChild(element));
