@@ -26,7 +26,7 @@ class XmlIo {
 				Element(TiXmlNode *node) throw (EvolvaException);
 				Element& operator[](const std::string element) throw (EvolvaException);
 				template <class T> operator T() const;
-				template <class T> Element& operator =(const T value);
+				template <class T> XmlIo::Element& operator =(const T value);
 		};
 
 		XmlIo(const std::string path) throw (EvolvaException);
@@ -60,6 +60,7 @@ template <class T> XmlIo::Element& XmlIo::Element::operator =(const T value) {
  *
  * Example of usage:
  * \code{.cpp} int x = xml["first_element"]["second_element"]; \endcode
+ * 
 */
 template <class T> XmlIo::Element::operator T() const {
 	std::string text = actual_node_->FirstChild()->ValueStr();
