@@ -2,6 +2,7 @@
 #define _CYCLIC_QUEUE_HPP_
 
 // includes
+#include <memory>
 #include <forward_list>
 
 // forward declarations
@@ -25,6 +26,7 @@ private:
 	iterator previous_position_;
 	iterator position_;
 	bool end_;
+	mutable iterator pushed_end_;
 };
 
 #endif // _CYCLIC_QUEUE_HPP_

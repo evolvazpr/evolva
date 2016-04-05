@@ -2,6 +2,7 @@
 #define _CELL_OBJECT_H_
 
 #include <memory>
+#include "FieldCell.hpp"
 
 // forward declarations
 class Field;
@@ -18,32 +19,32 @@ public:
 		UNIT = 3,
 		CARNIVORE = 4,
 		HERBIVORE = 5,
-		CREATURE = 6,
+		CREATURE = 6
 	}; //enum describes type of object. Right now used only by TUI.
+	//! TODO: type variable is not a good choice - we have to remove this and find another solution
 	CellObject();
 	CellObject(const size_t id);
 	inline size_t GetId() const { return id_; }
-//	virtual CellObject::Type GetType() = 0;				//Virtual method, returns type of object.
 	virtual ~CellObject() = 0;
-	friend class Field;	//Allow Field to change object's x, y coordinates
-	friend class Tui;
+	friend class Field;
+	friend class FieldCell;
 	bool GetType(const Type type) const;
+	inline size_t GetX() const { return cell_.lock()->GetX(); }; // wyjebac -> a potem mozna wyjebac incl field cell
+	inline size_t GetY() const { return cell_.lock()->GetY(); };
 protected:
 	void SetType(const Type bit, const bool value);
 private:
-	const size_t id_;		//Unique object's identifiacation number
-	size_t x_;					//Object's x field coordinate
-	size_t y_;					//Object's y field coordinate
+	const size_t id_;		//Unique object's identification number
+	std::weak_ptr<FieldCell> cell_;
 };
 
 class MovableObject : public CellObject {
 friend class Tui;
 public:
 	MovableObject();
-	bool MoveWithRelativeStep(int x, int y);
+	bool Move(const int x, const int y, const bool trim = false);
 	inline bool IsRemoved() const { return removed_; };
 	virtual ~MovableObject();
-//	virtual CellObject::Type GetType() { return Type::MOVABLE; };
 	virtual double GetMovePriority() const;
 	/*< Operator <= uses for sorting. It is used in custom class CyclingQueue.
 	It should be operator < (like in other sorting algorithms), but operator <=
@@ -60,6 +61,21 @@ public:
 };
 
 class Plant : public NonMovableObject {
+public:
+	inline double GetEnergy() const { return energy_; };
+	bool Eat(double energy);
+	Plant();
+	virtual ~Plant();
+protected:
+	double energy_;
+};
+
+class Tree : public Plant {
+public:
+	Tree(double energy);
+	virtual ~Tree();
+private:
+	double default_energy_;
 };
 
 class NonPlant : public NonMovableObject {

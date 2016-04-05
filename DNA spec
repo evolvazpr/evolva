@@ -1,0 +1,48 @@
+
+
+1. Basic properties (like in RPG games)
+	intelligence
+	agility
+	speed
+	strength
+
+2. Death time calculating normal distribution settings (u - mean, s - deviation)
+	death_time_u
+	death_time_s
+
+3. Mutation
+	mutability
+
+	3.1. "mutability" affects mutation process. Bigger mutability - bigger variety.
+
+4. Death thresholds (if >= then die)
+	fatigue_death_threshold
+	health_death_threshold
+
+	4.1. "fatigue_death_threshold" - level of fatigue where a unit is going to die.
+
+5. Poison
+	poison_susceptibility
+	poison_excertion
+
+6. Regenerations
+	fatigue_regeneration
+	health_regeneration_sleep
+
+7. Requirements (new node) (in energy per action)
+	requirements.normal_turn
+	requirements.sleep_turn
+	requirements.eating
+	requirements.mating
+	requirements.step
+	requirements.attack
+
+8. Other
+	wakeup_threshold
+	fatigue_turn_increase
+	normal_weight
+	pregnancy_time
+
+9. Żerność (angielski halp)
+	herbivore
+	carnivore

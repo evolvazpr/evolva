@@ -1,5 +1,5 @@
-#ifndef _EVOLVA_EXCEPTION_HPP
-#define _EVOLVA_EXCEPTION_HPP
+#ifndef _EVOLVA_EXCEPTION_HPP_
+#define _EVOLVA_EXCEPTION_HPP_
 
 #include <exception>
 #include <string>
@@ -17,4 +17,4 @@ class EvolvaException : public std::exception
 	}
 };
 
-#endif //_EVOLVA_EXCEPTION_HPP
+#endif //_EVOLVA_EXCEPTION_HPP_

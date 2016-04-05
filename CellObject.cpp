@@ -33,9 +33,8 @@ double MovableObject::GetMovePriority() const {
 	return 0.0;
 }
 
-bool MovableObject::MoveWithRelativeStep(int x, int y) {
-	std::shared_ptr<Field> field = Field::GetInstance();
-	return field->MoveObject(std::static_pointer_cast<MovableObject>(shared_from_this()), x, y);
+bool MovableObject::Move(const int x, const int y, const bool trim) {
+	return field->MoveObject(std::static_pointer_cast<MovableObject>(shared_from_this()), x, y, trim);
 }
 
 // NonMovableObject
@@ -45,6 +44,35 @@ NonMovableObject::NonMovableObject() : CellObject() {
 }
 
 NonMovableObject::~NonMovableObject() {
+}
+
+
+// Plant
+
+Plant::Plant() : NonMovableObject() {
+	SetType(Type::PLANT, true);
+}
+
+Plant::~Plant() {
+}
+
+bool Plant::Eat(double energy) {
+	if (energy <= energy_) {
+		energy_ -= energy;
+		if (energy_ == 0.0) field->KillNmo(std::dynamic_pointer_cast<NonMovableObject>(shared_from_this())); // hsraed from this?!
+		return true;
+	}
+	else return false;
+}
+
+// Tree
+
+Tree::Tree(double energy) : Plant() {
+	default_energy_ = energy;
+	energy_ = default_energy_;
+}
+
+Tree::~Tree() {
 }
 
 // NonPlant
