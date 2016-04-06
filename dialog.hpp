@@ -20,6 +20,7 @@ private slots:
 
 private:
     Ui::Dialog *ui;
+    QGraphicsScene *scene;
 };
 
 #endif // DIALOG_HPP

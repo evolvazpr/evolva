@@ -3,9 +3,8 @@
 
 Dialog::Dialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::Dialog) {
+    ui(new Ui::Dialog), scene(new QGraphicsScene) {
     ui->setupUi(this);
-    QGraphicsScene *scene = new QGraphicsScene();
     ui->graphicsView->setScene(scene);
 }
 
