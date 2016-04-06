@@ -7,7 +7,7 @@
 #include "tinyxml/tinyxml.h"
 #include "EvolvaException.hpp"
 
-/*brief XML document representation.
+/**\brief XML document representation.
 */
 class XmlIo {
 	private:
@@ -15,7 +15,8 @@ class XmlIo {
 		TiXmlDocument doc_;	
 
 	public:
-		/** XML's element (node) representation.
+		/**\brief XML's element (node) representation.
+		 * 
 		 * Class represents temporary object created due to the call of XmlIo's operator [].
 		 */
 		class Element {
@@ -26,7 +27,7 @@ class XmlIo {
 				Element(TiXmlNode *node) throw (EvolvaException);
 				Element& operator[](const std::string element) throw (EvolvaException);
 				template <class T> operator T() const;
-				template <class T> Element& operator =(const T value);
+				template <class T> XmlIo::Element& operator =(const T value);
 		};
 
 		XmlIo(const std::string path) throw (EvolvaException);
