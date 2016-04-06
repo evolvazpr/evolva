@@ -6,4 +6,5 @@ html
 *.py
 *.db
 test_insert_object
+test_move_object
 test_XML

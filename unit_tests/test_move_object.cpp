@@ -16,5 +16,8 @@ BOOST_AUTO_TEST_CASE(move) {
 	std::shared_ptr<MovableObject> bambo = std::make_shared<MovableObject>(Unit(dna_code));
 	field->InsertObject(mambo, 10, 10);
 	field->InsertObject(bambo, 2, 3);
-		
+	BOOST_CHECK(field->MoveObjectTo(mambo, 2, 3) == false);
+	BOOST_CHECK(field->MoveObjectTo(mambo, 2, 2) == true);
+	BOOST_CHECK(field->MoveObject(bambo, 0, -1) == false);
+	BOOST_CHECK(field->MoveObject(bambo, 0, -2) == true);	
 }
