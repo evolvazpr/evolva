@@ -1,9 +1,9 @@
 html
-test
-test_XML
 *.dblite
 *.o
 *.swp
 *.pyc
 *.py
 *.db
+test_insert_object
+test_XML

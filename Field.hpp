@@ -14,9 +14,7 @@ class Unit;
 class FieldPimpl;
 
 class Field {
-
-	friend class Tui;
-
+friend class Tui;
 private:
 
 	std::unique_ptr<FieldPimpl> pimpl_;
@@ -36,7 +34,7 @@ private:
 	bool InsertCellObject(std::shared_ptr<CellObject> object, const size_t x, const size_t y);
 
 public:
-	inline const size_t GetFfid() const { return ++ffid_; };
+	inline size_t GetFfid() const { return ++ffid_; };
 	static std::shared_ptr<Field> GetInstance(const size_t x = 0, const size_t y = 0);
 	size_t GetWidth() const;
 	size_t GetHeight() const;
@@ -44,15 +42,17 @@ public:
 	std::shared_ptr<FieldCell> GetCell(const size_t x, const size_t y);
 	bool InsertObject(std::shared_ptr<MovableObject> object, const size_t x, const size_t y);
 	bool InsertObject(std::shared_ptr<NonMovableObject> object, const size_t x, const size_t y);
-	bool MoveObject(std::shared_ptr<MovableObject> object, const long x_steps, const long y_steps);
-	bool MoveObjectTo(std::shared_ptr<MovableObject> object, const size_t x, const size_t y);
+	bool MoveObject(std::shared_ptr<MovableObject> object, const long x_steps, const long y_steps, const bool trim = false);
+	bool MoveObjectTo(std::shared_ptr<MovableObject> object, size_t x, size_t y, const bool trim = false);
 	inline std::default_random_engine& Random() const { return random_generator_; };
 	inline double Mutability() const { return mutability_; };
 	bool Kill(Unit *unit);
 	bool Kill(std::shared_ptr<Unit> unit);
+	bool KillNmo(std::shared_ptr<NonMovableObject> object);
 	bool BeginCycle();
 	void Pause();
 	void Play();
+	bool IsPauseLoop() const;
 	size_t GetGlobalTurnCounter() const;
 	std::shared_ptr<MovableObject> GetCurrentObject();
 	std::shared_ptr<Unit> GetCurrentUnit();
@@ -60,8 +60,6 @@ public:
 	std::shared_ptr<Unit> NextUnit();
 	bool IsCycleEnd() const;
 };
-
-extern std::shared_ptr<Field> field;
 
 #endif // _FIELD_HPP_
 

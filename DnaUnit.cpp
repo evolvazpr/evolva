@@ -4,7 +4,7 @@
 DnaUnit::DnaUnit() : dna_code_(std::make_shared<DnaCode>()), dna_(*dna_code_.get()) {
 }
 
-DnaUnit::DnaUnit(std::shared_ptr<DnaCode> dna_code) : dna_code_(std::move(dna_code)), dna_(*dna_code_.get()) {
+DnaUnit::DnaUnit(std::shared_ptr<DnaCode> dna_code) : dna_code_(dna_code), dna_(*dna_code_.get()) {
 }
 
 DnaUnit::~DnaUnit() {
@@ -12,6 +12,7 @@ DnaUnit::~DnaUnit() {
 
 std::shared_ptr<DnaCode> DnaUnit::Mating(const std::shared_ptr<const DnaCode> dna_in) const {
 	auto dna = std::make_shared<DnaCode>();
+	std::shared_ptr<Field> field = Field::GetInstance();
 	// crossover and mutating
 	// mutation genes (m. genes affect only children, not parents)
 	dna->insert(std::make_pair("mutability", 0.5 * (dna_code_->at("mutability") + dna_in->at("mutability"))));

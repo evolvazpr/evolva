@@ -23,11 +23,11 @@ void Tui::PrintField() {
 				std::cout << "|   ";
 			}
 			else {
-				object = field->GetCell(i, j)->CopyPtr();
+				object = field->GetCell(i, j)->GetObject();
 				if (object->GetType(CellObject::Type::MOVABLE)) {
 					std::cout << "| O ";
 				}
-				else std::cout << "| O ";
+				else std::cout << "| # ";
 			}
 		}
 		std::cout << "|\n";
@@ -50,8 +50,8 @@ void Tui::PresentFieldCell(const size_t x, const size_t y) {
  *Method informs about object in specific cell.
  */
 void Tui::PresentCellObject(const std::shared_ptr<CellObject> object) {
-	std::cout << "ID: " << object->id_ << std::endl;
-	std::cout << "Coordiantes: x = " << object->x_ << ", y = " << object->y_ << ".\n";
+	std::cout << "ID: " << object->GetId() << std::endl;
+	std::cout << "Coordiantes: x = " << object->GetX() << ", y = " << object->GetY() << ".\n";
 }
 
 /**
@@ -62,7 +62,7 @@ void Tui::PresentCellObject(const std::shared_ptr<MovableObject> object) {
 	PresentCellObject(static_cast<std::shared_ptr<CellObject>>(object));
 	std::cout << "Move priority: " << object->GetMovePriority() << "\n\n";
 }
-`
+
 /**
  *Method informs about object in specific cell.
  */
