@@ -18,6 +18,10 @@ BOOST_AUTO_TEST_CASE(move) {
 	field->InsertObject(bambo, 2, 3);
 	BOOST_CHECK(field->MoveObjectTo(mambo, 2, 3) == false);
 	BOOST_CHECK(field->MoveObjectTo(mambo, 2, 2) == true);
+	BOOST_CHECK(field->GetCell(2, 2)->GetObject() == mambo);
+	BOOST_CHECK(field->GetCell(10, 10)->GetObject() == nullptr);
 	BOOST_CHECK(field->MoveObject(bambo, 0, -1) == false);
-	BOOST_CHECK(field->MoveObject(bambo, 0, -2) == true);	
+	BOOST_CHECK(field->MoveObject(bambo, 0, -2) == true);
+	BOOST_CHECK(field->GetCell(2, 1)->GetObject() == bambo);
+	BOOST_CHECK(field->GetCell(2, 3)->GetObject() == nullptr);
 }
