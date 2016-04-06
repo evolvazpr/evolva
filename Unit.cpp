@@ -3,7 +3,7 @@
 #include "FieldCell.hpp"
 #include <forward_list>
 #include <boost/multi_array.hpp>
-
+#include <cmath>
 
 
 
@@ -39,7 +39,7 @@ public:
 		inline bool IsAvailable() const { return cell_ != nullptr; };
 		inline int GetX() const { return x_; }; //gdzie jest w sensie
 		inline int GetY() const { return y_; };
-		inline std::shared_ptr</*const /**/FieldCell> Get()/* const/**/ { return cell_; };
+		inline std::shared_ptr</*const*/FieldCell> Get()/* const*/ { return cell_; };
 		inline std::shared_ptr<FieldCell> GetEmpty() { return empty_cell_; };
 	private:
 		Cell() = delete;
@@ -96,6 +96,7 @@ bool Sense::IsRelativeEmpty(const int x, const int y) const {
 }
 
 std::pair<int, int> Sense::GetFirstEmptyNeighbor(const int x, const int y) const {
+	std::shared_ptr<Field> field = Field::GetInstance();
 	auto east = field->GetCell(x_ + x + 1, y_ + y);
 	if (east && east->IsEmpty()) return std::make_pair(1, 0);
 	auto north = field->GetCell(x_ + x, y_ + y - 1);
@@ -134,7 +135,7 @@ Sense::Sense(Unit *unit, double radius, double efficiency) : unit_(unit) {
 };
 
 bool Sense::Fetch() {
-
+	std::shared_ptr<Field> field = Field::GetInstance();
 	int a = -discrete_radius_ + 1;
 	int i = a;
 	int b = discrete_radius_ - 1;
@@ -176,6 +177,7 @@ Unit::~Unit() {
 }
 
 void Unit::CalculateDeathTime() {
+	std::shared_ptr<Field> field = Field::GetInstance();
 	const double death_factor_u = dna_["death_time_u"] * (0.8 + 0.001 * ((dna_["agility"] + dna_["intelligence"] - dna_["speed"] - dna_["strength"])));
 	const double death_factor_s = dna_["death_time_s"] - (dna_["agility"] + dna_["strength"] - dna_["intelligence"] - dna_["speed"]) / 240.0;
 	std::normal_distribution<double> distribution(death_factor_u, death_factor_s);
@@ -186,6 +188,7 @@ void Unit::CalculateDeathTime() {
 // najpierw usuwamy energię, potem thunk, potem dodajemy zmeczenie
 
 void Unit::Update() {
+	std::shared_ptr<Field> field = Field::GetInstance();
 	// Update the most important parameters: turns and speed.
 	UpdateSpeed();
 	++turns_;
@@ -278,12 +281,13 @@ enum class Direction : unsigned char {
 
 
 size_t Unit::Think(const double intelligence, std::shared_ptr<Unit> attacker) {
+	std::shared_ptr<Field> field = Field::GetInstance();
 	// Calculate steps the unit can move. C. speed is <0, 100> (can be lower),
 	// so when c. speed is 100, the unit is able to move 25 steps.
 	double steps = Heaviside(speed_ / 4.0);
 	// If intelligence is specified, method uses "swarm intelligence".
 	const double pushed_intelligence = dna_["intelligence"];
-	if (!isnan(intelligence)) dna_["intelligence"] = intelligence;
+	if (!std::isnan(intelligence)) dna_["intelligence"] = intelligence;
 	// For ergonomy.
 	DnaCode &dna = dna_;
 	// Think in danger. Fight or run.
@@ -297,7 +301,7 @@ size_t Unit::Think(const double intelligence, std::shared_ptr<Unit> attacker) {
 			if (target_strength < attacker_strength) {
 				// TODO: run
 				// Run and return
-				if (!isnan(intelligence)) dna_["intelligence"] = pushed_intelligence;
+				if (!std::isnan(intelligence)) dna_["intelligence"] = pushed_intelligence;
 				return 0;
 			}
 		}
@@ -319,7 +323,7 @@ size_t Unit::Think(const double intelligence, std::shared_ptr<Unit> attacker) {
 		if (attacker_health < 0.0) field->Kill(attacker);
 		else attacker->health_ = attacker_health;
 		// Back to original intelligence, and then return.
-		if (!isnan(intelligence)) dna_["intelligence"] = pushed_intelligence;
+		if (!std::isnan(intelligence)) dna_["intelligence"] = pushed_intelligence;
 		return 0;
 	}
 
@@ -513,12 +517,13 @@ bool Unit::Pregnant(std::shared_ptr<DnaCode> dna) {
 }
 
 size_t Unit::Explore(double steps) {
+	std::shared_ptr<Field> field = Field::GetInstance();
 	std::uniform_real_distribution<double> distribution(0.0, 2.0 * M_PI);
 	double angle = distribution(field->Random());
 	double &magnitude = steps;
 	int x = static_cast<int>(floor(magnitude * cos(angle)));
 	int y = static_cast<int>(floor(magnitude * sin(angle)));
-/*	bool movement = /**/Move(x, y, true);
+/*	bool movement = */Move(x, y, true);
 	return 0;
 	// TODO: gui -> log -> succcesful movement
 }

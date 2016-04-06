@@ -1,0 +1,5 @@
+*.o
+*.pyc
+*.dblite
+.*.py
+test_insert_object

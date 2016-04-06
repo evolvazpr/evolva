@@ -34,7 +34,7 @@ private:
 	bool InsertCellObject(std::shared_ptr<CellObject> object, const size_t x, const size_t y);
 
 public:
-	inline const size_t GetFfid() const { return ++ffid_; };
+	inline size_t GetFfid() const { return ++ffid_; };
 	static std::shared_ptr<Field> GetInstance(const size_t x = 0, const size_t y = 0);
 	size_t GetWidth() const;
 	size_t GetHeight() const;
@@ -60,8 +60,6 @@ public:
 	std::shared_ptr<Unit> NextUnit();
 	bool IsCycleEnd() const;
 };
-
-extern std::shared_ptr<Field> field;
 
 #endif // _FIELD_HPP_
 

@@ -76,7 +76,8 @@ bool Field::InsertCellObject(std::shared_ptr<CellObject> object, const size_t x,
 		char c;
 		std::cin >> c;
 		return false;
-	}/**/
+	}*/
+	return false;
 }
 
 bool Field::InsertObject(std::shared_ptr<MovableObject> object, const size_t x, const size_t y) {
@@ -207,7 +208,7 @@ std::shared_ptr<MovableObject> Field::Next() {
 		}
 	}
 	// Method returns next object.
-	return field->GetCurrentObject();
+	return GetCurrentObject();
 }
 
 std::shared_ptr<Unit> Field::NextUnit() {
@@ -227,7 +228,7 @@ void Field::Pause() {
 bool Field::IsPauseLoop() const {
 	return pimpl_->movable_objects_.IsPushedEnd();
 }
-/**/
+*/
 size_t Field::GetGlobalTurnCounter() const {
 	return pimpl_->global_turns_;
 }
