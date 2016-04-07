@@ -6,6 +6,8 @@ Dialog::Dialog(QWidget *parent) :
     ui(new Ui::Dialog), scene(new QGraphicsScene) {
     ui->setupUi(this);
     ui->graphicsView->setScene(scene);
+    scene->setSceneRect(ui->graphicsView->rect());
+    ui->graphicsView->show();
 }
 
 Dialog::~Dialog() {
