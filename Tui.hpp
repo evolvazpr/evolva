@@ -6,7 +6,7 @@
 class CellObject;
 class MovableObject;
 class NonMovableObject;
-
+/**\brief Text user interface*/
 class Tui {
 private:
 	void PresentCellObject(const std::shared_ptr<CellObject> object);

@@ -9,9 +9,9 @@ std::shared_ptr<DnaCode> DnaGenerator::Generate() const {
 	// calculates proportion, so 100 becomes 35.
 	std::normal_distribution<double> variation(100.0, 7.0 * variability_ / 20.0);
 	for (auto i = dna_code_->begin(); i != dna_code_->end(); ++i) {
-		double variation_factor = variation(field->Random());
+		double variation_factor = variation(Field::GetInstance()->Random());
 		if (variation_factor < 0.0) variation_factor *= -1.0;
 		dna->insert(std::make_pair(i->first, i->second * variation_factor * 0.01));
 	}
-	return std::move(dna);
+	return dna;
 }

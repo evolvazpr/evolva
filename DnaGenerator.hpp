@@ -6,7 +6,6 @@
 class DnaGenerator : public DnaUnit {
 public:
 	using DnaUnit::DnaUnit;
-//	using DnaUnit::DnaUnit(std::shared_ptr<DnaCode> dna_code);
 	using DnaUnit::dna_;
 	double variability_;
 	std::shared_ptr<DnaCode> Generate() const;

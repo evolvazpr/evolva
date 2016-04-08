@@ -1,6 +1,6 @@
 #include <string>
-#include "EvolvaException.hpp"
-#include "XmlIo.hpp"
+#include "../EvolvaException.hpp"
+#include "../XmlIo.hpp"
 
 int main(void) {
 	try {
