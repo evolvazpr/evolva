@@ -24,3 +24,7 @@ HEADERS  += dialog.hpp \
     statwindow.hpp
 
 FORMS    += dialog.ui
+
+CONFIG += c++11
+QMAKE_CXXFLAGS += -std=c++11
+QMAKE_LFLAGS += -std=c++11

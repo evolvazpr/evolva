@@ -3,39 +3,46 @@
 
 #include <QDialog>
 #include <QGraphicsObject>
+#include <QTimer>
 
 namespace Ui {
 class Dialog;
 }
 
-class DrawingInterface {
-private:
-       QGraphicsScene *scene;
-       const unsigned int field_width_;
-       const unsigned int field_heigth_;
-public:
-       DrawingInterface(QGraphicsScene *scene, const unsigned int field_width,
-                        const unsigned int field_heigth);
-       void insertObject(QGraphicsObject *object, unsigned int x, unsigned int y);
-       void removeObject(QGraphicsObject *object);
-       void draw(QGraphicsObject *object, unsigned int x, unsigned int y);
-};
+
 
 class Dialog : public QDialog
 {
     Q_OBJECT
 
-public:
-    explicit Dialog(QWidget *parent = 0);
-    ~Dialog();
-    void drawSand();
-private slots:
-    void on_pushButton_clicked();
-
 private:
+
     Ui::Dialog *ui;
     QGraphicsScene *scene;
-    DrawingInterface drawing_interface_;
+    const unsigned int width_;
+    const unsigned int height_;
+
+    QGraphicsItem* searchObject(const uint id);
+    qreal calculate_x(const uint x);
+    qreal calculate_y(const uint y);
+    qreal calculate_radius();
+
+    QTimer timer;
+
+
+public:
+
+    explicit Dialog(QWidget *parent = 0);
+    ~Dialog();
+
+    void createObject(const uint id, const uint x, const uint y);
+    void moveObject(const uint id, const uint x, const uint y);
+
+
+
+private slots:
+    void on_pushButton_clicked();
+    void test();
 };
 
 #endif // DIALOG_HPP

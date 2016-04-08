@@ -8,4 +8,5 @@ html
 test_insert_object
 test_move_object
 test_XML
-*.user
+evolva_gole_gui.pro.user
+evolva_gole_gui.pro.user*
