@@ -23,9 +23,9 @@ private:
     const unsigned int height_;
 
     QGraphicsItem* searchObject(const uint id);
-    qreal calculate_x(const uint x);
-    qreal calculate_y(const uint y);
-    qreal calculate_radius();
+    int calculate_x(const uint x);
+    int calculate_y(const uint y);
+    int calculate_radius();
 
     QTimer timer;
 

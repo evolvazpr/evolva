@@ -24,6 +24,8 @@ int main(int argc, char *argv[])
     w.createObject(1, 1, 1);
     w.createObject(2, 2, 2);
     w.createObject(3, 3, 3);
+    w.createObject(4, 0, 1);
+    w.createObject(5, 1, 0);
     QtConcurrent::run(test_thread, &w);
     return a.exec();
 }
