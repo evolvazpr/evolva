@@ -12,7 +12,8 @@ namespace Ui {
 	class Dialog;
 }
 
-/**\brief Temporary class for object's graphical representation.
+/**
+ * @brief The RoundObject class (GUI part).
  */
 class RoundObject : public QObject, public QGraphicsEllipseItem {
 	Q_OBJECT
@@ -33,6 +34,9 @@ public slots:
 
 };
 
+/**
+ * @brief The Dialog class (GUI part)
+ */
 class Dialog : public QDialog
 {
 	Q_OBJECT
