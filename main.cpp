@@ -12,15 +12,7 @@ public:
 };
 
 void test_thread(Dialog* w) {
-            w->moveObjectTo(0, 5, 6);
-            Sleeper::sleep(3);
-            w->moveObject(0, 3, 1);
-            Sleeper::sleep(3);
-            w->moveObjectTo(0, 6, 2);
-            Sleeper::sleep(3);
-            w->moveObject(0, 4, 4);
-            Sleeper::sleep(3);
-            w->removeObject(0);
+	    w->removeObject(6);
 }
 
 int main(int argc, char *argv[])
