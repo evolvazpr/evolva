@@ -1,69 +1,73 @@
 #include "dialog.hpp"
 #include "ui_dialog.h"
 
-static const uint ID_KEY = 0;
-static const uint DX_KEY = 1;
-static const uint DY_KEY = 2;
-
+/**
+ * @brief INCREMENT_PER_TICK static global variable. Parameter to set speed of animation.
+ */
 static const qreal INCREMENT_PER_TICK = 5;
 
+/**
+ * @brief ANIMATION_CLOCK static global variable. Parameter to setup freqency of animation (FPS or whatever).
+ */
 static const qreal ANIMATION_CLOCK = 1000/33;
 
-Dialog::Dialog(QWidget *parent) :
-	QDialog(parent),
-	ui(new Ui::Dialog), width_(50), height_(50) {
-	QRect rect;
-	ui->setupUi(this);
-	scene = new QGraphicsScene;
-	ui->graphicsView->setScene(scene);
+/**
+ * @brief FIELD_SIZE temporary?
+ */
+static const uint FIELD_SIZE = 50;
 
-	rect = ui->graphicsView->rect();
-	scene->setSceneRect(rect.x(), rect.y(), rect.height()-4, rect.height()-4);
-	ui->graphicsView->show();
+/**
+ * @brief RoundObject constructor.
+ * @param id - object's id.
+ * @param x - object's graphical x coordinate (it is not field coordinate!).
+ * To calculate graphical coordinates use Dialog::calculateX method.
+ * @param y - object's graphical y coordinate (it is not field coordinate!).
+ * To calculate graphical coordinates use Dialog::calculateY method.
+ * @param radius - object's radius.
+ * To calculate graphical radius use Dialog::calculateRadius method.
+ * @param scene - pointer to scene.
+ * @param timer - pointer to timer. It is needed, because on each move there is
+ * established connection between timer signal timout() and RoundObject slot animate() (to animate or whatever).
+ */
+RoundObject::RoundObject(const uint id, const int x, const int y, const uint radius, QGraphicsScene *scene, QTimer *timer) : QObject(scene->parent()),
+	QGraphicsEllipseItem(x, y, radius, radius, 0, scene), id_(id), timer_(timer) {}
+
+/**
+ * @brief RoundObject's deconstructor.
+ */
+RoundObject::~RoundObject() {
 }
 
-Dialog::~Dialog() {
-	delete ui;
+/**
+ * @brief Object move method.
+ *
+ * It makes connection of timer's signals and object animate method.
+ *
+ * @param dx - how many steps in pixels to take into x direction.
+ * @param dy - how many steps in pixels to take into y direction.
+ */
+void RoundObject::move(const int dx, const int dy) {
+	dx_ = dx;
+	dy_ = dy;
+	QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(animate()));
 }
 
-void Dialog::on_pushButton_clicked() {          //what happens when we click the "Kolejna tura" button
-
+/**
+ * @brief Method to obtain id number.
+ * @return object's id number.
+ */
+uint RoundObject::id() {
+	return id_;
 }
 
-int Dialog::calculate_x(const uint x) {
-	return (qreal)x / (qreal)width_ * scene->width();
-}
-
-int Dialog::calculate_y(const uint y) {
-	return (qreal)y / (qreal)height_ * scene->height();
-}
-
-int Dialog::calculate_radius() {
-	return  scene->height()/height_;
-}
-
-void Dialog::createObject(const uint id, const uint x, const uint y) {
-	int x_pos = calculate_x(x);
-	int y_pos = calculate_y(y);
-	int radius =  calculate_radius();
-	RoundObject *object = new RoundObject(x, y, radius, scene);
-	object->setData(ID_KEY, QVariant(id));
-	object->setRect(x_pos, y_pos, radius, radius);
-	QObject::connect(&timer, SIGNAL(timeout()), object, SLOT(animate()));
-}
-
-QGraphicsItem* Dialog::searchObject(const uint id) {
-	QList<QGraphicsItem *> obj_list = scene->items();
-	for (auto it : obj_list) {
-		if(it->data(ID_KEY) == id)
-			return it;
-	}
-	return 0;
-}
-
-RoundObject::RoundObject(const uint x, const uint y, const uint radius, QGraphicsScene *scene) : QObject(),
-	QGraphicsEllipseItem(x, y, radius, radius, 0, scene) {}
-
+/**
+ * @brief Centerpiece of animation.
+ *
+ * This method is called when timer emits signal timeout().
+ * It updates steps (dx, dy) that object must do, and updates
+ * graphical coordinates of object. If there is no steps to perform,
+ * method disconnects timer from this method.
+ */
 void RoundObject::animate() {
 	int dx;
 	int dy;
@@ -71,8 +75,8 @@ void RoundObject::animate() {
 	int y_coord;
 
 	/* Some calculations */
-	dx = data(DX_KEY).toInt();
-	dy = data(DY_KEY).toInt();
+	dx = dx_;
+	dy = dy_;
 	if ((!dx) && (!dy))
 		return;
 	if (dx > 0) {
@@ -117,36 +121,140 @@ void RoundObject::animate() {
 	/* End of some calculations */
 
 	setPos(x_coord, y_coord);
-	setData(DX_KEY, QVariant(dx));
-	setData(DY_KEY, QVariant(dy));
+	dx_ = dx;
+	dy_ = dy;
+	if((!dx) && (!dy))
+		QObject::disconnect(timer_, SIGNAL(timeout()), this, SLOT(animate()));
 }
 
+/**
+ * @brief Smooth constructor.
+ * @param parent - parent for Qt API (no need to call delete thanks to it).
+ */
+Dialog::Dialog(QWidget *parent) :
+	QDialog(parent),
+	ui(new Ui::Dialog), width_(FIELD_SIZE), height_(FIELD_SIZE) {
+	QRect rect;
+	ui->setupUi(this);
+	scene = new QGraphicsScene(ui->graphicsView);
+	ui->graphicsView->setScene(scene);
+
+	rect = ui->graphicsView->rect();
+	scene->setSceneRect(rect.x(), rect.y(), rect.height()-4, rect.height()-4);
+	ui->graphicsView->show();
+}
+
+/**
+ * @brief Smooth deconstructor.
+ */
+Dialog::~Dialog() {
+	delete ui;
+}
+
+void Dialog::on_pushButton_clicked() {          //what happens when we click the "Kolejna tura" button
+
+}
+/**
+ * @brief Graphical x coordinate calculation.
+ * @param x - field's x coordinate.
+ * @return  - graphical x coordinate.
+ */
+int Dialog::calculateX(const int x) {
+	return (qreal)x / (qreal)width_ * scene->width();
+}
+
+/**
+ * @brief Graphical y coordinate calculation.
+ * @param y - field's y coordinate.
+ * @return  - graphical y coordinate.
+ */
+int Dialog::calculateY(const int y) {
+	return (qreal)y / (qreal)height_ * scene->height();
+}
+
+/**
+ * @brief Graphical radius coordinate calculation.
+ * @return
+ */
+uint Dialog::calculateRadius() {
+	return  scene->height()/height_;
+}
+
+/**
+ * @brief RoundObject object creation.
+ * @param id - object's id.
+ * @param x - field's x coordinate of object.
+ * @param y - field's y coordinate of object.
+ */
+void Dialog::createObject(const uint id, const int x, const int y) {
+	int x_pos = calculateX(x);
+	int y_pos = calculateY(y);
+	int radius =  calculateRadius();
+	new RoundObject(id, x_pos, y_pos, radius, scene, &timer);
+}
+
+/**
+ * @brief RoundObject object search method.
+ * @param id - object's id.
+ * @return pointer to RoundObject. If there is RoundObject with passed id, nullptr is returned.
+ */
+RoundObject* Dialog::searchObject(const uint id) {
+	QList<QGraphicsItem *> obj_list = scene->items();
+	RoundObject *ptr;
+	for (auto it : obj_list) {
+		ptr = dynamic_cast<RoundObject *>(it);
+		if (ptr) {
+			if(ptr->id() == id)
+				return ptr;
+		}
+	}
+	return nullptr;
+}
+
+/**
+ * @brief Move object method with relative coordinates.
+ *
+ * By relative coordinates it is meant to be in relation to present object's position.
+ * @param id - id of RoundObject which will be moved.
+ * @param x - <b>realative field (not graphical) steps</b> in x direction to make.
+ * @param y - <b>realative field (not graphical) steps</b> in y direction to make.
+ */
 void Dialog::moveObject(const uint id, const int x, const int y) {
-	QGraphicsItem *object = searchObject(id);
+	RoundObject *object = searchObject(id);
 	if (!object) return; //TODO: throw exception
-	object->setData(DX_KEY, QVariant(calculate_x(x)));
-	object->setData(DY_KEY, QVariant(calculate_y(y)));
 	if(!timer.isActive())
 		timer.start(ANIMATION_CLOCK);
+	object->move(calculateX(x), calculateY(y));
 }
 
+/**
+ * @brief Move object method to specific field's coordinate.
+ * @param id - id of RoundObject that will be moved.
+ * @param x - <b>real field's x coordinate</b> in which RoundObject will be placed.
+ * @param y - <b>real field's y coordinate</b> in which RoundObject will be placed.
+ */
 void Dialog::moveObjectTo(const uint id, const int x, const int y) {
-	QGraphicsItem *object = searchObject(id);
+	RoundObject *object = searchObject(id);
 	int x_old, y_old, dx, dy;
 	if (!object) return; //TODO: throw exception
 	x_old = object->x();
 	y_old = object->y();
-	dx = calculate_x(x) - x_old;
-	dy = calculate_y(y) - y_old;
-	object->setData(DX_KEY, QVariant(dx));
-	object->setData(DY_KEY, QVariant(dy));
+	dx = calculateX(x) - x_old;
+	dy = calculateY(y) - y_old;
 	if(!timer.isActive())
 		timer.start(ANIMATION_CLOCK);
+	object->move(dx, dy);
 }
 
+/**
+ * @brief Remove (delete) specific RoundObject.
+ * @param id - id of RoundObject to be deleted.
+ */
 void Dialog::removeObject(const uint id) {
-	RoundObject *object = dynamic_cast<RoundObject *>(searchObject(id));
+	RoundObject *object = searchObject(id);
 	if (!object) return; //TODO: throw exception
-	QObject::disconnect(&timer, SIGNAL(timeout()), object, SLOT(animate()));
 	scene->removeItem(object);
+	delete(object);
 }
+
+

@@ -6,18 +6,31 @@
 #include <QTimer>
 
 #include <cmath>
+#include <iostream>
 
 namespace Ui {
 	class Dialog;
 }
 
+/**\brief Temporary class for object's graphical representation.
+ */
 class RoundObject : public QObject, public QGraphicsEllipseItem {
 	Q_OBJECT
-
+private:
+	const int id_;
+	int dx_;
+	int dy_;
+	QTimer *timer_;
 public:
-	RoundObject(const uint x, const uint y, const uint radius, QGraphicsScene *scene);
+	RoundObject(const uint id, const int x, const int y, const uint radius, QGraphicsScene *scene, QTimer *timer);
+	~RoundObject();
+
+	void move(const int x, const int y);
+	uint id();
+
 public slots:
 	void animate();
+
 };
 
 class Dialog : public QDialog
@@ -30,10 +43,10 @@ private:
 	const unsigned int width_;
 	const unsigned int height_;
 
-	QGraphicsItem* searchObject(const uint id);
-	int calculate_x(const uint x);
-	int calculate_y(const uint y);
-	int calculate_radius();
+	RoundObject* searchObject(const uint id);
+	int calculateX(const int x);
+	int calculateY(const int y);
+	uint calculateRadius();
 
 	QTimer timer;
 
@@ -42,7 +55,7 @@ public:
 	explicit Dialog(QWidget *parent = 0);
 	~Dialog();
 
-	void createObject(const uint id, const uint x, const uint y);
+	void createObject(const uint id, const int x, const int y);
 	void moveObject(const uint id, const int x, const int y);
 	void moveObjectTo(const uint id, const int x, const int y);
 	void removeObject(const uint id);
