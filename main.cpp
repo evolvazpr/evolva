@@ -12,7 +12,15 @@ public:
 };
 
 void test_thread(Dialog* w) {
-        w->moveObject(0, 5, 5);
+            w->moveObjectTo(0, 5, 6);
+            Sleeper::sleep(3);
+            w->moveObject(0, 3, 1);
+            Sleeper::sleep(3);
+            w->moveObjectTo(0, 6, 2);
+            Sleeper::sleep(3);
+            w->moveObject(0, 4, 4);
+            Sleeper::sleep(3);
+            w->removeObject(0);
 }
 
 int main(int argc, char *argv[])
@@ -26,6 +34,7 @@ int main(int argc, char *argv[])
     w.createObject(3, 3, 3);
     w.createObject(4, 0, 1);
     w.createObject(5, 1, 0);
+    w.createObject(6, 30, 30);
     QtConcurrent::run(test_thread, &w);
     return a.exec();
 }
