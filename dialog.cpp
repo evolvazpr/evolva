@@ -30,7 +30,9 @@ static const uint FIELD_SIZE = 50;
  * established connection between timer signal timout() and RoundObject slot animate() (to animate or whatever).
  */
 RoundObject::RoundObject(const uint id, const int x, const int y, const uint radius, QGraphicsScene *scene, QTimer *timer) : QObject(scene->parent()),
-	QGraphicsEllipseItem(x, y, radius, radius, 0, scene), id_(id), timer_(timer) {}
+	QGraphicsEllipseItem(x, y, radius, radius), id_(id), timer_(timer) {
+		scene->addItem(this);
+	}
 
 /**
  * @brief RoundObject's deconstructor.
@@ -141,6 +143,7 @@ Dialog::Dialog(QWidget *parent) :
 
 	rect = ui->graphicsView->rect();
 	scene->setSceneRect(rect.x(), rect.y(), rect.height()-4, rect.height()-4);
+	ui->graphicsView->setRenderHint(QPainter::Antialiasing);
 	ui->graphicsView->show();
 }
 
