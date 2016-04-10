@@ -1,4 +1,4 @@
-#include "dialog.hpp"
+#include "../dialog.hpp"
 #include <QApplication>
 #include <QThread>
 #include <QtConcurrentRun>
