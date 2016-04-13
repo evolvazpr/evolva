@@ -36,8 +36,8 @@ int main(int argc, char *argv[])
     w.show();
     w.createObject(0, 0, 0);
     w.createObject(1, 0, 1);
-    w.createObject(2, 2, 2);
-    w.createObject(4, 1, 0);
+    w.createObject(2, 1, 0);
+    w.createObject(4, 0, 2);
     w.createObject(5, 2, 0);
     w.createObject(6, 30, 30);
     QFuture<void> future = QtConcurrent::run(test_thread, &w);

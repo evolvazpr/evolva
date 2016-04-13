@@ -24,7 +24,7 @@ private:
 	QTimer *timer_;
 public:
 	RoundObject(const uint id, const int x, const int y, const uint radius, QGraphicsScene *scene, QTimer *timer);
-	~RoundObject();
+	virtual ~RoundObject();
 
 	void move(const int x, const int y);
 	uint id();
@@ -57,7 +57,7 @@ private:
 
 public:
 	explicit Dialog(QWidget *parent = 0);
-	~Dialog();
+	virtual ~Dialog();
 
 	void createObject(const uint id, const int x, const int y);
 	void moveObject(const uint id, const int x, const int y);

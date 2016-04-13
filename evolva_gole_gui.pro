@@ -8,15 +8,16 @@ QT       += core gui concurrent
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = evolva_gole_gui
+TARGET = test_qt_RoundObjects
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
+SOURCES +=\
         dialog.cpp \
     log.cpp \
     movement.cpp \
-    statwindow.cpp
+    statwindow.cpp \
+    unit_tests/test_qt_RoundObjects.cpp
 
 HEADERS  += dialog.hpp \
     log.hpp \
