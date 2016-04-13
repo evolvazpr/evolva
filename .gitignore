@@ -8,5 +8,6 @@ html
 test_insert_object
 test_move_object
 test_XML
+test_qt_RoundObjects
 evolva_gole_gui.pro.user
 evolva_gole_gui.pro.user*
