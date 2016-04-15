@@ -24,6 +24,7 @@ void CellObject::SetType(const CellObject::Type bit, const bool value) {
 
 MovableObject::MovableObject() : CellObject() {
 	SetType(Type::MOVABLE, true);
+	removed_ = false;
 }
 
 MovableObject::~MovableObject() {
@@ -56,13 +57,15 @@ Plant::Plant() : NonMovableObject() {
 Plant::~Plant() {
 }
 
-bool Plant::Eat(double energy) {
-	if (energy <= energy_) {
-		energy_ -= energy;
-		if (energy_ == 0.0) field->KillNmo(std::dynamic_pointer_cast<NonMovableObject>(shared_from_this())); // hsraed from this?!
-		return true;
+double Plant::Eat(double energy) {
+	if (energy_ - energy <= 0.0) {
+		field->KillNmo(std::static_pointer_cast<NonMovableObject>(shared_from_this())); // IT IS non movable
+		return energy_; // no need to set energy to 0, because it is already killed
 	}
-	else return false;
+	else {
+		energy_ -= energy;
+		return energy;
+	}
 }
 
 // Tree

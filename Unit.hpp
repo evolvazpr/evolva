@@ -12,6 +12,9 @@ public:
 	Unit();
 	Unit(std::shared_ptr<DnaCode> dna_code);
 	virtual ~Unit();
+	inline double GetEnergy() const { return energy_; };
+	inline double GetFatigue() const { return fatigue_; };
+	inline bool IsAlive() const { return alive_; };
 private:
 	/*< Configuration for thinking and updating functions. It provides several
 	parameters using to describe the behaviour of one given unit. It is inherited
@@ -32,6 +35,7 @@ private:
 		bool pregnant_;
 		std::shared_ptr<DnaCode> child_dna_code_;
 		size_t pregnant_turns_;
+		bool puerperium_;
 	/*< Updates current status, checks death time. */
 	void Update();
 	void Sleep();
@@ -44,6 +48,12 @@ private:
 	virtual double GetMovePriority() const;
 	bool Pregnant(std::shared_ptr<DnaCode> dna);
 	size_t Explore(double steps);
+	inline std::shared_ptr<Unit> GetUnit(){ return std::static_pointer_cast<Unit>(shared_from_this()); };
+	bool alive_;
+	virtual bool Move(const int x, const int y, const bool trim = false);
+	template <class SC, class F> std::shared_ptr<SC> Action(double steps_limit, double max_steps, double radius, double efficiency, F conditions);
+	void GiveBirth(const int x, const int y);
+	void Miscarry();
 };
 
 #endif // _UNIT_HPP_

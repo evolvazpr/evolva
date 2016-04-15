@@ -12,6 +12,5 @@ TODO:
 *dodanie a. kom. do rozkezwiania drzew i trawy
 *dodanie roznych rodzajow drzew
 *test think (uooou)
-*dodanie poszukiwania jedzenia przez herbiworow
 *dodanie polowania karniworow
 *merg z qtem

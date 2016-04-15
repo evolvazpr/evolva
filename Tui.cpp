@@ -6,29 +6,36 @@
 
 void Tui::DrawHorizontalLine() {
 	const std::shared_ptr<Field> field = Field::GetInstance();
-	for (size_t i = 0; i <= field->GetWidth() * 4; i++)
+	for (size_t i = 0; i <= field->GetWidth() * 2; i++)
 		std::cout << "-";
 	std::cout << std::endl;
 }
 
 void Tui::PrintField() {
-	const std::shared_ptr<Field> field = Field::GetInstance();
-	std::shared_ptr<CellObject> object;
+//	const std::shared_ptr<Field> field = Field::GetInstance();
 	DrawHorizontalLine();
-	for (size_t i = 0; i < field->GetWidth(); i++) {
-		for (size_t j = 0; j < field->GetHeight(); j++) {
+	try {
+	for (size_t j = 0; j < field->GetHeight(); j++) {
+		for (size_t i = 0; i < field->GetWidth(); i++) {
 			if (field->GetCell(i, j)->IsEmpty()) {
-				std::cout << "|   ";
+				std::cout << "  ";
 			}
 			else {
-				object = field->GetCell(i, j)->GetObject();
-				if (object->GetType(CellObject::Type::MOVABLE)) {
-					std::cout << "| O ";
+				std::weak_ptr<CellObject> object = field->GetCell(i, j)->GetObject();
+				CellObject *fg = object.lock().get();
+				if (object.lock()->GetType(CellObject::Type::MOVABLE)) {
+					if (object.lock()->GetId() <= 9) std::cout << object.lock()->GetId() << object.lock()->GetId();
+					else std::cout << "@@";
 				}
-				else std::cout << "| # ";
+				else std::cout << "##";
 			}
 		}
 		std::cout << "|\n";
+	}
+	}
+	catch (std::exception &e) {
+		std::cout << e.what() << "\n\n";
+		return;
 	}
 	DrawHorizontalLine();
 }

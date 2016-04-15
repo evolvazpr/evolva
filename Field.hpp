@@ -42,11 +42,11 @@ public:
 	std::shared_ptr<FieldCell> GetCell(const size_t x, const size_t y);
 	bool InsertObject(std::shared_ptr<MovableObject> object, const size_t x, const size_t y);
 	bool InsertObject(std::shared_ptr<NonMovableObject> object, const size_t x, const size_t y);
+	inline bool InsertNmo(std::shared_ptr<NonMovableObject> object, const size_t x, const size_t y) { return InsertObject(object, x, y);};
 	bool MoveObject(std::shared_ptr<MovableObject> object, const long x_steps, const long y_steps, const bool trim = false);
 	bool MoveObjectTo(std::shared_ptr<MovableObject> object, size_t x, size_t y, const bool trim = false);
 	inline std::default_random_engine& Random() const { return random_generator_; };
 	inline double Mutability() const { return mutability_; };
-	bool Kill(Unit *unit);
 	bool Kill(std::shared_ptr<Unit> unit);
 	bool KillNmo(std::shared_ptr<NonMovableObject> object);
 	bool BeginCycle();
@@ -59,6 +59,8 @@ public:
 	std::shared_ptr<MovableObject> Next();
 	std::shared_ptr<Unit> NextUnit();
 	bool IsCycleEnd() const;
+	void f1();
+	void f2();
 };
 
 extern std::shared_ptr<Field> field;

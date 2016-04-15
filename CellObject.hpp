@@ -29,7 +29,7 @@ public:
 	friend class Field;
 	friend class FieldCell;
 	bool GetType(const Type type) const;
-	inline size_t GetX() const { return cell_.lock()->GetX(); }; // wyjebac -> a potem mozna wyjebac incl field cell
+	inline size_t GetX() const { return cell_.lock()->GetX(); }; //?
 	inline size_t GetY() const { return cell_.lock()->GetY(); };
 protected:
 	void SetType(const Type bit, const bool value);
@@ -42,17 +42,17 @@ class MovableObject : public CellObject {
 friend class Tui;
 public:
 	MovableObject();
-	bool Move(const int x, const int y, const bool trim = false);
+	virtual bool Move(const int x, const int y, const bool trim = false);
 	inline bool IsRemoved() const { return removed_; };
 	virtual ~MovableObject();
+//	MovableObject();
 	virtual double GetMovePriority() const;
-	/*< Operator <= uses for sorting. It is used in custom class CyclingQueue.
-	It should be operator < (like in other sorting algorithms), but operator <=
-	provides new elements to be inserted AFTER old elements with the same comparing value. */
-	inline bool operator <= (const MovableObject &object) const { return this->GetMovePriority() <= object.GetMovePriority(); };
+	/*< Operator <= uses for sorting. It is used in custom class CyclingQueue. */
+	inline bool operator <= (const MovableObject &object) const { return this->GetMovePriority() <= object.GetMovePriority(); }; ///uninline
 protected:
 	bool removed_;
 };
+
 
 class NonMovableObject : public CellObject {
 public:
@@ -63,7 +63,7 @@ public:
 class Plant : public NonMovableObject {
 public:
 	inline double GetEnergy() const { return energy_; };
-	bool Eat(double energy);
+	double Eat(double energy);
 	Plant();
 	virtual ~Plant();
 protected:

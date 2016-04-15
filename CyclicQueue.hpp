@@ -3,18 +3,19 @@
 
 // includes
 #include <memory>
-#include <forward_list>
+#include <list>
 
 // forward declarations
 class MovableObject;
 
-class CyclicQueue : private std::forward_list<std::shared_ptr<MovableObject>> {
+class CyclicQueue : private std::list<std::shared_ptr<MovableObject>> {
 public:
-	using std::forward_list<std::shared_ptr<MovableObject>>::forward_list;
-	using std::forward_list<std::shared_ptr<MovableObject>>::empty;
+	typedef std::list<std::shared_ptr<MovableObject>> list;
+	using list::list;
+	using list::empty;
 	void Begin();
 	void Begin(iterator beggining);
-	inline std::shared_ptr<MovableObject> Get() { return *position_; };
+	inline std::shared_ptr<MovableObject> Get() { return (position_ != end() ? *position_ : nullptr); };
 	bool Next();
 	/*< Insortion means "insertion sort" or "insert with sorting". It provides
 	inserting elements with keeping list sorted. */
@@ -23,10 +24,11 @@ public:
 	void Sort();
 	inline bool IsEnd() const { return end_; };
 private:
-	iterator previous_position_;
+//	iterator previous_position_;
 	iterator position_;
 	bool end_;
-	mutable iterator pushed_end_;
+//	mutable iterator pushed_end_;
+//	CyclicQueue(const CyclicQueue &object);
 };
 
 #endif // _CYCLIC_QUEUE_HPP_
