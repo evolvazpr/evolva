@@ -1,13 +1,16 @@
 #include "Field.hpp"
 #include "FieldCell.hpp"
 #include "CellObject.hpp"
+#define private public
 #include "CyclicQueue.hpp"
+#undef private
 #include "Unit.hpp"
 #include <vector>
 #include <boost/multi_array.hpp>
 
 #include <iostream>
 
+std::shared_ptr<Field> field;
 
 class FieldPimpl {
 friend class Field;
@@ -76,8 +79,7 @@ bool Field::InsertCellObject(std::shared_ptr<CellObject> object, const size_t x,
 		char c;
 		std::cin >> c;
 		return false;
-	}*/
-	return false;
+	}/**/
 }
 
 bool Field::InsertObject(std::shared_ptr<MovableObject> object, const size_t x, const size_t y) {
@@ -86,7 +88,28 @@ bool Field::InsertObject(std::shared_ptr<MovableObject> object, const size_t x, 
 	bool insertion = InsertCellObject(std::static_pointer_cast<CellObject>(object), x, y);
 //	bool insertion = true;
 	if (insertion){
+		std::cout << "xxx\n";
+		f1();
 		pimpl_->movable_objects_.Insortion(object);
+		f1();
+		std::cout << "yyy\n";
+	/*	{
+			auto p1 = pimpl_->movable_objects_.position_;
+//			auto p2 = pimpl_->movable_objects_.previous_position_;
+//			auto p3 = pimpl_->movable_objects_.pushed_end_;
+			auto p4 = pimpl_->movable_objects_.end_;
+			pimpl_->movable_objects_.Begin();
+			std::cout << "que:\n";
+            while (1) {
+				std::cout << pimpl_->movable_objects_.Get()->GetId() << "\n";
+				if (pimpl_->movable_objects_.IsEnd()) break;
+				else pimpl_->movable_objects_.Next();
+            }
+            std::cout << "\n";
+            pimpl_->movable_objects_.position_ = p1;
+//            pimpl_->movable_objects_.previous_position_ = p2;
+            pimpl_->movable_objects_.end_ = p4;
+		}/**/
 		return true;
 	}
 	else return false;
@@ -124,26 +147,31 @@ bool Field::MoveObjectTo(std::shared_ptr<MovableObject> object, size_t x, size_t
 	return true;
 }
 
-bool Field::Kill(Unit *unit) {
-	return true;
-}
-
 bool Field::Kill(std::shared_ptr<Unit> unit) {
-	return true;
+	auto cell = GetCell(unit->GetX(), unit->GetY());
+	if (cell->GetUnit() == unit) {
+		std::cout << unit->GetId() << " is dead\n";
+		cell->RemoveObject();
+		unit->removed_ = true;
+		unit->alive_ = false;
+	}
+	else throw; //wow problem memory
 }
 
 bool Field::KillNmo(std::shared_ptr<NonMovableObject> object) {
 	for (size_t i = 0; i < pimpl_->non_movable_objects_.size(); ++i) {
 		if (object ==  pimpl_->non_movable_objects_[i]) {
-			if ( pimpl_->non_movable_objects_.size() == 1)  pimpl_->non_movable_objects_.clear();
+			GetCell(object->GetX(), object->GetY())->RemoveObject();
+			if (pimpl_->non_movable_objects_.size() == 1) pimpl_->non_movable_objects_.clear();
 			else if (i + 1 ==  pimpl_->non_movable_objects_.size())  pimpl_->non_movable_objects_.pop_back();
 			else {
 				std::cout << "usuwanie\n";
 				std::cout << "x: " << pimpl_->non_movable_objects_[i]->GetX() << " y: " << pimpl_->non_movable_objects_[i]->GetY() << "\n";
 				std::cout << "x: " << object->GetX() << " y: " << object->GetY() << "\n";
-				pimpl_->non_movable_objects_[i].reset();
-				object->cell_.lock()->RemoveObject();
-				object.reset();
+			//	pimpl_->non_movable_objects_[i].reset();
+			//	GetCell(object->GetX(), object->GetY())->RemoveObject();
+//				object->GetCell()->RemoveObject();
+		//		object.reset();
 				pimpl_->non_movable_objects_[i] =  pimpl_->non_movable_objects_.back();
 				pimpl_->non_movable_objects_.pop_back();
 				std::cout << "x: " << pimpl_->non_movable_objects_[i]->GetX() << " y: " << pimpl_->non_movable_objects_[i]->GetY() << "\n";
@@ -191,6 +219,10 @@ std::shared_ptr<MovableObject> Field::Next() {
 	// Take next turn. Then check whether the field is paused. Only non-paused
 	// field pass methods such Update() and Think().
 	pimpl_->movable_objects_.Next();
+	if (pimpl_->movable_objects_.empty()) {
+		std::cout << "NIOH!\n";
+		return nullptr;
+	}
 	if (!pimpl_->pause_) {
 		// If loop reaches its end, then increment global turn counter,
 		// then sort (new turn, new order) and back to square one.
@@ -203,12 +235,15 @@ std::shared_ptr<MovableObject> Field::Next() {
 		// issues, recalculating movement priority. Then, let an unit think.
 		if (pimpl_->movable_objects_.Get()->GetType(CellObject::Type::UNIT)) {
 			auto unit = std::dynamic_pointer_cast<Unit>(pimpl_->movable_objects_.Get());
+			if (unit->GetId() == 9) {
+				std::cout << "YOU!\n";
+			}
 			unit->Update();
 //			unit->Think();
 		}
 	}
 	// Method returns next object.
-	return GetCurrentObject();
+	return field->GetCurrentObject();
 }
 
 std::shared_ptr<Unit> Field::NextUnit() {
@@ -228,11 +263,35 @@ void Field::Pause() {
 bool Field::IsPauseLoop() const {
 	return pimpl_->movable_objects_.IsPushedEnd();
 }
-*/
+/**/
 size_t Field::GetGlobalTurnCounter() const {
 	return pimpl_->global_turns_;
 }
 
 bool Field::IsCycleEnd() const {
 	return pimpl_->movable_objects_.IsEnd();
+}
+
+void Field::f1() {
+	std::cout << "cqs: " << pimpl_->movable_objects_.size() << "\n";
+}
+
+void Field::f2() {
+	auto z = std::dynamic_pointer_cast<Unit>(pimpl_->movable_objects_.Get());
+	auto h = z;
+	while (1) {
+		std::cout << z->GetId() << "\n";
+		std::cout << "preg: " << z->pregnant_ << "\n";
+		std::cout << "post: " << z->puerperium_ << "\n";
+		std::cout << "energy: " << z->energy_ << "\n";
+		std::cout << "fat: " << z->fatigue_ << "\n\n";
+		pimpl_->movable_objects_.Next();
+		z = std::dynamic_pointer_cast<Unit>(pimpl_->movable_objects_.Get());
+		if (z == nullptr) break;
+		if (h->IsRemoved()) {
+			h = z;
+			z = std::dynamic_pointer_cast<Unit>(pimpl_->movable_objects_.Get());
+		}
+		if (z == h) break;
+	}
 }

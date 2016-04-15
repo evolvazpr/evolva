@@ -1,5 +1,6 @@
 #include "FieldCell.hpp"
 #include "CellObject.hpp"
+#include "Unit.hpp"
 
 FieldCell::FieldCell(const size_t x, const size_t y) {
 	object_ = nullptr;
@@ -8,6 +9,10 @@ FieldCell::FieldCell(const size_t x, const size_t y) {
 }
 
 FieldCell::~FieldCell() {
+}
+
+std::shared_ptr<Unit> FieldCell::GetUnit() {
+	return std::static_pointer_cast<Unit>(GetObject());
 }
 
 std::shared_ptr<CellObject> FieldCell::SetObject(std::shared_ptr<CellObject> object) {

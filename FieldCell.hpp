@@ -8,6 +8,7 @@
 class CellObject;
 class Field;
 class NonMovableObject;
+class Unit;
 
 class FieldCell : public std::enable_shared_from_this<FieldCell> {
 friend class Field;
@@ -17,6 +18,7 @@ public:
 	virtual ~FieldCell();
 	std::shared_ptr<CellObject> SetObject(std::shared_ptr<CellObject> object);
 	inline std::shared_ptr<CellObject> GetObject() { return object_; };
+	std::shared_ptr<Unit> GetUnit();
 	std::shared_ptr<NonMovableObject> GetNmo(); //UNSAFE :(
 	inline std::shared_ptr<CellObject> RemoveObject() { return SetObject(nullptr); };
 	inline bool IsEmpty() const { return (object_ == nullptr); };

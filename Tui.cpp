@@ -6,39 +6,40 @@
 
 void Tui::DrawHorizontalLine() {
 	const std::shared_ptr<Field> field = Field::GetInstance();
-	for (size_t i = 0; i <= field->GetWidth() * 4; i++)
+	for (size_t i = 0; i <= field->GetWidth() * 2; i++)
 		std::cout << "-";
 	std::cout << std::endl;
 }
-/**
- * Method draws field in console. Objects are represented by 'O' sign.
- */
+
 void Tui::PrintField() {
-	const std::shared_ptr<Field> field = Field::GetInstance();
-	std::shared_ptr<CellObject> object;
+//	const std::shared_ptr<Field> field = Field::GetInstance();
 	DrawHorizontalLine();
-	for (size_t i = 0; i < field->GetWidth(); i++) {
-		for (size_t j = 0; j < field->GetHeight(); j++) {
+	try {
+	for (size_t j = 0; j < field->GetHeight(); j++) {
+		for (size_t i = 0; i < field->GetWidth(); i++) {
 			if (field->GetCell(i, j)->IsEmpty()) {
-				std::cout << "|   ";
+				std::cout << "  ";
 			}
 			else {
-				object = field->GetCell(i, j)->GetObject();
-				if (object->GetType(CellObject::Type::MOVABLE)) {
-					std::cout << "| O ";
+				std::weak_ptr<CellObject> object = field->GetCell(i, j)->GetObject();
+				CellObject *fg = object.lock().get();
+				if (object.lock()->GetType(CellObject::Type::MOVABLE)) {
+					if (object.lock()->GetId() <= 9) std::cout << object.lock()->GetId() << object.lock()->GetId();
+					else std::cout << "@@";
 				}
-				else std::cout << "| # ";
+				else std::cout << "##";
 			}
 		}
 		std::cout << "|\n";
 	}
+	}
+	catch (std::exception &e) {
+		std::cout << e.what() << "\n\n";
+		return;
+	}
 	DrawHorizontalLine();
 }
 
-/**
- * Method reports if cell on \p x and \p y coordinates is empty or not - 
- * by occupied we mean that kind of object is standing there.
- */
 void Tui::PresentFieldCell(const size_t x, const size_t y) {
 	std::cout << "Presenting cell:\n";
 	std::cout << "Coordinates: x = " << x << ", " << y << ".\n";
@@ -46,26 +47,17 @@ void Tui::PresentFieldCell(const size_t x, const size_t y) {
 	else std::cout << "Cell is not empty.\n\n";
 }
 
-/**
- *Method informs about object in specific cell.
- */
 void Tui::PresentCellObject(const std::shared_ptr<CellObject> object) {
 	std::cout << "ID: " << object->GetId() << std::endl;
 	std::cout << "Coordiantes: x = " << object->GetX() << ", y = " << object->GetY() << ".\n";
 }
 
-/**
- *Method informs about object in specific cell.
- */
 void Tui::PresentCellObject(const std::shared_ptr<MovableObject> object) {
 	std::cout << "Presenting moveable object:\n";
 	PresentCellObject(static_cast<std::shared_ptr<CellObject>>(object));
 	std::cout << "Move priority: " << object->GetMovePriority() << "\n\n";
 }
 
-/**
- *Method informs about object in specific cell.
- */
 void Tui::PresentCellObject(const std::shared_ptr<NonMovableObject> object) {
 	std::cout << "Presenting non-moveable object:\n";
 	PresentCellObject(static_cast<std::shared_ptr<CellObject>>(object));

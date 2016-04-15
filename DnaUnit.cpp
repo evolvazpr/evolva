@@ -12,7 +12,6 @@ DnaUnit::~DnaUnit() {
 
 std::shared_ptr<DnaCode> DnaUnit::Mating(const std::shared_ptr<const DnaCode> dna_in) const {
 	auto dna = std::make_shared<DnaCode>();
-	std::shared_ptr<Field> field = Field::GetInstance();
 	// crossover and mutating
 	// mutation genes (m. genes affect only children, not parents)
 	dna->insert(std::make_pair("mutability", 0.5 * (dna_code_->at("mutability") + dna_in->at("mutability"))));
