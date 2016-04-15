@@ -1,6 +1,7 @@
 ##Evolva - game of life
 
-
+W katalogu tests zawarte są programy testowe sprawdzające działanie poszczególnych modułów projektu.
+Celem ich kompilacji na systemie Linux Mint należy wybrać odpowiedni plik Makefile (tj. wpisać "make -f Makefile_mint").
 
 TODO:
 

@@ -10,8 +10,7 @@ CXXFLAGS      = -m64 -pipe -std=c++11 -O2 -Wall -Wextra -D_REENTRANT -fPIE $(DEF
 INCPATH       = -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I../../evolva -isystem /usr/include/x86_64-linux-gnu/qt5 -isystem /usr/include/x86_64-linux-gnu/qt5/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt5/QtConcurrent -isystem /usr/include/x86_64-linux-gnu/qt5/QtGui -isystem /usr/include/x86_64-linux-gnu/qt5/QtCore -isystem /usr/include/boost/ -I.. -I.
 LINK          = g++
 LFLAGS        = -m64 -std=c++11 -Wl,-O1
-LIBS          = $(SUBLIBS) -L/usr/X11R6/lib64 -lQt5Widgets -lQt5Concurrent -lQt5Gui -lQt5Core -lGL -lpthread 
-LIBS          += -lboost_unit_test_framework 
+LIBS          = $(SUBLIBS) -L/usr/X11R6/lib64 -lQt5Widgets -lQt5Concurrent -lQt5Gui -lQt5Core -lGL -lpthread  
 AR            = ar cqs
 RANLIB        = 
 QMAKE         = /usr/lib/x86_64-linux-gnu/qt5/bin/qmake
@@ -70,7 +69,7 @@ first: all
 
 all: $(EXECUTABLES)
 
-$(EXECUTABLES): ../ui_dialog.h $(OBJECTS) $(EXECUTABLE_OBJECTS) 
+$(EXECUTABLES): ../ui_dialog.h $(OBJECTS) $(EXECUTABLE_OBJECTS) ../moc_dialog.cpp 
 	$(LINK) $(LFLAGS) -o $@ $(OBJECTS) $@.o $(LIBS) 
 
 clean:compiler_clean 

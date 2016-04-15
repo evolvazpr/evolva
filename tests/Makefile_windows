@@ -1,0 +1,130 @@
+MAKEFILE      = Makefile_windows
+
+####### if this script does not work out of the box, check following lines:
+QT_PATH = /c/Qt/Qt5.6.0/5.6
+WIN_QT_PATH := C:/Qt/Qt5.6.0/5.6
+BOOST_INCLUDE_PATH = /c/boost/include/boost-1_60
+BOOST_LIB_PATH = C:/boost/lib
+BOOST_LIB_TEST_FRAMEWORK = libboost_unit_test_framework-mgw49-mt-1_60.a
+export PATH := /c/Qt/Qt5.6.0/Tools/mingw492_32/bin:$(PATH)
+####### end of specified lines
+
+####### Compiler, tools and options
+CC            = gcc
+CXX           = g++
+DEFINES       = -DUNICODE -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -DTIXML_USE_STL
+CFLAGS        = -pipe -fno-keep-inline-dllexport -O3 -Wall -Wextra $(DEFINES)
+CXXFLAGS      = -pipe -fno-keep-inline-dllexport -std=c++11 -O3 -frtti -Wall -Wextra -fexceptions -mthreads $(DEFINES)
+INCPATH       = -I. -I$(QT_PATH)/mingw49_32/include -I$(QT_PATH)/mingw49_32/include/QtWidgets -I$(QT_PATH)/mingw49_32/include/QtGui -I$(QT_PATH)/mingw49_32/include/QtANGLE -I$(QT_PATH)/mingw49_32/include/QtConcurrent -I$(QT_PATH)/mingw49_32/include/QtCore -Irelease -I. -I$(QT_PATH)/mingw49_32/mkspecs/win32-g++ -I$(BOOST_INCLUDE_PATH)
+LINK      = g++
+LFLAGS        =        -std=c++11 -Wl,-s -Wl,-subsystem,windows -mthreads
+
+LIBS          =        -lmingw32 -L$(WIN_QT_PATH)/mingw49_32/lib $(WIN_QT_PATH)/mingw49_32/lib/libqtmain.a -LC:/utils/postgresql/pgsql/lib -LC:/utils/my_sql/my_sql/lib -lshell32 
+LIBS 		  += 		$(WIN_QT_PATH)/mingw49_32/lib/libQt5Core.a $(WIN_QT_PATH)/mingw49_32/lib/libQt5Widgets.a $(WIN_QT_PATH)/mingw49_32/lib/libQt5Gui.a $(WIN_QT_PATH)/mingw49_32/lib/libQt5Concurrent.a $(WIN_QT_PATH)/mingw49_32/lib/libQt5Core.a 
+
+IDC           = idc
+IDL           = midl
+ZIP           = 
+DEF_FILE      = 
+RES_FILE      = 
+COPY          = cp -f
+SED           = sed
+COPY_FILE     = cp -f
+COPY_DIR      = cp -f -R
+DEL_FILE      = rm -f
+DEL_DIR       = rmdir
+MOVE          = mv -f
+CHK_DIR_EXISTS= test -d
+MKDIR         = mkdir -p
+INSTALL_FILE    = cp -f
+INSTALL_PROGRAM = cp -f
+INSTALL_DIR     = cp -f -R
+
+####### Output directory
+
+OBJECTS_DIR   = release/
+
+####### Files
+
+SOURCES       = $(wildcard ../*.cpp)
+SOURCES       += $(wildcard ../tinyxml/*.cpp)
+
+ifeq (,$(findstring ../moc_dialog.cpp, $(SOURCES)))
+	SOURCES += ../moc_dialog.cpp
+endif
+
+EXECUTABLE_SOURCES = $(wildcard *.cpp)
+EXECUTABLES 	   = $(patsubst %.cpp, %, $(EXECUTABLE_SOURCES))
+
+OBJECTS            = $(patsubst %.cpp, %.o, $(SOURCES))
+EXECUTABLE_OBJECTS = $(patsubst %.cpp, %.o, $(EXECUTABLE_SOURCES))
+
+first: all
+####### Implicit rules
+
+.SUFFIXES: .o .c .cpp .cc .cxx .C
+
+.cpp.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o "$@" "$<"   
+
+.cc.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o "$@" "$<"  
+
+.cxx.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o "$@" "$<"   
+
+.C.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o "$@" "$<"   
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(INCPATH) -o "$@" "$<"   
+
+####### Build rules
+
+all: $(EXECUTABLES)
+
+$(EXECUTABLES): ../ui_dialog.h $(OBJECTS) $(EXECUTABLE_OBJECTS) 
+	$(LINK) $(LFLAGS) -o $@ $(OBJECTS) $@.o $(LIBS) 
+
+clean:compiler_clean 
+	-$(DEL_FILE) $(OBJECTS) $(EXECUTABLES) $(EXECUTABLE_OBJECTS)
+	-$(DEL_FILE) *~ core *.core
+	
+####### Sub-libraries
+
+mocclean: compiler_moc_header_clean compiler_moc_source_clean
+
+mocables: compiler_moc_header_make_all compiler_moc_source_make_all
+
+check: first
+
+compiler_no_pch_compiler_make_all:
+compiler_no_pch_compiler_clean:
+compiler_rcc_make_all:
+compiler_rcc_clean:
+compiler_moc_header_make_all: ../moc_dialog.cpp
+compiler_moc_header_clean:
+	-$(DEL_FILE) ../moc_dialog.cpp
+../moc_dialog.cpp: ../dialog.hpp
+	'C:\Qt\Qt5.6.0\5.6\mingw49_32\bin\moc.exe' $(DEFINES) -D__GNUC__ -DWIN32 -IC:/Qt/Qt5.6.0/5.6/mingw49_32/mkspecs/win32-g++ -IC:/Users/Konrad/Desktop/evolva -IC:/Qt/Qt5.6.0/5.6/mingw49_32/include -IC:/Qt/Qt5.6.0/5.6/mingw49_32/include/QtWidgets -IC:/Qt/Qt5.6.0/5.6/mingw49_32/include/QtGui -IC:/Qt/Qt5.6.0/5.6/mingw49_32/include/QtANGLE -IC:/Qt/Qt5.6.0/5.6/mingw49_32/include/QtConcurrent -IC:/Qt/Qt5.6.0/5.6/mingw49_32/include/QtCore dialog.hpp -o ../moc_dialog.cpp
+
+compiler_moc_source_make_all:
+compiler_moc_source_clean:
+compiler_uic_make_all: ../ui_dialog.h
+compiler_uic_clean:
+	-$(DEL_FILE) ui_dialog.h
+../ui_dialog.h: ../dialog.ui
+	'C:\Qt\Qt5.6.0\5.6\mingw49_32\bin\uic.exe' ../dialog.ui -o ../ui_dialog.h
+
+compiler_yacc_decl_make_all:
+compiler_yacc_decl_clean:
+compiler_yacc_impl_make_all:
+compiler_yacc_impl_clean:
+compiler_lex_make_all:
+compiler_lex_clean:
+compiler_clean: compiler_moc_header_clean compiler_uic_clean 
+
+FORCE:
+
+
+

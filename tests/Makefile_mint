@@ -11,7 +11,6 @@ INCPATH       = -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I../../evo
 LINK          = g++
 LFLAGS        = -m64 -std=c++11 -Wl,-O1
 LIBS          = $(SUBLIBS) -L/usr/X11R6/lib64 -lQt5Widgets -lQt5Concurrent -lQt5Gui -lQt5Core -lGL -lpthread 
-LIBS          += -lboost_unit_test_framework 
 AR            = ar cqs
 RANLIB        = 
 QMAKE         = /usr/lib/x86_64-linux-gnu/qt5/bin/qmake

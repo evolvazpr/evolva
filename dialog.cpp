@@ -130,7 +130,7 @@ void RoundObject::animate() {
 }
 
 /**
- * @brief Smooth constructor.
+ * @brief Constructor.
  * @param parent - parent for Qt API (no need to call delete thanks to it).
  */
 Dialog::Dialog(QWidget *parent) :
@@ -138,17 +138,19 @@ Dialog::Dialog(QWidget *parent) :
 	ui(new Ui::Dialog), width_(FIELD_SIZE), height_(FIELD_SIZE) {
 	QRect rect;
 	ui->setupUi(this);
-	scene = new QGraphicsScene(ui->graphicsView);
+	scene = new QGraphicsScene();
 	ui->graphicsView->setScene(scene);
 
-	rect = ui->graphicsView->rect();
-	scene->setSceneRect(rect.x(), rect.y(), rect.height()-4, rect.height()-4);
+//	rect = ui->graphicsView->sceneRect();
+//	std::cout << rect.x() << rect.y() << rect.height() << std::endl;
+	//scene->setSceneRect(rect.x(), rect.y(), rect.height()-4, rect.height()-4);
+	scene->setSceneRect(0, 0, 300, 300);
 	ui->graphicsView->setRenderHint(QPainter::Antialiasing);
 	ui->graphicsView->show();
 }
 
 /**
- * @brief Smooth deconstructor.
+ * @brief Deconstructor.
  */
 Dialog::~Dialog() {
 	delete ui;
