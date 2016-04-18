@@ -7,13 +7,7 @@ to build on Mint 17 'Qiana' write "make -f Makefile_mint".
 
 Required Mint's packages:
 g++
-qt5-base
-libboost-all-dev
-
-Required Debian's packages:
-g++
 qt5-default
-qtbase5-dev-tools
 libboost-all-dev
 
 If any error occurs please contact with:
