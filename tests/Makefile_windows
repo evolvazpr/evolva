@@ -10,12 +10,12 @@ export PATH := /c/Qt/Qt5.6.0/Tools/mingw492_32/bin:$(PATH)
 ####### end of specified lines
 
 ####### Compiler, tools and options
-CC            = gcc
+CC            = /c/Qt/Qt5.6.0/Tools/mingw492_32/bin/gcc
 CXX           = g++
 DEFINES       = -DUNICODE -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -DTIXML_USE_STL
 CFLAGS        = -pipe -fno-keep-inline-dllexport -O3 -Wall -Wextra $(DEFINES)
 CXXFLAGS      = -pipe -fno-keep-inline-dllexport -std=c++11 -O3 -frtti -Wall -Wextra -fexceptions -mthreads $(DEFINES)
-INCPATH       = -I. -I$(QT_PATH)/mingw49_32/include -I$(QT_PATH)/mingw49_32/include/QtWidgets -I$(QT_PATH)/mingw49_32/include/QtGui -I$(QT_PATH)/mingw49_32/include/QtANGLE -I$(QT_PATH)/mingw49_32/include/QtConcurrent -I$(QT_PATH)/mingw49_32/include/QtCore -Irelease -I. -I$(QT_PATH)/mingw49_32/mkspecs/win32-g++ -I$(BOOST_INCLUDE_PATH)
+INCPATH       = -I. -I.. -I$(QT_PATH)/mingw49_32/include -I$(QT_PATH)/mingw49_32/include/QtWidgets -I$(QT_PATH)/mingw49_32/include/QtGui -I$(QT_PATH)/mingw49_32/include/QtANGLE -I$(QT_PATH)/mingw49_32/include/QtConcurrent -I$(QT_PATH)/mingw49_32/include/QtCore -Irelease -I. -I$(QT_PATH)/mingw49_32/mkspecs/win32-g++ -I$(BOOST_INCLUDE_PATH)
 LINK      = g++
 LFLAGS        =        -std=c++11 -Wl,-s -Wl,-subsystem,windows -mthreads
 
@@ -106,7 +106,7 @@ compiler_moc_header_make_all: ../moc_dialog.cpp
 compiler_moc_header_clean:
 	-$(DEL_FILE) ../moc_dialog.cpp
 ../moc_dialog.cpp: ../dialog.hpp
-	'C:\Qt\Qt5.6.0\5.6\mingw49_32\bin\moc.exe' $(DEFINES) -D__GNUC__ -DWIN32 -IC:/Qt/Qt5.6.0/5.6/mingw49_32/mkspecs/win32-g++ -IC:/Users/Konrad/Desktop/evolva -IC:/Qt/Qt5.6.0/5.6/mingw49_32/include -IC:/Qt/Qt5.6.0/5.6/mingw49_32/include/QtWidgets -IC:/Qt/Qt5.6.0/5.6/mingw49_32/include/QtGui -IC:/Qt/Qt5.6.0/5.6/mingw49_32/include/QtANGLE -IC:/Qt/Qt5.6.0/5.6/mingw49_32/include/QtConcurrent -IC:/Qt/Qt5.6.0/5.6/mingw49_32/include/QtCore dialog.hpp -o ../moc_dialog.cpp
+	'C:\Qt\Qt5.6.0\5.6\mingw49_32\bin\moc.exe' $(DEFINES) -D__GNUC__ -DWIN32 -IC:/Qt/Qt5.6.0/5.6/mingw49_32/mkspecs/win32-g++ -IC:/Users/Konrad/Desktop/evolva -IC:/Qt/Qt5.6.0/5.6/mingw49_32/include -IC:/Qt/Qt5.6.0/5.6/mingw49_32/include/QtWidgets -IC:/Qt/Qt5.6.0/5.6/mingw49_32/include/QtGui -IC:/Qt/Qt5.6.0/5.6/mingw49_32/include/QtANGLE -IC:/Qt/Qt5.6.0/5.6/mingw49_32/include/QtConcurrent -IC:/Qt/Qt5.6.0/5.6/mingw49_32/include/QtCore ../dialog.hpp -o ../moc_dialog.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
