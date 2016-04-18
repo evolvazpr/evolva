@@ -17,6 +17,11 @@ static const qreal ANIMATION_CLOCK = 1000/33;
 static const uint FIELD_SIZE = 50;
 
 /**
+ * @brief Pixels per object
+ */
+static const uint PIXELS_PER_OBJECT = 30;
+
+/**
  * @brief RoundObject constructor.
  * @param id - object's id.
  * @param x - object's graphical x coordinate (it is not field coordinate!).
@@ -29,16 +34,21 @@ static const uint FIELD_SIZE = 50;
  * @param timer - pointer to timer. It is needed, because on each move there is
  * established connection between timer signal timout() and RoundObject slot animate() (to animate or whatever).
  */
-RoundObject::RoundObject(const uint id, const int x, const int y, const uint radius, QGraphicsScene *scene, QTimer *timer) : QObject(scene->parent()),
-	QGraphicsEllipseItem(x, y, radius, radius), id_(id), timer_(timer) {
-		scene->addItem(this);
-	}
+RoundObject::RoundObject(const uint id, const int x, const int y, const uint radius,
+			QGraphicsScene *scene, QTimer *timer, QColor color) : 
+			QObject(scene->parent()), QGraphicsEllipseItem(x, y, radius, radius),
+		       	id_(id), timer_(timer) 
+{
+	setBrush(QBrush(color, Qt::SolidPattern));
+	scene->addItem(this);	
+}
 
 /**
  * @brief RoundObject's deconstructor.
  */
 RoundObject::~RoundObject() {
 }
+
 
 /**
  * @brief Object move method.
@@ -140,12 +150,11 @@ Dialog::Dialog(QWidget *parent) :
 	ui->setupUi(this);
 	scene = new QGraphicsScene();
 	ui->graphicsView->setScene(scene);
-
-//	rect = ui->graphicsView->sceneRect();
-//	std::cout << rect.x() << rect.y() << rect.height() << std::endl;
-	//scene->setSceneRect(rect.x(), rect.y(), rect.height()-4, rect.height()-4);
-	scene->setSceneRect(0, 0, 300, 300);
+	scene->setSceneRect(0, 0, FIELD_SIZE * PIXELS_PER_OBJECT, FIELD_SIZE * PIXELS_PER_OBJECT);
+	ui->graphicsView->setSceneRect(scene->sceneRect());
+	ui->graphicsView->setCacheMode(QGraphicsView::CacheNone);
 	ui->graphicsView->setRenderHint(QPainter::Antialiasing);
+	ui->graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 	ui->graphicsView->show();
 }
 
@@ -191,11 +200,11 @@ uint Dialog::calculateRadius() {
  * @param x - field's x coordinate of object.
  * @param y - field's y coordinate of object.
  */
-void Dialog::createObject(const uint id, const int x, const int y) {
+void Dialog::createObject(const uint id, const int x, const int y, const QColor color) {
 	int x_pos = calculateX(x);
 	int y_pos = calculateY(y);
 	int radius =  calculateRadius();
-	new RoundObject(id, x_pos, y_pos, radius, scene, &timer);
+	new RoundObject(id, x_pos, y_pos, radius, scene, &timer, color);
 }
 
 /**
@@ -207,7 +216,7 @@ RoundObject* Dialog::searchObject(const uint id) {
 	QList<QGraphicsItem *> obj_list = scene->items();
 	RoundObject *ptr;
 	for (auto it : obj_list) {
-		ptr = dynamic_cast<RoundObject *>(it);
+		ptr = dynamic_cast<RoundObject *>(it);//TODO: why not use of pattern? Visitor or strategy maybe?
 		if (ptr) {
 			if(ptr->id() == id)
 				return ptr;

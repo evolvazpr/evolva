@@ -4,9 +4,12 @@
 #include <QDialog>
 #include <QGraphicsObject>
 #include <QTimer>
-
+#include <QColor>
+#include <QBrush>
+#include <QStyleOptionGraphicsItem>
 #include <cmath>
 #include <iostream>
+#include <QPainter>
 
 namespace Ui {
 	class Dialog;
@@ -23,15 +26,14 @@ private:
 	int dy_;
 	QTimer *timer_;
 public:
-	RoundObject(const uint id, const int x, const int y, const uint radius, QGraphicsScene *scene, QTimer *timer);
+	RoundObject(const uint id, const int x, const int y, const uint radius, 
+		    QGraphicsScene *scene, QTimer *timer, QColor color);
 	virtual ~RoundObject();
-
 	void move(const int x, const int y);
 	uint id();
 
 public slots:
 	void animate();
-
 };
 
 /**
@@ -59,7 +61,7 @@ public:
 	explicit Dialog(QWidget *parent = 0);
 	virtual ~Dialog();
 
-	void createObject(const uint id, const int x, const int y);
+	void createObject(const uint id, const int x, const int y, const QColor color);
 	void moveObject(const uint id, const int x, const int y);
 	void moveObjectTo(const uint id, const int x, const int y);
 	void removeObject(const uint id);

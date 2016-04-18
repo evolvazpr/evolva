@@ -42,7 +42,13 @@ flags = [
 '-std=c++11',
 '-x',
 'c++',
-'-I', '/usr/include/'
+'-isystem', '/usr/include/',
+'-isystem', '/usr/include/boost/',
+'-isystem', '/usr/include/x86_64-linux-gnu/qt5',
+'-isystem', '/usr/include/x86_64-linux-gnu/qt5/QtCore',
+'-isystem', '/usr/include/x86_64-linux-gnu/qt5/QtGui',
+'-isystem', '/usr/include/x86_64-linux-gnu/qt5/QtWidgets',
+'-isystem', '/usr/include/x86_64-linux-gnu/qt5/QtConcurrent'
 ]
 
 
