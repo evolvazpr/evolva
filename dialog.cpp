@@ -215,7 +215,7 @@ void Dialog::createObject(const uint id, const int x, const int y, const QColor 
 RoundObject* Dialog::searchObject(const uint id) {
 	QList<QGraphicsItem *> obj_list = scene->items();
 	RoundObject *ptr;
-	for (auto it : obj_list) {
+	for (auto &it : obj_list) {
 		ptr = dynamic_cast<RoundObject *>(it);//TODO: why not use of pattern? Visitor or strategy maybe?
 		if (ptr) {
 			if(ptr->id() == id)
