@@ -3,6 +3,7 @@
 #include <QThread>
 #include <QtConcurrentRun>
 #include <QColor> 
+#include <iostream>
 
 class Sleeper : public QThread
 {

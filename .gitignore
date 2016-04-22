@@ -3,6 +3,7 @@ html
 *.o
 *.swp
 *.pyc
+*.exe
 *.db
 test_insert_object
 test_move_object

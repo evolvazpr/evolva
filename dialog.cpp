@@ -156,6 +156,7 @@ Dialog::Dialog(QWidget *parent) :
 	ui->graphicsView->setRenderHint(QPainter::Antialiasing);
 	ui->graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 	ui->graphicsView->show();
+	timer.start(ANIMATION_CLOCK);
 }
 
 /**
@@ -236,8 +237,6 @@ RoundObject* Dialog::searchObject(const uint id) {
 void Dialog::moveObject(const uint id, const int x, const int y) {
 	RoundObject *object = searchObject(id);
 	if (!object) return; //TODO: throw exception
-	if(!timer.isActive())
-		timer.start(ANIMATION_CLOCK);
 	object->move(calculateX(x), calculateY(y));
 }
 
@@ -255,8 +254,6 @@ void Dialog::moveObjectTo(const uint id, const int x, const int y) {
 	y_old = object->y();
 	dx = calculateX(x) - x_old;
 	dy = calculateY(y) - y_old;
-	if(!timer.isActive())
-		timer.start(ANIMATION_CLOCK);
 	object->move(dx, dy);
 }
 
