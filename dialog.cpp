@@ -170,7 +170,10 @@ Dialog::~Dialog() {
 
 void Dialog::on_pushButton_clicked() {          //what happens when we click the "Kolejna tura" button
 	static Tui tui;
-	field->Next();
+	std::shared_ptr<MovableObject> next;
+	next = field->Next();
+	if (next == nullptr)
+		exit(0);
 	tui.PrintField();
 	field->f2();
 }

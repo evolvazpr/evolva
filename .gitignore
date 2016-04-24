@@ -5,6 +5,7 @@ html
 *.pyc
 *.exe
 *.db
+test
 test_insert_object
 test_move_object
 test_XML

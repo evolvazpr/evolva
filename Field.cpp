@@ -149,7 +149,6 @@ bool Field::MoveObjectTo(std::shared_ptr<MovableObject> object, size_t x, size_t
 	cell->SetObject(object);
 //	object->x_ = x;
 //	object->y_ = y;
-	std::cout << "MOJE MOJE: x:" << x << "; y:" << y << std::endl;	
 	qt_dialog_->moveObjectTo(object->id_, x, y);	
 	return true;
 }

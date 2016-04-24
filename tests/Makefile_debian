@@ -79,7 +79,7 @@ compiler_moc_header_clean:
 compiler_uic_clean:
 	-$(DEL_FILE) ui_dialog.h
 ../ui_dialog.h: ../dialog.ui
-	$(QT_PATH)/bin/uic ../dialog.ui -o ../ui_dialog.h
+	$(QT_PATH_BIN)/bin/uic ../dialog.ui -o ../ui_dialog.h
 
 compiler_clean: compiler_moc_header_clean compiler_uic_clean 
 
