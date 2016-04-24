@@ -1,53 +1,23 @@
-#include "Field.hpp"
-#include "CellObject.hpp"
-#include "Tui.hpp"
+#include "../Field.hpp"
+#include "../CellObject.hpp"
+#include "../Tui.hpp"
 #define private public
 #define protected public
-#include "DnaGenerator.hpp"
-#include "Unit.hpp"
+#include "../DnaGenerator.hpp"
+#include "../Unit.hpp"
 #undef protected
 #undef private
 #include <iostream>
+#include <stdio.h>
 
+#include "../CyclicQueue.hpp"
+#include <memory>
+#include <QApplication>
 
+#include "../dialog.hpp"
 
-
-    #include <unistd.h>   //_getch*/
-    #include <termios.h>  //_getch*/
-
-
-
-char getch(){
-    char buf=0;
-    struct termios old={0};
-    fflush(stdout);
-    if(tcgetattr(0, &old)<0)
-        perror("tcsetattr()");
-    old.c_lflag&=~ICANON;
-    old.c_lflag&=~ECHO;
-    old.c_cc[VMIN]=1;
-    old.c_cc[VTIME]=0;
-    if(tcsetattr(0, TCSANOW, &old)<0)
-        perror("tcsetattr ICANON");
-    if(read(0,&buf,1)<0)
-        perror("read()");
-    old.c_lflag|=ICANON;
-    old.c_lflag|=ECHO;
-    if(tcsetattr(0, TCSADRAIN, &old)<0)
-        perror ("tcsetattr ~ICANON");
-//    printf("%c\n",buf);
-    return buf;
- }
-
-
-#include "CyclicQueue.hpp"
-
-int main(void) {
-
-	field = Field::GetInstance(10, 10);
-
-
-
+void EvolvaInit(Dialog* w) {
+	field = Field::GetInstance(10, 10, w);
 	std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();
 	DnaCode &dna = *dna_ptr;
 	dna["intelligence"] = 45.0;
@@ -86,14 +56,14 @@ int main(void) {
 	u[0]->energy_ = 200.0;
 	u[0]->death_ = 10000;
 	u[0]->dna_["normal_weight"] = 220.0;
-	field->InsertObject(u[0], 0, 0);
+	field->InsertObject(u[0], 6, 6);
 	u[1]->energy_ = 200.0;
 	u[1]->death_ = 10000;
 	u[1]->dna_["normal_weight"] = 200.0;
-	field->InsertObject(u[1], 9, 9);
+	field->InsertObject(u[1], 7, 7);
 
 
-	for (size_t i = 0; i < 2; ++i) {
+/*	for (size_t i = 0; i < 2; ++i) {
 		if (!u[i]->GetType(CellObject::Type::UNIT)) continue;
 		std::cout << "u " << i << ":\n";
 		for (auto j = u[i]->dna_.begin(); j != u[i]->dna_.end(); ++j) {
@@ -105,44 +75,27 @@ int main(void) {
 		std::cout << "x: " << u[i]->GetX() << "\n";
 		std::cout << "y: " << u[i]->GetY() << "\n";
 		std::cout << "\n";
-	}
+	}*/
 
 
-	field->InsertNmo(std::make_shared<Tree>(50.0), 1, 1);
-	field->InsertNmo(std::make_shared<Tree>(80.0), 7, 2);
-	field->InsertNmo(std::make_shared<Tree>(20.0), 3, 4);
-	field->InsertNmo(std::make_shared<Tree>(24.0), 4, 4);
-	field->InsertNmo(std::make_shared<Tree>(500.0), 2, 8);
-	field->InsertNmo(std::make_shared<Tree>(100.0), 0, 9);/**/
-
-
-//	field->KillNmo(field->GetCell(1,1)->GetNmo());
-//	field->KillNmo(field->GetCell(3,4)->GetNmo());
-//	field->KillNmo(field->GetCell(2,8)->GetNmo());
-
-	Tui tui;
-
+	field->InsertNmo(std::make_shared<Tree>(50.0), 0, 0);
+	field->InsertNmo(std::make_shared<Tree>(80.0), 0, 9);
+	field->InsertNmo(std::make_shared<Tree>(20.0), 9, 0);
+	field->InsertNmo(std::make_shared<Tree>(24.0), 9, 9);
+	field->InsertNmo(std::make_shared<Tree>(500.0), 1, 0);
+//	field->InsertNmo(std::make_shared<Tree>(100.0), 5, 5);/**/
 
 	field->BeginCycle();
 	field->Play();
-
 	Unit *xz = u[0].get();
 	xz->IsRemoved();
+}
 
-	while(1) {
-	//	if(!u[0]->IsRemoved()) {
-			tui.PrintField();
-
-//			std::cout << "0\n" << "en: " << u[0]->GetEnergy() << "\nfatg: " << u[0]->GetFatigue() << "\n";
-//			std::cout << "1\n" << "en: " << u[1]->GetEnergy() << "\nfatg: " << u[1]->GetFatigue() << "\n";
-		field->f2();
-	//	}
-//		else std::cout << "COUNT: " << u[0].use_count() << "\n" << u[1].use_count() << "\n";
-		if (getch() == ' ') break;
-		if (!field->Next()) break;
-	}
-	std::cout << "kuniec, c:" << u[0].use_count() << "\n" << u[1].use_count() << "\n\n";
-
-
+int main(int argc, char *argv[]) {
+	QApplication a(argc, argv);
+	Dialog w;
+	EvolvaInit(&w);
+	w.show();
+	a.exec();
 	return 0;
 }

@@ -11,6 +11,8 @@
 #include <iostream>
 #include <QPainter>
 
+class Field;
+
 namespace Ui {
 	class Dialog;
 }
@@ -55,7 +57,6 @@ private:
 	uint calculateRadius();
 
 	QTimer timer;
-
 
 public:
 	explicit Dialog(QWidget *parent = 0);

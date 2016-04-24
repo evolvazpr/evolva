@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <random>
-
+#include <QColor>
 #include "EvolvaException.hpp"
 
 class CellObject;
@@ -12,6 +12,7 @@ class NonMovableObject;
 class FieldCell;
 class Unit;
 class FieldPimpl;
+class Dialog;
 
 class Field {
 friend class Tui;
@@ -33,9 +34,12 @@ private:
 	double mutability_;
 	bool InsertCellObject(std::shared_ptr<CellObject> object, const size_t x, const size_t y);
 
+	static Dialog* qt_dialog_;
+
 public:
 	inline const size_t GetFfid() const { return ++ffid_; };
-	static std::shared_ptr<Field> GetInstance(const size_t x = 0, const size_t y = 0);
+	static std::shared_ptr<Field> GetInstance(const size_t x = 0, const size_t y = 0,
+						  Dialog* qt_dialog = nullptr);
 	size_t GetWidth() const;
 	size_t GetHeight() const;
 	bool IsCorrect(const size_t x, const size_t y) const;

@@ -1,6 +1,7 @@
 #include "dialog.hpp"
 #include "ui_dialog.h"
-
+#include "Field.hpp"
+#include "Tui.hpp"
 /**
  * @brief INCREMENT_PER_TICK static global variable. Parameter to set speed of animation.
  */
@@ -36,11 +37,12 @@ static const uint PIXELS_PER_OBJECT = 30;
  */
 RoundObject::RoundObject(const uint id, const int x, const int y, const uint radius,
 			QGraphicsScene *scene, QTimer *timer, QColor color) : 
-			QObject(scene->parent()), QGraphicsEllipseItem(x, y, radius, radius),
+			QObject(scene->parent()), QGraphicsEllipseItem(0, 0, radius, radius),
 		       	id_(id), timer_(timer) 
 {
 	setBrush(QBrush(color, Qt::SolidPattern));
-	scene->addItem(this);	
+	scene->addItem(this);
+	setPos(x, y);	
 }
 
 /**
@@ -167,7 +169,10 @@ Dialog::~Dialog() {
 }
 
 void Dialog::on_pushButton_clicked() {          //what happens when we click the "Kolejna tura" button
-
+	static Tui tui;
+	field->Next();
+	tui.PrintField();
+	field->f2();
 }
 /**
  * @brief Graphical x coordinate calculation.
@@ -227,7 +232,7 @@ RoundObject* Dialog::searchObject(const uint id) {
 }
 
 /**
- * @brief Move object method with relative coordinates.
+ * @brief Move object by relative coordinates (in other words - move with (x, y) steps somewhere).
  *
  * By relative coordinates it is meant to be in relation to present object's position.
  * @param id - id of RoundObject which will be moved.
@@ -238,6 +243,7 @@ void Dialog::moveObject(const uint id, const int x, const int y) {
 	RoundObject *object = searchObject(id);
 	if (!object) return; //TODO: throw exception
 	object->move(calculateX(x), calculateY(y));
+
 }
 
 /**

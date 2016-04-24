@@ -5,11 +5,8 @@
 #include <boost/multi_array.hpp>
 
 #include <iostream>
+#define _USE_MATH_DEFINES
 #include <cmath>
-#define M_SQRT2 1.41
-#define M_PI 3.14
-
-
 
 // TODO: Unnatural breeding. Children may have more energy than parent! It brakes
 // the first law of thermodynamics. :( <- FIX THAT!
@@ -27,14 +24,6 @@ double min3 (double a, double b, double c) {
 		else return c;
 	}
 }
-
-
-
-
-
-
-
-
 
 class Sense {
 public:

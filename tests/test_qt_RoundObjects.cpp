@@ -16,18 +16,21 @@ public:
 QAtomicInt run_thread(1);
 
 void test_thread(Dialog* w) {
-	    w->removeObject(6);
 	    while(run_thread.fetchAndAddAcquire(0)) {
-		    w->moveObject(0, 8, 4);
-		    Sleeper::sleep(1);
-		    w->moveObjectTo(0, 20, 25);
-		    Sleeper::sleep(1);
-		    w->moveObject(0, -3, -2);
-		    Sleeper::sleep(1);
-		    w->moveObjectTo(0, 5, 10);
-		    Sleeper::sleep(1);
-		    w->moveObjectTo(0, 0, 0);
-		    Sleeper::sleep(1);
+		    w->moveObjectTo(0, (size_t)1, (size_t)0);
+		    Sleeper::sleep(2);
+		    w->moveObjectTo(0, (size_t)2, (size_t)0);
+		    Sleeper::sleep(2);
+ 		    w->moveObjectTo(0, (size_t)3, (size_t)0);
+		    Sleeper::sleep(2);
+		    w->moveObjectTo(0, (size_t)3, (size_t)1);
+		    Sleeper::sleep(2);
+		    w->moveObjectTo(0, (size_t)3, (size_t)2);
+		    Sleeper::sleep(2);
+ 		    w->moveObjectTo(0, (size_t)3, (size_t)3);
+		    Sleeper::sleep(2);
+		    w->moveObjectTo(0, (size_t)9, (size_t)9);
+		    Sleeper::sleep(2);
 	    }
 }
 
@@ -38,13 +41,10 @@ int main(int argc, char *argv[])
     w.show();
     w.createObject(0, 0, 0, Qt::red);
     w.createObject(1, 0, 1, Qt::blue);
-    w.createObject(2, 1, 0, Qt::yellow);
-    w.createObject(4, 0, 2, Qt::black);
-    w.createObject(5, 2, 0, Qt::green);
-    w.createObject(6, 30, 30, Qt::green);
-    QFuture<void> future = QtConcurrent::run(test_thread, &w);
+    w.createObject(2, 1, 1, Qt::black);
+    //QFuture<void> future = QtConcurrent::run(test_thread, &w);
     a.exec();
     run_thread.deref();
-    future.waitForFinished();
+    //future.waitForFinished();
     return 0;
 }

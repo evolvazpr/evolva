@@ -7,7 +7,7 @@
 #include "Unit.hpp"
 #include <vector>
 #include <boost/multi_array.hpp>
-
+#include "dialog.hpp"
 #include <iostream>
 
 std::shared_ptr<Field> field;
@@ -42,6 +42,7 @@ FieldPimpl::~FieldPimpl() {
 }
 
 std::shared_ptr<Field> Field::instance_ = nullptr;
+Dialog* Field::qt_dialog_ = nullptr;
 
 Field::Field(const size_t x, const size_t y) : pimpl_(new FieldPimpl(x, y)) {
 	for (size_t i = 0; i < x; i++) {
@@ -51,9 +52,10 @@ Field::Field(const size_t x, const size_t y) : pimpl_(new FieldPimpl(x, y)) {
 	}
 }
 
-std::shared_ptr<Field> Field::GetInstance(const size_t x, const size_t y) {
+std::shared_ptr<Field> Field::GetInstance(const size_t x, const size_t y, Dialog * qt_dialog) {
 	if (!instance_) {
 		instance_ = std::shared_ptr<Field>(new Field(x, y));
+		qt_dialog_ = qt_dialog;
 	}
 	return instance_;
 }
@@ -110,6 +112,9 @@ bool Field::InsertObject(std::shared_ptr<MovableObject> object, const size_t x, 
 //            pimpl_->movable_objects_.previous_position_ = p2;
             pimpl_->movable_objects_.end_ = p4;
 		}/**/
+		
+		qt_dialog_->createObject(object->id_, x, y, Qt::red);
+		
 		return true;
 	}
 	else return false;
@@ -119,6 +124,7 @@ bool Field::InsertObject(std::shared_ptr<NonMovableObject> object, const size_t 
 	bool insertion = InsertCellObject(std::static_pointer_cast<CellObject>(object), x, y);
 	if (insertion){
 		pimpl_->non_movable_objects_.push_back(object);
+		qt_dialog_->createObject(object->id_, x, y, Qt::blue);
 		return true;
 	}
 	else return false;
@@ -143,7 +149,8 @@ bool Field::MoveObjectTo(std::shared_ptr<MovableObject> object, size_t x, size_t
 	cell->SetObject(object);
 //	object->x_ = x;
 //	object->y_ = y;
-	//TODO: Gui move
+	std::cout << "MOJE MOJE: x:" << x << "; y:" << y << std::endl;	
+	qt_dialog_->moveObjectTo(object->id_, x, y);	
 	return true;
 }
 
@@ -153,7 +160,8 @@ bool Field::Kill(std::shared_ptr<Unit> unit) {
 		std::cout << unit->GetId() << " is dead\n";
 		cell->RemoveObject();
 		unit->removed_ = true;
-		unit->alive_ = false;
+		unit->alive_ = false;		
+		qt_dialog_->removeObject(unit->id_);
 	}
 	else throw; //wow problem memory
 }
@@ -162,6 +170,7 @@ bool Field::KillNmo(std::shared_ptr<NonMovableObject> object) {
 	for (size_t i = 0; i < pimpl_->non_movable_objects_.size(); ++i) {
 		if (object ==  pimpl_->non_movable_objects_[i]) {
 			GetCell(object->GetX(), object->GetY())->RemoveObject();
+			qt_dialog_->removeObject(object->id_);
 			if (pimpl_->non_movable_objects_.size() == 1) pimpl_->non_movable_objects_.clear();
 			else if (i + 1 ==  pimpl_->non_movable_objects_.size())  pimpl_->non_movable_objects_.pop_back();
 			else {
@@ -284,7 +293,9 @@ void Field::f2() {
 		std::cout << "preg: " << z->pregnant_ << "\n";
 		std::cout << "post: " << z->puerperium_ << "\n";
 		std::cout << "energy: " << z->energy_ << "\n";
-		std::cout << "fat: " << z->fatigue_ << "\n\n";
+		std::cout << "fat: " << z->fatigue_ << "\n";
+		std::cout << "x: " << z->GetX() << "\n";
+		std::cout << "y: " << z->GetY() << "\n\n";
 		pimpl_->movable_objects_.Next();
 		z = std::dynamic_pointer_cast<Unit>(pimpl_->movable_objects_.Get());
 		if (z == nullptr) break;
