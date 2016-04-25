@@ -10,8 +10,10 @@
 #include <cmath>
 #include <iostream>
 #include <QPainter>
+#include <memory>
 
 class Field;
+class CellObject;
 
 namespace Ui {
 	class Dialog;
@@ -51,24 +53,27 @@ private:
 	const unsigned int width_;
 	const unsigned int height_;
 
-	RoundObject* searchObject(const uint id);
+	RoundObject* SearchObject(const uint id);
 	int calculateX(const int x);
 	int calculateY(const int y);
 	uint calculateRadius();
-
+	QList<QGraphicsItem *> to_remove_;
 	QTimer timer;
-
+	void RemoveObject(const uint id);
 public:
 	explicit Dialog(QWidget *parent = 0);
 	virtual ~Dialog();
 
-	void createObject(const uint id, const int x, const int y, const QColor color);
-	void moveObject(const uint id, const int x, const int y);
-	void moveObjectTo(const uint id, const int x, const int y);
-	void removeObject(const uint id);
+	void CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y);
+	void MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y);
+	void MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y);
+	void RemoveObject(std::shared_ptr<const CellObject> object);
 
 private slots:
 	void on_pushButton_clicked();
+
+public slots:
+	void ClearField();
 };
 
 #endif // DIALOG_HPP

@@ -2,6 +2,9 @@
 #include "ui_dialog.h"
 #include "Field.hpp"
 #include "Tui.hpp"
+#include "CellObject.hpp"
+#include "EvolvaException.hpp"
+
 /**
  * @brief INCREMENT_PER_TICK static global variable. Parameter to set speed of animation.
  */
@@ -106,7 +109,7 @@ void RoundObject::animate() {
 			dx += INCREMENT_PER_TICK;
 			x_coord = x() - INCREMENT_PER_TICK;
 		} else {
-			x_coord = x() + dx;
+x_coord = x() + dx;
 			dx = 0;
 		}
 	} else {
@@ -137,7 +140,7 @@ void RoundObject::animate() {
 	setPos(x_coord, y_coord);
 	dx_ = dx;
 	dy_ = dy;
-	if((!dx) && (!dy))
+	if((!dx) && (!dy)) 
 		QObject::disconnect(timer_, SIGNAL(timeout()), this, SLOT(animate()));
 }
 
@@ -175,6 +178,7 @@ void Dialog::on_pushButton_clicked() {          //what happens when we click the
 	if (next == nullptr)
 		exit(0);
 	tui.PrintField();
+	ClearField();
 	field->f2();
 }
 /**
@@ -209,11 +213,21 @@ uint Dialog::calculateRadius() {
  * @param x - field's x coordinate of object.
  * @param y - field's y coordinate of object.
  */
-void Dialog::createObject(const uint id, const int x, const int y, const QColor color) {
+void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
 	int x_pos = calculateX(x);
 	int y_pos = calculateY(y);
 	int radius =  calculateRadius();
-	new RoundObject(id, x_pos, y_pos, radius, scene, &timer, color);
+	QColor color;
+	if (object->GetType(CellObject::Type::MOVABLE)) {
+		if (object->GetType(CellObject::Type::CREATURE)) 
+			color = Qt::red;
+	} else {
+		if (object->GetType(CellObject::Type::PLANT))
+			color = Qt::green;
+		else 
+			color = Qt::gray;
+	}	
+	new RoundObject(object->GetId(), x_pos, y_pos, radius, scene, &timer, color);
 }
 
 /**
@@ -221,11 +235,11 @@ void Dialog::createObject(const uint id, const int x, const int y, const QColor 
  * @param id - object's id.
  * @return pointer to RoundObject. If there is RoundObject with passed id, nullptr is returned.
  */
-RoundObject* Dialog::searchObject(const uint id) {
+RoundObject* Dialog::SearchObject(const uint id) {
 	QList<QGraphicsItem *> obj_list = scene->items();
 	RoundObject *ptr;
 	for (auto &it : obj_list) {
-		ptr = dynamic_cast<RoundObject *>(it);//TODO: why not use of pattern? Visitor or strategy maybe?
+		ptr = dynamic_cast<RoundObject *>(it);
 		if (ptr) {
 			if(ptr->id() == id)
 				return ptr;
@@ -238,43 +252,50 @@ RoundObject* Dialog::searchObject(const uint id) {
  * @brief Move object by relative coordinates (in other words - move with (x, y) steps somewhere).
  *
  * By relative coordinates it is meant to be in relation to present object's position.
- * @param id - id of RoundObject which will be moved.
+ * @param object - shared_ptr to object which will be moved.
  * @param x - <b>realative field (not graphical) steps</b> in x direction to make.
  * @param y - <b>realative field (not graphical) steps</b> in y direction to make.
  */
-void Dialog::moveObject(const uint id, const int x, const int y) {
-	RoundObject *object = searchObject(id);
-	if (!object) return; //TODO: throw exception
-	object->move(calculateX(x), calculateY(y));
-
+void Dialog::MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
+	RoundObject *roundObject = SearchObject(object->GetId());
+	if (!roundObject)
+		throw EvolvaException("Dialog::moveObject - object not found!\n");
+	roundObject->move(calculateX(x), calculateY(y));
 }
 
 /**
  * @brief Move object method to specific field's coordinate.
- * @param id - id of RoundObject that will be moved.
+ * @param object - shared_ptr of object that will be moved.
  * @param x - <b>real field's x coordinate</b> in which RoundObject will be placed.
  * @param y - <b>real field's y coordinate</b> in which RoundObject will be placed.
  */
-void Dialog::moveObjectTo(const uint id, const int x, const int y) {
-	RoundObject *object = searchObject(id);
+void Dialog::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y) {
+	RoundObject *roundObject = SearchObject(object->GetId());
 	int x_old, y_old, dx, dy;
-	if (!object) return; //TODO: throw exception
-	x_old = object->x();
-	y_old = object->y();
+	if (!object)
+		throw EvolvaException("Dialog::moveObjectTo - object not found!\n");
+	x_old = roundObject->x();
+	y_old = roundObject->y();
 	dx = calculateX(x) - x_old;
 	dy = calculateY(y) - y_old;
-	object->move(dx, dy);
+	roundObject->move(dx, dy);
 }
 
 /**
  * @brief Remove (delete) specific RoundObject.
- * @param id - id of RoundObject to be deleted.
+ * @param object - shared_ptr to object which will be deleted from GUI.
  */
-void Dialog::removeObject(const uint id) {
-	RoundObject *object = searchObject(id);
-	if (!object) return; //TODO: throw exception
-	scene->removeItem(object);
-	delete(object);
+void Dialog::RemoveObject(std::shared_ptr<const CellObject> object) {
+	RoundObject *roundObject = SearchObject(object->GetId());
+	if (!roundObject) 
+		throw EvolvaException("Dialog::removeObject - object not found!\n");	
+	to_remove_.push_back(roundObject);
 }
 
-
+void Dialog::ClearField() {
+	for(auto &it : to_remove_) {
+		scene->removeItem(it);
+		delete(it);
+	}
+	to_remove_.clear();
+}
