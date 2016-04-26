@@ -71,12 +71,11 @@ public:
 	void MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void RemoveObject(std::shared_ptr<const CellObject> object);
-
+	void ClearField();
 private slots:
 	void on_pushButton_clicked();
 
 public slots:
-	void ClearField();
 	void AnimationFinished();
 };
 

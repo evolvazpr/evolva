@@ -180,7 +180,6 @@ void Dialog::on_pushButton_clicked() {          //what happens when we click the
 	if (next == nullptr)
 		exit(0);
 	tui.PrintField();
-	ClearField();
 	field->f2();
 }
 /**
