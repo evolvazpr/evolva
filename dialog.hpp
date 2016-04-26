@@ -11,6 +11,7 @@
 #include <iostream>
 #include <QPainter>
 #include <memory>
+#include <QMutex>
 
 class Field;
 class CellObject;
@@ -35,7 +36,8 @@ public:
 	virtual ~RoundObject();
 	void move(const int x, const int y);
 	uint id();
-
+signals:
+	void AnimationFinished();
 public slots:
 	void animate();
 };
@@ -59,6 +61,7 @@ private:
 	uint calculateRadius();
 	QList<QGraphicsItem *> to_remove_;
 	QTimer timer;
+	QAtomicInt animations_;
 	void RemoveObject(const uint id);
 public:
 	explicit Dialog(QWidget *parent = 0);
@@ -74,6 +77,7 @@ private slots:
 
 public slots:
 	void ClearField();
+	void AnimationFinished();
 };
 
 #endif // DIALOG_HPP

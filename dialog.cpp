@@ -94,8 +94,7 @@ void RoundObject::animate() {
 	/* Some calculations */
 	dx = dx_;
 	dy = dy_;
-	if ((!dx) && (!dy))
-		return;
+
 	if (dx > 0) {
 		if (dx >= INCREMENT_PER_TICK) {
 			dx -= INCREMENT_PER_TICK;
@@ -140,8 +139,10 @@ x_coord = x() + dx;
 	setPos(x_coord, y_coord);
 	dx_ = dx;
 	dy_ = dy;
-	if((!dx) && (!dy)) 
+	if((!dx) && (!dy)) {
 		QObject::disconnect(timer_, SIGNAL(timeout()), this, SLOT(animate()));
+		emit AnimationFinished();
+	}
 }
 
 /**
@@ -161,6 +162,7 @@ Dialog::Dialog(QWidget *parent) :
 	ui->graphicsView->setRenderHint(QPainter::Antialiasing);
 	ui->graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 	ui->graphicsView->show();
+	animations_ = 0;
 	timer.start(ANIMATION_CLOCK);
 }
 
@@ -217,6 +219,7 @@ void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x,
 	int x_pos = calculateX(x);
 	int y_pos = calculateY(y);
 	int radius =  calculateRadius();
+	RoundObject *roundObject;
 	QColor color;
 	if (object->GetType(CellObject::Type::MOVABLE)) {
 		if (object->GetType(CellObject::Type::CREATURE)) 
@@ -227,7 +230,8 @@ void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x,
 		else 
 			color = Qt::gray;
 	}	
-	new RoundObject(object->GetId(), x_pos, y_pos, radius, scene, &timer, color);
+	roundObject = new RoundObject(object->GetId(), x_pos, y_pos, radius, scene, &timer, color);
+	QObject::connect(dynamic_cast<QObject *>(roundObject), SIGNAL(AnimationFinished()), this, SLOT(AnimationFinished()));
 }
 
 /**
@@ -260,6 +264,7 @@ void Dialog::MoveObject(std::shared_ptr<const CellObject> object, const int x, c
 	RoundObject *roundObject = SearchObject(object->GetId());
 	if (!roundObject)
 		throw EvolvaException("Dialog::moveObject - object not found!\n");
+	animations_.fetchAndAddAcquire(1);
 	roundObject->move(calculateX(x), calculateY(y));
 }
 
@@ -278,6 +283,7 @@ void Dialog::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x,
 	y_old = roundObject->y();
 	dx = calculateX(x) - x_old;
 	dy = calculateY(y) - y_old;
+	animations_.fetchAndAddAcquire(1);
 	roundObject->move(dx, dy);
 }
 
@@ -290,12 +296,24 @@ void Dialog::RemoveObject(std::shared_ptr<const CellObject> object) {
 	if (!roundObject) 
 		throw EvolvaException("Dialog::removeObject - object not found!\n");	
 	to_remove_.push_back(roundObject);
+	if (!animations_.fetchAndAddAcquire(0))
+		ClearField();
 }
 
 void Dialog::ClearField() {
+	static QMutex mutex;
+	mutex.lock();
 	for(auto &it : to_remove_) {
 		scene->removeItem(it);
 		delete(it);
 	}
 	to_remove_.clear();
+	mutex.unlock();
+}
+
+void Dialog::AnimationFinished() {
+	if (animations_.fetchAndAddAcquire(0))
+		animations_.fetchAndAddAcquire(-1);
+	if (!animations_.fetchAndAddAcquire(0))
+		ClearField();
 }
