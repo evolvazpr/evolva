@@ -68,6 +68,8 @@ public:
 	virtual ~Dialog();
 
 	void CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y);
+	void CreateFloorObject(QColor color, const int x, const int y);
+	void RemoveFloorObject(const int x, const int y);
 	void MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void RemoveObject(std::shared_ptr<const CellObject> object);

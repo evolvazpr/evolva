@@ -9,7 +9,7 @@
 #include <boost/multi_array.hpp>
 #include "dialog.hpp"
 #include <iostream>
-
+#include <QColor>
 std::shared_ptr<Field> field;
 
 class FieldPimpl {
@@ -56,6 +56,10 @@ std::shared_ptr<Field> Field::GetInstance(const size_t x, const size_t y, Dialog
 	if (!instance_) {
 		instance_ = std::shared_ptr<Field>(new Field(x, y));
 		qt_dialog_ = qt_dialog;
+		for(size_t i = 0; i < x; i++) {
+			for(size_t j = 0; j < y; j++)
+				qt_dialog_->CreateFloorObject(Qt::green, i, j);
+		}
 	}
 	return instance_;
 }

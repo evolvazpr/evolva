@@ -300,7 +300,7 @@ void Dialog::RemoveObject(std::shared_ptr<const CellObject> object) {
 }
 
 void Dialog::ClearField() {
-	static QMutex mutex;
+	static QMutex mutex; //TODO RAII!!
 	mutex.lock();
 	for(auto &it : to_remove_) {
 		scene->removeItem(it);
@@ -315,4 +315,22 @@ void Dialog::AnimationFinished() {
 		animations_.fetchAndAddAcquire(-1);
 	if (!animations_.fetchAndAddAcquire(0))
 		ClearField();
+}
+
+void Dialog::CreateFloorObject(QColor color, const int x, const int y) 
+{
+	QGraphicsRectItem *rect = new QGraphicsRectItem(0, 0, calculateRadius(), calculateRadius());
+	rect->setBrush(QBrush(color, Qt::SolidPattern));
+	rect->setPos(calculateX(x), calculateY(y));	
+	scene->addItem(rect);
+}
+
+void Dialog::RemoveFloorObject(const int x, const int y)
+{
+	QTransform test;
+	QGraphicsItem *item = scene->itemAt(calculateX(x), calculateY(y), test);
+	if (!item)
+		return;
+	scene->removeItem(item);
+	delete(item);	
 }
