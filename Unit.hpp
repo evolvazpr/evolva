@@ -22,15 +22,15 @@ private:
 	from the DNA generator. */
 	/*< Status contains transitory status of a unit. It is update each turn
 	using Update() method. */
-		size_t turns_;										/*< Current lifetime in turns */
-		bool sleep_;										/*< Is unit sleeping. */
-		double fatigue_;									/*< Level of fatigue (0 - 100). */
-		double health_;										/*< Level of health (0 - 100). */
-		double speed_;										/*< Calculated level of speed (0 - 100). */
-		double attractiveness_;								/*< Calculated level of attractiveness (0 - 100). */
-		double strength_;									/*< Calculated level of strength. */
-		double energy_;										/*< Level stored in nutritions in organism. */
-		double poison_;										/*< Level of poison. */
+		size_t turns_;				/*< Current lifetime in turns */
+		bool sleep_;				/*< Is unit sleeping. */
+		double fatigue_;			/*< Level of fatigue (0 - 100). */
+		double health_;				/*< Level of health (0 - 100). */
+		double speed_;				/*< Calculated level of speed (0 - 100). */
+		double attractiveness_;			/*< Calculated level of attractiveness (0 - 100). */
+		double strength_;			/*< Calculated level of strength. */
+		double energy_;				/*< Level stored in nutritions in organism. */
+		double poison_;				/*< Level of poison. */
 		size_t death_;
 		bool pregnant_;
 		std::shared_ptr<DnaCode> child_dna_code_;

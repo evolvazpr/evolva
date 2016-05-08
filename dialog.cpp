@@ -233,8 +233,12 @@ void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x,
 	RoundObject *roundObject;
 	QColor color;
 	if (object->GetType(CellObject::Type::MOVABLE)) {
-		if (object->GetType(CellObject::Type::CREATURE)) 
+		if (object->GetType(CellObject::Type::CARNIVORE)) 
 			color = Qt::red;
+		else if (object->GetType(CellObject::Type::HERBIVORE))
+			color = Qt::darkGreen;
+		else
+			color = Qt::black;
 	} else {
 		if (object->GetType(CellObject::Type::PLANT))
 			color = Qt::green;
@@ -242,7 +246,8 @@ void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x,
 			color = Qt::gray;
 	}	
 	roundObject = new RoundObject(object->GetId(), x_pos, y_pos, radius, scene, &timer, color);
-	QObject::connect(dynamic_cast<QObject *>(roundObject), SIGNAL(AnimationFinished()), this, SLOT(AnimationFinished()));
+	QObject::connect(dynamic_cast<QObject *>(roundObject), SIGNAL(AnimationFinished()), 
+			 this, SLOT(AnimationFinished()));
 }
 
 /**
