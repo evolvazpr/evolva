@@ -48,6 +48,18 @@ RoundObject::RoundObject(const uint id, const int x, const int y, const uint rad
 	setPos(x, y);	
 }
 
+void RoundObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget){
+	qreal pos = rect().height();
+	pos = pos/2.0;
+	QString text = QString::number(id());
+	QFontMetrics font(painter->font());
+	qreal x = pos - ((qreal)font.width(text)/2.0);
+	qreal y = pos - (qreal)font.height()/2.0;
+	QRect rect = QRect(x, y, font.width(text), font.height()); 
+	QGraphicsEllipseItem::paint(painter, option, widget);
+	painter->drawText(rect, text);
+}
+
 /**
  * @brief RoundObject's deconstructor.
  */
@@ -108,7 +120,7 @@ void RoundObject::animate() {
 			dx += INCREMENT_PER_TICK;
 			x_coord = x() - INCREMENT_PER_TICK;
 		} else {
-x_coord = x() + dx;
+			x_coord = x() + dx;
 			dx = 0;
 		}
 	} else {

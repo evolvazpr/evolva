@@ -36,6 +36,7 @@ public:
 	virtual ~RoundObject();
 	void move(const int x, const int y);
 	uint id();
+	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 signals:
 	void AnimationFinished();
 public slots:
