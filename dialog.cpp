@@ -231,7 +231,7 @@ void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x,
 	int y_pos = calculateY(y);
 	int radius =  calculateRadius();
 	RoundObject *roundObject;
-	QColor color;
+	QColor color = Qt::white;
 	if (object->GetType(CellObject::Type::MOVABLE)) {
 		if (object->GetType(CellObject::Type::CARNIVORE)) 
 			color = Qt::red;
@@ -259,8 +259,8 @@ RoundObject* Dialog::SearchObject(const uint id) {
 	QList<QGraphicsItem *> obj_list = scene->items();
 	RoundObject *ptr;
 	for (auto &it : obj_list) {
-		ptr = dynamic_cast<RoundObject *>(it);
-		if (ptr) {
+		if (it->type() == QGraphicsEllipseItem::Type) {
+			ptr = static_cast<RoundObject *>(it);
 			if(ptr->id() == id)
 				return ptr;
 		}
