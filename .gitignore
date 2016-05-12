@@ -10,6 +10,7 @@ test_insert_object
 test_move_object
 test_XML
 test_qt_RoundObjects
+test_qt
 evolva_gole_gui.pro.user
 evolva_gole_gui.pro.user*
 moc_dialog.cpp

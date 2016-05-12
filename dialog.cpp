@@ -18,12 +18,12 @@ static const qreal ANIMATION_CLOCK = 1000/33;
 /**
  * @brief FIELD_SIZE temporary?
  */
-static const uint FIELD_SIZE = 50;
+static const uint FIELD_SIZE = 10;
 
 /**
  * @brief Pixels per object
  */
-static const uint PIXELS_PER_OBJECT = 30;
+static const uint PIXELS_PER_OBJECT = 25;
 
 /**
  * @brief RoundObject constructor.
@@ -169,7 +169,7 @@ Dialog::Dialog(QWidget *parent) :
 	scene = new QGraphicsScene();
 	ui->graphicsView->setScene(scene);
 	scene->setSceneRect(0, 0, FIELD_SIZE * PIXELS_PER_OBJECT, FIELD_SIZE * PIXELS_PER_OBJECT);
-	ui->graphicsView->setSceneRect(scene->sceneRect());
+	ui->graphicsView->centerOn(scene->sceneRect().center());
 	ui->graphicsView->setCacheMode(QGraphicsView::CacheNone);
 	ui->graphicsView->setRenderHint(QPainter::Antialiasing);
 	ui->graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
@@ -200,7 +200,7 @@ void Dialog::on_pushButton_clicked() {          //what happens when we click the
  * @return  - graphical x coordinate.
  */
 int Dialog::calculateX(const int x) {
-	return (qreal)x / (qreal)width_ * scene->width();
+	return ((qreal)x) / ((qreal)width_ )* scene->width();
 }
 
 /**
@@ -209,7 +209,7 @@ int Dialog::calculateX(const int x) {
  * @return  - graphical y coordinate.
  */
 int Dialog::calculateY(const int y) {
-	return (qreal)y / (qreal)height_ * scene->height();
+	return ((qreal)y) / ((qreal)height_) * scene->height();
 }
 
 /**
@@ -217,7 +217,7 @@ int Dialog::calculateY(const int y) {
  * @return
  */
 uint Dialog::calculateRadius() {
-	return  scene->height()/height_;
+	return  scene->height()/(qreal)height_;
 }
 
 /**
