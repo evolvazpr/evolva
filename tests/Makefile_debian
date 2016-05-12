@@ -22,7 +22,8 @@ CXXFLAGS      = -m64 -pipe -std=c++11 $(OPT_FLAGS) $(DBG_FLAGS) -Wall -Wextra -D
 INCPATH       = -I $(QT_PATH_BIN)/mkspecs/linux-g++-64 -isystem $(QT_PATH_INC) -isystem $(QT_PATH_INC)/QtWidgets -isystem $(QT_PATH_INC)/QtConcurrent -isystem $(QT_PATH_INC)/QtGui -isystem $(QT_PATH_INC)/QtCore -isystem $(BOOST_PATH_INC) -I.. -I.
 LINK          = g++
 LFLAGS        = -m64 -std=c++11 -Wl,-O1
-LIBS          = $(SUBLIBS) -L/usr/X11R6/lib64 -lQt5Widgets -lQt5Concurrent -lQt5Gui -lQt5Core -lGL -lpthread  
+LIBS          = $(SUBLIBS) -L/usr/X11R6/lib64 -lQt5Widgets -lQt5Concurrent
+LIBS 	     += -lQt5Gui -lQt5Core -lGL -lpthread -lboost_unit_test_framework
 DEL_FILE      = rm -f
 
 
