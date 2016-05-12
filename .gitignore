@@ -6,11 +6,13 @@ html
 *.exe
 *.db
 test
-test_insert_object
-test_move_object
 test_XML
 test_qt_RoundObjects
 test_qt
+test_movement
+test_kill_method
+test_killNmo_method
+test_insert
 evolva_gole_gui.pro.user
 evolva_gole_gui.pro.user*
 moc_dialog.cpp

@@ -15,6 +15,36 @@
 #include <QApplication>
 
 #include "../dialog.hpp"
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE insert_objects
+#include <boost/test/unit_test.hpp>
+
+
+/**
+ * This is a unit test for object movement. It checks if 
+ * movement and "collision" detection works.
+ */
+
+void MoveObjects(std::shared_ptr <Unit> u[])
+{
+	Tui tui;
+	tui.PrintField();	
+	sleep(1);
+	BOOST_CHECK(field->MoveObject(u[0], -1, -1, 1) == true);
+	tui.PrintField();
+	sleep(1);
+	BOOST_CHECK(field->MoveObject(u[1], -2, -2, 1) == false);
+	BOOST_CHECK(field->MoveObject(u[1], 1, 1, 1) == true);
+	tui.PrintField();
+	sleep(1);
+	BOOST_CHECK(field->MoveObjectTo(u[0], 0, 0, 1) == false);
+	BOOST_CHECK(field->MoveObjectTo(u[0], 1, 1, 1) == true);
+	tui.PrintField();
+	sleep(1);
+	BOOST_CHECK(field->MoveObjectTo(u[1], 1, 1, 1) == false);
+	BOOST_CHECK(field->MoveObjectTo(u[1], 0, 5, 1) == true);
+	tui.PrintField();
+}
 
 void EvolvaInit(Dialog* w) {
 	field = Field::GetInstance(10, 10, w);
@@ -56,46 +86,31 @@ void EvolvaInit(Dialog* w) {
 	u[0]->energy_ = 200.0;
 	u[0]->death_ = 10000;
 	u[0]->dna_["normal_weight"] = 220.0;
-	field->InsertObject(u[0], 6, 6);
+	BOOST_CHECK(field->InsertObject(u[0], 6, 6) == true);
 	u[1]->energy_ = 200.0;
 	u[1]->death_ = 10000;
 	u[1]->dna_["normal_weight"] = 200.0;
-	field->InsertObject(u[1], 7, 7);
+	BOOST_CHECK(field->InsertObject(u[1], 7, 7) == true);
 
 
-/*	for (size_t i = 0; i < 2; ++i) {
-		if (!u[i]->GetType(CellObject::Type::UNIT)) continue;
-		std::cout << "u " << i << ":\n";
-		for (auto j = u[i]->dna_.begin(); j != u[i]->dna_.end(); ++j) {
-			std::cout << j->first << ": " << j->second << "\n";
-		}
-		std::cout << "death: " << u[i]->death_ << "\n";
-		std::cout << "energy: " << u[i]->energy_ << "\n";
-		std::cout << "c. speed: " << u[i]->speed_ << "\n";
-		std::cout << "x: " << u[i]->GetX() << "\n";
-		std::cout << "y: " << u[i]->GetY() << "\n";
-		std::cout << "\n";
-	}*/
 
+	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(50.0), 0, 0) == true);
+	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(80.0), 0, 9) == true);
+	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(20.0), 9, 0) == true);
+	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(24.0), 9, 9) == true);
+	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(500.0), 1, 0) == true);
+	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(100.0), 1, 0) == false);
 
-	field->InsertNmo(std::make_shared<Tree>(50.0), 0, 0);
-	field->InsertNmo(std::make_shared<Tree>(80.0), 0, 9);
-	field->InsertNmo(std::make_shared<Tree>(20.0), 9, 0);
-	field->InsertNmo(std::make_shared<Tree>(24.0), 9, 9);
-	field->InsertNmo(std::make_shared<Tree>(500.0), 1, 0);
-//	field->InsertNmo(std::make_shared<Tree>(100.0), 5, 5);/**/
-
-	field->BeginCycle();
-	field->Play();
-	Unit *xz = u[0].get();
-	xz->IsRemoved();
+	MoveObjects(u);
 }
 
-int main(int argc, char *argv[]) {
+BOOST_AUTO_TEST_CASE(movement)
+{
+	int argc = 1;
+	char *argv[2];
+	argv[0] = (char *)"insert"; //only for QApplication creation
 	QApplication a(argc, argv);
 	Dialog w;
 	EvolvaInit(&w);
-	w.show();
-	a.exec();
-	return 0;
+
 }

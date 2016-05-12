@@ -15,6 +15,25 @@
 #include <QApplication>
 
 #include "../dialog.hpp"
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE insert_objects
+#include <boost/test/unit_test.hpp>
+
+
+/**
+ * This is a unit test for object removing from map, and 
+ * clearing space after it.
+ */
+
+void KillTest(std::shared_ptr <Unit> u[], int x, int y) {
+	Tui tui;
+	tui.PrintField();
+	BOOST_CHECK(field->MoveObjectTo(u[1], x, y, 1) == false);
+	field->Kill(u[0]);
+	sleep(1);
+	tui.PrintField();
+	BOOST_CHECK(field->MoveObjectTo(u[1], x, y, 1) == true);	
+}
 
 void EvolvaInit(Dialog* w) {
 	field = Field::GetInstance(10, 10, w);
@@ -56,46 +75,30 @@ void EvolvaInit(Dialog* w) {
 	u[0]->energy_ = 200.0;
 	u[0]->death_ = 10000;
 	u[0]->dna_["normal_weight"] = 220.0;
-	field->InsertObject(u[0], 6, 6);
+	BOOST_CHECK(field->InsertObject(u[0], 6, 6) == true);
 	u[1]->energy_ = 200.0;
 	u[1]->death_ = 10000;
 	u[1]->dna_["normal_weight"] = 200.0;
-	field->InsertObject(u[1], 7, 7);
+	BOOST_CHECK(field->InsertObject(u[1], 7, 7) == true);
 
 
-/*	for (size_t i = 0; i < 2; ++i) {
-		if (!u[i]->GetType(CellObject::Type::UNIT)) continue;
-		std::cout << "u " << i << ":\n";
-		for (auto j = u[i]->dna_.begin(); j != u[i]->dna_.end(); ++j) {
-			std::cout << j->first << ": " << j->second << "\n";
-		}
-		std::cout << "death: " << u[i]->death_ << "\n";
-		std::cout << "energy: " << u[i]->energy_ << "\n";
-		std::cout << "c. speed: " << u[i]->speed_ << "\n";
-		std::cout << "x: " << u[i]->GetX() << "\n";
-		std::cout << "y: " << u[i]->GetY() << "\n";
-		std::cout << "\n";
-	}*/
 
-
-	field->InsertNmo(std::make_shared<Tree>(50.0), 0, 0);
-	field->InsertNmo(std::make_shared<Tree>(80.0), 0, 9);
-	field->InsertNmo(std::make_shared<Tree>(20.0), 9, 0);
-	field->InsertNmo(std::make_shared<Tree>(24.0), 9, 9);
-	field->InsertNmo(std::make_shared<Tree>(500.0), 1, 0);
-//	field->InsertNmo(std::make_shared<Tree>(100.0), 5, 5);/**/
-
-	field->BeginCycle();
-	field->Play();
-	Unit *xz = u[0].get();
-	xz->IsRemoved();
+	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(50.0), 0, 0) == true);
+	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(80.0), 0, 9) == true);
+	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(20.0), 9, 0) == true);
+	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(24.0), 9, 9) == true);
+	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(500.0), 1, 0) == true);
+	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(100.0), 1, 0) == false);
+	KillTest(u, 6, 6);
 }
 
-int main(int argc, char *argv[]) {
+BOOST_AUTO_TEST_CASE(kill)
+{
+	int argc = 1;
+	char *argv[2];
+	argv[0] = (char *)"kill"; //only for creating QApplication
 	QApplication a(argc, argv);
 	Dialog w;
 	EvolvaInit(&w);
-	w.show();
-	a.exec();
-	return 0;
+
 }
