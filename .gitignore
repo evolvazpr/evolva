@@ -12,6 +12,8 @@ test_qt
 test_movement
 test_kill_method
 test_killNmo_method
+test_GetCurrentObject
+test_CyclicQueue
 test_insert
 evolva_gole_gui.pro.user
 evolva_gole_gui.pro.user*
