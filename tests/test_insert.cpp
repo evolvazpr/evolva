@@ -17,7 +17,15 @@
 #include "../dialog.hpp"
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE insert_objects
+
+#ifdef OS_WINDOWS
+/*
+ * stupid workaround over boost lib problems on Windows.
+ */
+#include <boost/test/included/unit_test.hpp>	
+#else
 #include <boost/test/unit_test.hpp>
+#endif 
 
 void EvolvaInit(Dialog* w) {
 	Tui tui;
