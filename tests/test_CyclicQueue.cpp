@@ -74,11 +74,11 @@ BOOST_AUTO_TEST_CASE(CyclicQueueUnitTest)
 	queue.Begin();
 	BOOST_CHECK(queue.Next() == false);
 	BOOST_CHECK(queue.IsEnd() == false);
-	BOOST_CHECK(queue.Get() == u[1]);
+	BOOST_CHECK(queue.Get() == u[0]);
 	BOOST_CHECK(queue.Next() == true);
 	BOOST_CHECK(queue.IsEnd() == true);
-	BOOST_CHECK(queue.Get() == u[0]);
+	BOOST_CHECK(queue.Get() == u[1]);
 	BOOST_CHECK(queue.Next() == false);
 	BOOST_CHECK(queue.IsEnd() == false);
-	BOOST_CHECK(queue.Get() == u[1]);	
+	BOOST_CHECK(queue.Get() == u[0]);	
 } 
