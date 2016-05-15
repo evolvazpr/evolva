@@ -18,10 +18,11 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE insert_objects
 
-#ifdef OS_WINDOWS
-#include <boost/test/included/unit_test.hpp>	
-#else
 #include <boost/test/unit_test.hpp>
+
+#ifdef OS_WINDOWS
+#include <windows.h>
+#define sleep(ms) Sleep(ms)
 #endif 
 
 

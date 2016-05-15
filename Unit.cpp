@@ -1,12 +1,11 @@
-#include "Field.hpp"
+
 #include "Unit.hpp"
+#include "Field.hpp"
 #include "FieldCell.hpp"
 #include <forward_list>
 #include <boost/multi_array.hpp>
 
 #include <iostream>
-#define _USE_MATH_DEFINES
-#include <cmath>
 
 // TODO: Unnatural breeding. Children may have more energy than parent! It brakes
 // the first law of thermodynamics. :( <- FIX THAT!

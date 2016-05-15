@@ -1,9 +1,13 @@
 #ifndef _UNIT_HPP_
 #define _UNIT_HPP_
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
+
 #include "CellObject.hpp"
 #include "DnaUnit.hpp"
-#include <cmath>
+
 #include <vector>
 
 class Unit : public DnaUnit, public Creature {
@@ -44,7 +48,7 @@ private:
 	void UpdateSpeed();
 	void CalculateDeathTime();
 	//! TODO: intelligence? swarm? :(
-	size_t Think(const double intelligence = NAN, std::shared_ptr<Unit> attacker = nullptr);
+	size_t Think(const double intelligence = std::isnan(0.0), std::shared_ptr<Unit> attacker = nullptr);
 	virtual double GetMovePriority() const;
 	bool Pregnant(std::shared_ptr<DnaCode> dna);
 	size_t Explore(double steps);
