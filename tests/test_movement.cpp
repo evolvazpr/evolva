@@ -32,23 +32,13 @@
 
 void MoveObjects(std::shared_ptr <Unit> u[])
 {
-	Tui tui;
-	tui.PrintField();	
-	sleep(1);
 	BOOST_CHECK(field->MoveObject(u[0], -1, -1, 1) == true);
-	tui.PrintField();
-	sleep(1);
 	BOOST_CHECK(field->MoveObject(u[1], -2, -2, 1) == false);
 	BOOST_CHECK(field->MoveObject(u[1], 1, 1, 1) == true);
-	tui.PrintField();
-	sleep(1);
 	BOOST_CHECK(field->MoveObjectTo(u[0], 0, 0, 1) == false);
 	BOOST_CHECK(field->MoveObjectTo(u[0], 1, 1, 1) == true);
-	tui.PrintField();
-	sleep(1);
 	BOOST_CHECK(field->MoveObjectTo(u[1], 1, 1, 1) == false);
 	BOOST_CHECK(field->MoveObjectTo(u[1], 0, 5, 1) == true);
-	tui.PrintField();
 }
 
 void EvolvaInit(Dialog* w) {

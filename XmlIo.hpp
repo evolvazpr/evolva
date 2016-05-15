@@ -33,7 +33,8 @@ class XmlIo {
 		XmlIo(const std::string path) throw (EvolvaException);
 		~XmlIo();
 		Element operator[](const std::string element) throw (EvolvaException);
-		template <class T = int> void CreateElement(std::initializer_list<const std::string> name_path, T value = 0);
+		template <class T = int> void CreateElement(std::initializer_list<const std::string> name_path,
+							    T value = 0);
 		void SaveFile();
 };
 

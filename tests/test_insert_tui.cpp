@@ -20,6 +20,11 @@
 
 #include <boost/test/unit_test.hpp>
 
+#ifdef OS_WINDOWS
+#include <windows.h>
+#define sleep(ms) Sleep(ms)
+#endif 
+
 void EvolvaInit(Dialog* w) {
 	Tui tui;
 	field = Field::GetInstance(10, 10, w);
@@ -61,18 +66,35 @@ void EvolvaInit(Dialog* w) {
 	u[0]->energy_ = 200.0;
 	u[0]->death_ = 10000;
 	u[0]->dna_["normal_weight"] = 220.0;
+	tui.PrintField();
 	BOOST_CHECK(field->InsertObject(u[0], 6, 6) == true);
+	sleep(1);
 	u[1]->energy_ = 200.0;
 	u[1]->death_ = 10000;
 	u[1]->dna_["normal_weight"] = 200.0;
+	tui.PrintField();
 	BOOST_CHECK(field->InsertObject(u[1], 7, 7) == true);
+	sleep(1);
+	
+	tui.PrintField();
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(50.0), 0, 0) == true);
+	sleep(1);
+	tui.PrintField();
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(80.0), 0, 9) == true);
+	sleep(1);
+	tui.PrintField();
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(20.0), 9, 0) == true);
+	sleep(1);
+	tui.PrintField();
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(24.0), 9, 9) == true);
+	sleep(1);
+	tui.PrintField();
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(500.0), 1, 0) == true);
+	sleep(1);
+	tui.PrintField();
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(100.0), 1, 0) == false);
-
+	sleep(1);
+	tui.PrintField();
 
 	field->BeginCycle();
 	field->Play();

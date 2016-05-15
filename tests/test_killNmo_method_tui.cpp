@@ -20,8 +20,28 @@
 
 #include <boost/test/unit_test.hpp>
 
-void EvolvaInit(Dialog* w) {
+#ifdef OS_WINDOWS
+#include <windows.h>
+#define sleep(ms) Sleep(ms)
+#endif 
+
+/**
+ * This is a unit test for nonmovable object remove.
+ */
+
+void KillNmoTest(std::shared_ptr <Unit> u, std::shared_ptr<Tree> t, int x, int y) {
 	Tui tui;
+	tui.PrintField();
+	BOOST_CHECK(field->MoveObjectTo(u, x, y, 1) == false);
+	field->KillNmo(t);
+	sleep(1);
+	tui.PrintField();
+	BOOST_CHECK(field->MoveObjectTo(u, x, y, 1) == true);	
+	sleep(1);
+	tui.PrintField();
+}
+
+void EvolvaInit(Dialog* w) {
 	field = Field::GetInstance(10, 10, w);
 	std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();
 	DnaCode &dna = *dna_ptr;
@@ -66,26 +86,25 @@ void EvolvaInit(Dialog* w) {
 	u[1]->death_ = 10000;
 	u[1]->dna_["normal_weight"] = 200.0;
 	BOOST_CHECK(field->InsertObject(u[1], 7, 7) == true);
-	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(50.0), 0, 0) == true);
+
+
+	std::shared_ptr<Tree> tree = std::make_shared<Tree>(50.0);
+	BOOST_CHECK(field->InsertNmo(tree, 0, 0) == true);
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(80.0), 0, 9) == true);
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(20.0), 9, 0) == true);
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(24.0), 9, 9) == true);
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(500.0), 1, 0) == true);
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(100.0), 1, 0) == false);
-
-
-	field->BeginCycle();
-	field->Play();
-	Unit *xz = u[0].get();
-	xz->IsRemoved();
+	KillNmoTest(u[0], tree, 0, 0);
 }
 
-BOOST_AUTO_TEST_CASE(insert)
+BOOST_AUTO_TEST_CASE(kill)
 {
 	int argc = 1;
 	char *argv[2];
-	argv[0] = (char *)"insert";
-	QApplication a(argc, argv); //only for QApplication creation
+	argv[0] = (char *)"kill"; //only for creating QApplication
+	QApplication a(argc, argv);
 	Dialog w;
 	EvolvaInit(&w);
+
 }

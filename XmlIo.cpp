@@ -40,7 +40,6 @@ XmlIo::XmlIo(const std::string path) throw (EvolvaException) : doc_(path.c_str()
  * Saves XML document (writes data to XML file) and destructs XmlIo object.
 */
 XmlIo::~XmlIo() {
-	SaveFile();
 }
 
 

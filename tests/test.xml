@@ -1,14 +1,6 @@
 <Evolva>
     <Field>
-        <Width>10</Width>
+        <Width>100</Width>
         <Length>100</Length>
     </Field>
-    <a>
-        <b>
-            <c>
-                <d>0</d>
-            </c>
-        </b>
-    </a>
-    <not_empty>5</not_empty>
 </Evolva>

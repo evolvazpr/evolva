@@ -20,11 +20,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#ifdef OS_WINDOWS
-#include <windows.h>
-#define sleep(ms) Sleep(ms)
-#endif 
-
 
 /**
  * This is a unit test for object removing from map, and 
@@ -32,12 +27,8 @@
  */
 
 void KillTest(std::shared_ptr <Unit> u[], int x, int y) {
-	Tui tui;
-	tui.PrintField();
 	BOOST_CHECK(field->MoveObjectTo(u[1], x, y, 1) == false);
 	field->Kill(u[0]);
-	sleep(1);
-	tui.PrintField();
 	BOOST_CHECK(field->MoveObjectTo(u[1], x, y, 1) == true);	
 }
 
