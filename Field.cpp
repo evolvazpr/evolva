@@ -76,16 +76,9 @@ bool Field::InsertCellObject(std::shared_ptr<CellObject> object, const size_t x,
 	std::shared_ptr<FieldCell> cell = GetCell(x, y);
 	if (cell->IsEmpty()){
 		cell->SetObject(object);
-//		object->cell_->x_ = x; //the same as in MoveObjectTo????
-//		object->cell_->y_ = y;
 		return true;
 	}
-/*	else {
-		std::cout << "!!!!!!!   " << x << "  " << y << "  !!!!!!!!!!!!\n\n";
-		char c;
-		std::cin >> c;
-		return false;
-	}/**/
+	return false;
 }
 
 bool Field::InsertObject(std::shared_ptr<MovableObject> object, const size_t x, const size_t y) {
@@ -115,7 +108,7 @@ bool Field::InsertObject(std::shared_ptr<MovableObject> object, const size_t x, 
             pimpl_->movable_objects_.position_ = p1;
 //            pimpl_->movable_objects_.previous_position_ = p2;
             pimpl_->movable_objects_.end_ = p4;
-		}/**/
+		}*/
 		
 		qt_dialog_->CreateObject(object, x, y);
 		
