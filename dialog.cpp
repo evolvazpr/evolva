@@ -157,6 +157,14 @@ void RoundObject::animate() {
 	}
 }
 
+bool RoundObject::IsMoving()
+{
+	bool ret = false;
+		if (dx_ || dy_)
+			ret = true;
+	return ret;
+}
+
 /**
  * @brief Constructor.
  * @param parent - parent for Qt API (no need to call delete thanks to it).
@@ -295,11 +303,18 @@ void Dialog::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x,
 	int x_old, y_old, dx, dy;
 	if (!object)
 		throw EvolvaException("Dialog::moveObjectTo - object not found!\n");
+	
 	x_old = roundObject->x();
 	y_old = roundObject->y();
+	
+	if (roundObject->IsMoving())
+		animations_.fetchAndAddAcquire(0);
+	else
+		animations_.fetchAndAddAcquire(1);
+
 	dx = calculateX(x) - x_old;
 	dy = calculateY(y) - y_old;
-	animations_.fetchAndAddAcquire(1);
+	
 	roundObject->move(dx, dy);
 }
 
