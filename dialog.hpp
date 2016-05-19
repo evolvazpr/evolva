@@ -65,13 +65,23 @@ private:
 	QTimer timer;
 	QAtomicInt animations_;
 	void RemoveObject(const uint id);
+	void IncrementAnimations(RoundObject *roundObject);
+
 public:
+
+	enum class Ground {
+		WATER,
+		SAND,
+		GRASS,
+		SOIL		
+	};
+
 	explicit Dialog(QWidget *parent = 0);
 	virtual ~Dialog();
 
 	void CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y);
-	void CreateFloorObject(QColor color, const int x, const int y);
-	void RemoveFloorObject(const int x, const int y);
+	void CreateGroundObject(const Dialog::Ground ground_type, const int x, const int y);
+	void RemoveGroundObject(const int x, const int y);
 	void MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void RemoveObject(std::shared_ptr<const CellObject> object);

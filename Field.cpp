@@ -57,8 +57,16 @@ std::shared_ptr<Field> Field::GetInstance(const size_t x, const size_t y, Dialog
 		instance_ = std::shared_ptr<Field>(new Field(x, y));
 		qt_dialog_ = qt_dialog;
 		for(size_t i = 0; i < x; i++) {
-			for(size_t j = 0; j < y; j++)
-				qt_dialog_->CreateFloorObject(Qt::green, i, j);
+			for(size_t j = 0; j < y; j++) {
+				if (i % 4 == 2)
+					qt_dialog_->CreateGroundObject(Dialog::Ground::SOIL, i, j);
+				else if (i % 4 == 1)
+					qt_dialog_->CreateGroundObject(Dialog::Ground::GRASS, i, j);
+				else if (i % 4 == 3)
+					qt_dialog_->CreateGroundObject(Dialog::Ground::SAND, i, j);
+				else
+					qt_dialog_->CreateGroundObject(Dialog::Ground::WATER, i, j);
+			}
 		}
 	}
 	return instance_;

@@ -8,7 +8,7 @@
 /**
  * @brief INCREMENT_PER_TICK static global variable. Parameter to set speed of animation.
  */
-static const qreal INCREMENT_PER_TICK = 5;
+static const qreal INCREMENT_PER_TICK = 3;
 
 /**
  * @brief ANIMATION_CLOCK static global variable. Parameter to setup freqency of animation (FPS or whatever).
@@ -23,7 +23,7 @@ static const uint FIELD_SIZE = 10;
 /**
  * @brief Pixels per object
  */
-static const uint PIXELS_PER_OBJECT = 25;
+static const uint PIXELS_PER_OBJECT = 50;
 
 /**
  * @brief RoundObject constructor.
@@ -45,6 +45,8 @@ RoundObject::RoundObject(const uint id, const int x, const int y, const uint rad
 {
 	setBrush(QBrush(color, Qt::SolidPattern));
 	scene->addItem(this);
+	dx_ = 0;
+	dy_ = 0;
 	setPos(x, y);	
 }
 
@@ -276,6 +278,13 @@ RoundObject* Dialog::SearchObject(const uint id) {
 	return nullptr;
 }
 
+void Dialog::IncrementAnimations(RoundObject *roundObject){
+	if (roundObject->IsMoving())
+		animations_.fetchAndAddAcquire(0);
+	else
+		animations_.fetchAndAddAcquire(1);
+}
+
 /**
  * @brief Move object by relative coordinates (in other words - move with (x, y) steps somewhere).
  *
@@ -288,7 +297,9 @@ void Dialog::MoveObject(std::shared_ptr<const CellObject> object, const int x, c
 	RoundObject *roundObject = SearchObject(object->GetId());
 	if (!roundObject)
 		throw EvolvaException("Dialog::moveObject - object not found!\n");
-	animations_.fetchAndAddAcquire(1);
+
+	IncrementAnimations(roundObject);	
+
 	roundObject->move(calculateX(x), calculateY(y));
 }
 
@@ -303,14 +314,11 @@ void Dialog::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x,
 	int x_old, y_old, dx, dy;
 	if (!object)
 		throw EvolvaException("Dialog::moveObjectTo - object not found!\n");
-	
+
+	IncrementAnimations(roundObject);
+
 	x_old = roundObject->x();
 	y_old = roundObject->y();
-	
-	if (roundObject->IsMoving())
-		animations_.fetchAndAddAcquire(0);
-	else
-		animations_.fetchAndAddAcquire(1);
 
 	dx = calculateX(x) - x_old;
 	dy = calculateY(y) - y_old;
@@ -349,15 +357,37 @@ void Dialog::AnimationFinished() {
 		ClearField();
 }
 
-void Dialog::CreateFloorObject(QColor color, const int x, const int y) 
-{
-	QGraphicsRectItem *rect = new QGraphicsRectItem(0, 0, calculateRadius(), calculateRadius());
-	rect->setBrush(QBrush(color, Qt::SolidPattern));
-	rect->setPos(calculateX(x), calculateY(y));	
+void Dialog::CreateGroundObject(const Dialog::Ground ground_type, const int x, const int y) {
+	QString file;
+	switch (ground_type) {
+	case Dialog::Ground::GRASS :
+		file = "../sprites/grass.png";
+		break;
+	case Dialog::Ground::SAND :
+		file = "../sprites/sand.png";
+		break;
+	case Dialog::Ground::WATER :
+		file = "../sprites/water.png";
+		break;
+	case Dialog::Ground::SOIL :
+		file = "../sprites/soil.png";
+		break;
+	default:
+		file = "";
+		break;	
+	}
+	QPixmap pix_map(file);
+	pix_map = pix_map.scaled(PIXELS_PER_OBJECT, PIXELS_PER_OBJECT, 
+				 Qt::KeepAspectRatio, 
+				 Qt::SmoothTransformation);
+	if (pix_map.isNull())
+		throw EvolvaException("Ground sprite could not have been loaded. Aborting program.\n");
+	QGraphicsPixmapItem *rect = new QGraphicsPixmapItem(pix_map);
+	rect->setOffset(calculateX(x), calculateY(y));
 	scene->addItem(rect);
 }
 
-void Dialog::RemoveFloorObject(const int x, const int y)
+void Dialog::RemoveGroundObject(const int x, const int y)
 {
 	QTransform test;
 	QGraphicsItem *item = scene->itemAt(calculateX(x), calculateY(y), test);
