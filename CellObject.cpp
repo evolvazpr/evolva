@@ -4,9 +4,11 @@
 // CellObject
 
 CellObject::CellObject() : id_(field->GetFfid()) {
+	memset(types_, 0, sizeof(types_));
 }
 
 CellObject::CellObject(const size_t id) : id_(id) {
+	memset(types_, 0, sizeof(types_));
 }
 
 CellObject::~CellObject() {

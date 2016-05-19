@@ -16,6 +16,7 @@ test_GetCurrentObject
 test_CyclicQueue
 test_insert
 test_CellObject_GetCoord
+test_CellObject_GetType
 *tui
 evolva_gole_gui.pro.user
 evolva_gole_gui.pro.user*
