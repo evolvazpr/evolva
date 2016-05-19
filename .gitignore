@@ -5,6 +5,7 @@ html
 *.pyc
 *.exe
 *.db
+*.png
 test
 test_XML
 test_qt_RoundObjects
