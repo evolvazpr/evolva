@@ -49,6 +49,10 @@ ifeq (,$(findstring ../moc_dialog.cpp, $(SOURCES)))
 	SOURCES += ../moc_dialog.cpp
 endif
 
+ifeq (,$(findstring ../moc_RoundObject.cpp, $(SOURCES)))
+	SOURCES += ../moc_RoundObject.cpp
+endif
+
 EXECUTABLE_SOURCES = $(wildcard *.cpp)
 EXECUTABLES 	   = $(patsubst %.cpp, %, $(EXECUTABLE_SOURCES))
 
@@ -93,21 +97,20 @@ mocables: compiler_moc_header_make_all compiler_moc_source_make_all
 
 check: first
 
-#WIN_QT_PATH := C:/Qt/Qt5.6.0/5.6/mingw49_32
-#QT_INC_PATH = /c/Qt/Qt5.6.0/5.6/mingw49_32/include
-#WIN_QT_LIB_PATH := C:/Qt/Qt5.6.0/5.6/mingw49_32/lib
-#QT_PATH = /c/Qt/Qt5.6.0/5.6/mingw49_32/
-
 compiler_no_pch_compiler_make_all:
 compiler_no_pch_compiler_clean:
 compiler_rcc_make_all:
 compiler_rcc_clean:
-compiler_moc_header_make_all: ../moc_dialog.cpp
+compiler_moc_header_make_all: ../moc_dialog.cpp ../moc_RoundObject.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) ../moc_dialog.cpp
+	-$(DEL_FILE) ../moc_dialog.cpp ../moc_RoundObject.cpp
 ../moc_dialog.cpp: ../dialog.hpp
 	moc $(DEFINES) -D__GNUC__ -DWIN32 -I$(WIN_QT_PATH)/mkspecs/win32-g++ -I$(WIN_QT_PATH)/include -I$(WIN_QT_PATH)/include/QtWidgets -I$(WIN_QT_PATH)/include/QtGui -I$(WIN_QT_PATH)/include/QtANGLE -I$(WIN_QT_PATH)/include/QtConcurrent -I$(WIN_QT_PATH)/include/QtCore ../dialog.hpp -o ../moc_dialog.cpp
-#'$(WIN_QT_BIN_PATH)\moc.exe' $(DEFINES) -D__GNUC__ -DWIN32 -I$(WIN_QT_PATH)/mkspecs/win32-g++ -I$(WIN_QT_PATH)/include -I$(WIN_QT_PATH)/include/QtWidgets -I$(WIN_QT_PATH)/include/QtGui -I$(WIN_QT_PATH)/include/QtANGLE -I$(WIN_QT_PATH)/include/QtConcurrent -I$(WIN_QT_PATH)/include/QtCore ../dialog.hpp -o ../moc_dialog.cpp
+
+../moc_RoundObject.cpp: ../RoundObject.hpp
+	moc $(DEFINES) -D__GNUC__ -DWIN32 -I$(WIN_QT_PATH)/mkspecs/win32-g++ -I$(WIN_QT_PATH)/include -I$(WIN_QT_PATH)/include/QtWidgets -I$(WIN_QT_PATH)/include/QtGui -I$(WIN_QT_PATH)/include/QtANGLE -I$(WIN_QT_PATH)/include/QtConcurrent -I$(WIN_QT_PATH)/include/QtCore ../RoundObject.hpp -o ../moc_RoundObject.cpp
+
+
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:

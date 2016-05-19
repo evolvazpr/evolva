@@ -9,10 +9,10 @@
 #include <QStyleOptionGraphicsItem>
 #include <cmath>
 #include <iostream>
-#include <QPainter>
 #include <memory>
 #include <QMutex>
 
+class RoundObject;
 class Field;
 class CellObject;
 
@@ -20,29 +20,6 @@ namespace Ui {
 	class Dialog;
 }
 
-/**
- * @brief The RoundObject class (GUI part).
- */
-class RoundObject : public QObject, public QGraphicsEllipseItem {
-	Q_OBJECT
-private:
-	const int id_;
-	int dx_;
-	int dy_;
-	QTimer *timer_;
-public:
-	RoundObject(const uint id, const int x, const int y, const uint radius, 
-		    QGraphicsScene *scene, QTimer *timer, QColor color);
-	virtual ~RoundObject();
-	void move(const int x, const int y);
-	uint id();
-	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-	bool IsMoving();
-signals:
-	void AnimationFinished();
-public slots:
-	void animate();
-};
 
 /**
  * @brief The Dialog class (GUI part)
