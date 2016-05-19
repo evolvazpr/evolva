@@ -28,20 +28,29 @@ void EvolvaInit(Dialog* w) {
 	DnaGenerator gen(dna_ptr);
 
 	std::shared_ptr<Unit> u[2];
+	std::shared_ptr<Tree> t[2];
 	u[0] = std::make_shared<Unit>(gen.Generate());
 	u[1] = std::make_shared<Unit>(gen.Generate());
 
-	BOOST_CHECK(field->InsertObject(u[0], 6, 6) == true);
-	BOOST_CHECK(field->InsertObject(u[1], 7, 7) == true);
-	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(50.0), 0, 0) == true);
-	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(80.0), 0, 9) == true);
-	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(20.0), 9, 0) == true);
-	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(24.0), 9, 9) == true);
-	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(500.0), 1, 0) == true);
-	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(100.0), 1, 0) == false);
+	t[0] = std::make_shared<Tree>(50.0);
+	t[1] = std::make_shared<Tree>(50.0);
+
+	BOOST_CHECK(field->InsertObject(u[0], 6, 5) == true);
+	BOOST_CHECK(field->InsertObject(u[1], 7, 6) == true);
+	BOOST_CHECK(field->InsertObject(t[0], 0, 1) == true);
+	BOOST_CHECK(field->InsertObject(t[1], 1, 9) == true);
+
+	BOOST_CHECK(u[0]->GetX() == 6);
+	BOOST_CHECK(u[0]->GetY() == 5);
+	BOOST_CHECK(u[1]->GetX() == 7);
+	BOOST_CHECK(u[1]->GetY() == 6);
+	BOOST_CHECK(t[0]->GetX() == 0);
+	BOOST_CHECK(t[0]->GetY() == 1);
+	BOOST_CHECK(t[1]->GetX() == 1);
+	BOOST_CHECK(t[1]->GetY() == 9);
 }
 
-BOOST_AUTO_TEST_CASE(insert)
+BOOST_AUTO_TEST_CASE(GetCoord)
 {
 	int argc = 1;
 	char *argv[2];

@@ -15,6 +15,7 @@ test_killNmo_method
 test_GetCurrentObject
 test_CyclicQueue
 test_insert
+test_CellObject_GetCoord
 *tui
 evolva_gole_gui.pro.user
 evolva_gole_gui.pro.user*
