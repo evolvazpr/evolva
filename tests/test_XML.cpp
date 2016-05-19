@@ -9,7 +9,7 @@ int print_start() {
 	char buf[100];
 	std::ifstream file;
 	std::cout << "\nThis is a test for XmlIo class.\n\nIt opens test.xml file, "	
-	"writes into it nodes, changes value of Field - Width element,\n"
+	"writes into its nodes, changes value of Field - Width element,\n"
 	"and saves file.\ntest.xml file now contains:\n\n";
 	
 	file.open("test.xml");
