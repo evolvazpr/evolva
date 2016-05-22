@@ -28,6 +28,7 @@ class XmlIo {
 				Element& operator[](const std::string element) throw (EvolvaException);
 				template <class T> operator T() const;
 				template <class T> XmlIo::Element& operator =(const T value);
+				template <class T> bool operator ==(const T value);
 		};
 
 		XmlIo(const std::string path) throw (EvolvaException);

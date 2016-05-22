@@ -5,6 +5,8 @@
 #include "CellObject.hpp"
 #include "EvolvaException.hpp"
 #include "RoundObject.hpp"
+#include "XmlIo.hpp"
+
 /**
  * @brief ANIMATION_CLOCK static global variable. Parameter to setup freqency of animation (FPS or whatever).
  */
@@ -212,24 +214,29 @@ void Dialog::AnimationFinished() {
 
 void Dialog::CreateGroundObject(const Dialog::Ground ground_type, const int x, const int y) {
 	QString file;
+	static XmlIo xml("gui.xml");
+	std::string xml_cmd;
+
 	switch (ground_type) {
 	case Dialog::Ground::GRASS :
-		file = "../sprites/grass.png";
+		xml_cmd = "grass";
 		break;
 	case Dialog::Ground::SAND :
-		file = "../sprites/sand.png";
+		xml_cmd = "sand";
 		break;
 	case Dialog::Ground::WATER :
-		file = "../sprites/water.png";
+		xml_cmd = "water";
 		break;
 	case Dialog::Ground::SOIL :
-		file = "../sprites/soil.png";
+		xml_cmd = "soil";
 		break;
 	default:
-		file = "";
+		throw EvolvaException("Wrong ground_type in CreateGroundObject!");
 		break;	
 	}
-	QPixmap pix_map(file);
+	
+	QPixmap pix_map(QString::fromStdString(xml[xml_cmd]));
+
 	pix_map = pix_map.scaled(PIXELS_PER_OBJECT, PIXELS_PER_OBJECT, 
 				 Qt::KeepAspectRatio, 
 				 Qt::SmoothTransformation);
