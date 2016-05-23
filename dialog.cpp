@@ -93,14 +93,16 @@ uint Dialog::calculateRadius() {
 void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
 	int x_pos = calculateX(x);
 	int y_pos = calculateY(y);
-
+	int sprite_cnt = 1;
 	SpriteObject *sprite_object;
 	QString sprite_path;
 	if (object->GetType(CellObject::Type::MOVABLE)) {
 		if (object->GetType(CellObject::Type::CARNIVORE)) 
 			sprite_path = QString::fromStdString(sprites["carnivore"]);
-		else if (object->GetType(CellObject::Type::HERBIVORE))
+		else if (object->GetType(CellObject::Type::HERBIVORE)) {
 			sprite_path = QString::fromStdString(sprites["herbivore"]);
+			sprite_cnt = 6;
+		}
 		else
 			sprite_path = QString::fromStdString(sprites["unit"]);
 	} else {
@@ -109,7 +111,7 @@ void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x,
 		else 
 			sprite_path = QString::fromStdString(sprites["stone"]);
 	}	
-	sprite_object = new SpriteObject(object->GetId(), x_pos, y_pos, scene, &timer, sprite_path);
+	sprite_object = new SpriteObject(object->GetId(), x_pos, y_pos, scene, &timer, sprite_path, sprite_cnt);
 	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(AnimationFinished()), 
 			 this, SLOT(AnimationFinished()));
 }

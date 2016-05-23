@@ -20,17 +20,28 @@ static const qreal INCREMENT_PER_TICK = 5.0;
  */
 
 SpriteObject::SpriteObject(const uint id, const int x, const int y,
-			QGraphicsScene *scene, QTimer *timer, QString sprite_path) : 
+			QGraphicsScene *scene, QTimer *timer, const QString sprite_path,
+			const int sprites_cnt) : 
 			QObject(scene->parent()), QGraphicsPixmapItem(),
-		       	id_(id), timer_(timer) 
+		       	id_(id), timer_(timer), sprites_cnt_(sprites_cnt) 
 {
+	actual_sprite_ = 0;
 	QPixmap pixmap(sprite_path);
-	pixmap = pixmap.scaled(50, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-	setPixmap(pixmap);		
+	pixmap = pixmap.scaled(50*sprites_cnt, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	setPixmap(pixmap);	
 	scene->addItem(this);
 	dx_ = 0;
 	dy_ = 0;
 	setPos(x, y);
+}
+
+
+void SpriteObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+		           QWidget *widget) {
+	QPixmap pmap = pixmap();
+	QRectF target(0, 0, 50, 50);
+	QRectF source(actual_sprite_*50, 0, 50, 50);
+	painter->drawPixmap(target, pmap, source);
 }
 
 /**
@@ -88,16 +99,9 @@ void SpriteObject::animate() {
 	qreal angle = 0;
 	qreal dx = 0, dy = 0;
 
-//	if (dx_ != 0 && dy_ != 0) {
-		angle = qAtan(qFabs((qreal)dx_)/qFabs((qreal)dy_));
-		dx = INCREMENT_PER_TICK * qSin(angle);
-		dy = INCREMENT_PER_TICK * qCos(angle);
-/*	} else {
-		if (dx_)
-			dx = INCREMENT_PER_TICK;
-		else if (dy_)
-			dy = INCREMENT_PER_TICK;
-	}*/
+	angle = qAtan(qFabs((qreal)dx_)/qFabs((qreal)dy_));
+	dx = INCREMENT_PER_TICK * qSin(angle);
+	dy = INCREMENT_PER_TICK * qCos(angle);
 
 	if (dx_ < 0)
 		dx *= -1.0;
@@ -108,7 +112,7 @@ void SpriteObject::animate() {
 	y_coord = CalculateCoord(&dy_, dy, y());
 
 	setPos(x_coord, y_coord);
-
+	actual_sprite_ = (actual_sprite_ + 1) % (sprites_cnt_ - 1);
 	if((!dx_) && (!dy_)) {
 		QObject::disconnect(timer_, SIGNAL(timeout()), this, SLOT(animate()));
 		emit AnimationFinished();
