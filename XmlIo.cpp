@@ -33,7 +33,8 @@ XmlIo::Element& XmlIo::Element::operator[](const std::string element) throw (Evo
 */
 XmlIo::XmlIo(const std::string path) throw (EvolvaException) : doc_(path.c_str()) {
 	bool ret = doc_.LoadFile();
-	if (!ret) throw EvolvaException("XmlIo fails: " + std::string(doc_.ErrorDesc()));
+	if (!ret) 
+		throw EvolvaException("XmlIo fails: " + std::string(doc_.ErrorDesc()));
 }
 
 /**

@@ -3,4 +3,9 @@
 	<water>/home/konrad/Programming/linux/workspace/evolva/sprites/water.png</water>
 	<sand>/home/konrad/Programming/linux/workspace/evolva/sprites/sand.png</sand>
 	<soil>/home/konrad/Programming/linux/workspace/evolva/sprites/soil.png</soil>
+	<tree>/home/konrad/Programming/linux/workspace/evolva/sprites/tree.png</tree>
+	<herbivore>/home/konrad/Programming/linux/workspace/evolva/sprites/herbivore.png</herbivore>
+	<unit>/home/konrad/Programming/linux/workspace/evolva/sprites/unit.png</unit>
+	<carnivore>/home/konrad/Programming/linux/workspace/evolva/sprites/carnivore.png</carnivore>
+	<stone>/home/konrad/Programming/linux/workspace/evolva/sprites/herbivore.png</stone>
 </evolva>

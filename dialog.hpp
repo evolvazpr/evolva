@@ -12,9 +12,12 @@
 #include <memory>
 #include <QMutex>
 
+#include "XmlIo.hpp"
+
 class RoundObject;
 class Field;
 class CellObject;
+class SpriteObject;
 
 namespace Ui {
 	class Dialog;
@@ -29,12 +32,13 @@ class Dialog : public QDialog
 	Q_OBJECT
 
 private:
+	XmlIo sprites;
 	Ui::Dialog *ui;
 	QGraphicsScene *scene;
 	const unsigned int width_;
 	const unsigned int height_;
 
-	RoundObject* SearchObject(const uint id);
+	SpriteObject* SearchObject(const uint id);
 	int calculateX(const int x);
 	int calculateY(const int y);
 	uint calculateRadius();
@@ -42,7 +46,7 @@ private:
 	QTimer timer;
 	QAtomicInt animations_;
 	void RemoveObject(const uint id);
-	void IncrementAnimations(RoundObject *roundObject);
+	void IncrementAnimations(SpriteObject *roundObject);
 
 public:
 

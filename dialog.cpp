@@ -5,7 +5,6 @@
 #include "CellObject.hpp"
 #include "EvolvaException.hpp"
 #include "RoundObject.hpp"
-#include "XmlIo.hpp"
 
 /**
  * @brief ANIMATION_CLOCK static global variable. Parameter to setup freqency of animation (FPS or whatever).
@@ -27,7 +26,7 @@ static const uint PIXELS_PER_OBJECT = 50;
  * @param parent - parent for Qt API (no need to call delete thanks to it).
  */
 Dialog::Dialog(QWidget *parent) :
-	QDialog(parent),
+	QDialog(parent), sprites("gui.xml"),
 	ui(new Ui::Dialog), width_(FIELD_SIZE), height_(FIELD_SIZE) {
 	QRect rect;
 	ui->setupUi(this);
@@ -94,24 +93,24 @@ uint Dialog::calculateRadius() {
 void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
 	int x_pos = calculateX(x);
 	int y_pos = calculateY(y);
-	int radius =  calculateRadius();
-	RoundObject *roundObject;
-	QColor color = Qt::white;
+
+	SpriteObject *sprite_object;
+	QString sprite_path;
 	if (object->GetType(CellObject::Type::MOVABLE)) {
 		if (object->GetType(CellObject::Type::CARNIVORE)) 
-			color = Qt::red;
+			sprite_path = QString::fromStdString(sprites["carnivore"]);
 		else if (object->GetType(CellObject::Type::HERBIVORE))
-			color = Qt::darkGreen;
+			sprite_path = QString::fromStdString(sprites["herbivore"]);
 		else
-			color = Qt::black;
+			sprite_path = QString::fromStdString(sprites["unit"]);
 	} else {
 		if (object->GetType(CellObject::Type::PLANT))
-			color = Qt::green;
+			sprite_path = QString::fromStdString(sprites["tree"]);
 		else 
-			color = Qt::gray;
+			sprite_path = QString::fromStdString(sprites["stone"]);
 	}	
-	roundObject = new RoundObject(object->GetId(), x_pos, y_pos, radius, scene, &timer, color);
-	QObject::connect(dynamic_cast<QObject *>(roundObject), SIGNAL(AnimationFinished()), 
+	sprite_object = new SpriteObject(object->GetId(), x_pos, y_pos, scene, &timer, sprite_path);
+	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(AnimationFinished()), 
 			 this, SLOT(AnimationFinished()));
 }
 
@@ -120,12 +119,12 @@ void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x,
  * @param id - object's id.
  * @return pointer to RoundObject. If there is RoundObject with passed id, nullptr is returned.
  */
-RoundObject* Dialog::SearchObject(const uint id) {
+SpriteObject* Dialog::SearchObject(const uint id) {
 	QList<QGraphicsItem *> obj_list = scene->items();
-	RoundObject *ptr;
+	SpriteObject *ptr;
 	for (auto &it : obj_list) {
-		if (it->type() == QGraphicsEllipseItem::Type) {
-			ptr = static_cast<RoundObject *>(it);
+		if (it->type() == QGraphicsPixmapItem::Type) {
+			ptr = static_cast<SpriteObject *>(it);
 			if(ptr->id() == id)
 				return ptr;
 		}
@@ -133,7 +132,7 @@ RoundObject* Dialog::SearchObject(const uint id) {
 	return nullptr;
 }
 
-void Dialog::IncrementAnimations(RoundObject *roundObject){
+void Dialog::IncrementAnimations(SpriteObject *roundObject){
 	if (roundObject->IsMoving())
 		animations_.fetchAndAddAcquire(0);
 	else
@@ -149,7 +148,7 @@ void Dialog::IncrementAnimations(RoundObject *roundObject){
  * @param y - <b>realative field (not graphical) steps</b> in y direction to make.
  */
 void Dialog::MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
-	RoundObject *roundObject = SearchObject(object->GetId());
+	SpriteObject *roundObject = SearchObject(object->GetId());
 	if (!roundObject)
 		throw EvolvaException("Dialog::moveObject - object not found!\n");
 
@@ -165,7 +164,7 @@ void Dialog::MoveObject(std::shared_ptr<const CellObject> object, const int x, c
  * @param y - <b>real field's y coordinate</b> in which RoundObject will be placed.
  */
 void Dialog::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y) {
-	RoundObject *roundObject = SearchObject(object->GetId());
+	SpriteObject *roundObject = SearchObject(object->GetId());
 	int x_old, y_old, dx, dy;
 	if (!object)
 		throw EvolvaException("Dialog::moveObjectTo - object not found!\n");
@@ -186,7 +185,7 @@ void Dialog::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x,
  * @param object - shared_ptr to object which will be deleted from GUI.
  */
 void Dialog::RemoveObject(std::shared_ptr<const CellObject> object) {
-	RoundObject *roundObject = SearchObject(object->GetId());
+	SpriteObject *roundObject = SearchObject(object->GetId());
 	if (!roundObject) 
 		throw EvolvaException("Dialog::removeObject - object not found!\n");	
 	to_remove_.push_back(roundObject);
@@ -214,7 +213,6 @@ void Dialog::AnimationFinished() {
 
 void Dialog::CreateGroundObject(const Dialog::Ground ground_type, const int x, const int y) {
 	QString file;
-	static XmlIo xml("gui.xml");
 	std::string xml_cmd;
 
 	switch (ground_type) {
@@ -235,13 +233,14 @@ void Dialog::CreateGroundObject(const Dialog::Ground ground_type, const int x, c
 		break;	
 	}
 	
-	QPixmap pix_map(QString::fromStdString(xml[xml_cmd]));
+	QPixmap pix_map(QString::fromStdString(sprites[xml_cmd]));
 
+	if (pix_map.isNull())
+		throw EvolvaException("Ground sprite could not have been loaded. Aborting program.\n");
+	
 	pix_map = pix_map.scaled(PIXELS_PER_OBJECT, PIXELS_PER_OBJECT, 
 				 Qt::KeepAspectRatio, 
 				 Qt::SmoothTransformation);
-	if (pix_map.isNull())
-		throw EvolvaException("Ground sprite could not have been loaded. Aborting program.\n");
 	QGraphicsPixmapItem *rect = new QGraphicsPixmapItem(pix_map);
 	rect->setOffset(calculateX(x), calculateY(y));
 	scene->addItem(rect);

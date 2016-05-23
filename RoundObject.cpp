@@ -125,3 +125,105 @@ bool RoundObject::IsMoving()
 			ret = true;
 	return ret;
 }
+
+
+#include <iostream>
+SpriteObject::SpriteObject(const uint id, const int x, const int y,
+			QGraphicsScene *scene, QTimer *timer, QString sprite_path) : 
+			QObject(scene->parent()), QGraphicsPixmapItem(),
+		       	id_(id), timer_(timer) 
+{
+	QPixmap pixmap(sprite_path);
+	pixmap = pixmap.scaled(50, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	setPixmap(pixmap);		
+	scene->addItem(this);
+	dx_ = 0;
+	dy_ = 0;
+	setPos(x, y);
+}
+
+/**
+ * @brief RoundObject's deconstructor.
+ */
+SpriteObject::~SpriteObject() {
+}
+
+
+/**
+ * @brief Object move method.
+ *
+ * It makes connection of timer's signals and object animate method.
+ *
+ * @param dx - how many steps in pixels to take into x direction.
+ * @param dy - how many steps in pixels to take into y direction.
+ */
+void SpriteObject::move(const int dx, const int dy) {
+	dx_ = dx;
+	dy_ = dy;
+	QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(animate()));
+}
+
+/**
+ * @brief Method to obtain id number.
+ * @return object's id number.
+ */
+uint SpriteObject::id() {
+	return id_;
+}
+
+int SpriteObject::CalculateCoord(int *increment, int actual_coord) {
+	int new_coord;
+	if (*increment > 0) {
+		if (*increment >= INCREMENT_PER_TICK) {
+			*increment -= INCREMENT_PER_TICK;
+			new_coord = actual_coord + INCREMENT_PER_TICK;
+		} else {
+			new_coord = actual_coord + *increment;
+			*increment = 0;
+		}
+	} else if (*increment < 0) {
+		if (std::abs(*increment) >= INCREMENT_PER_TICK) {
+			*increment += INCREMENT_PER_TICK;
+			new_coord = actual_coord - INCREMENT_PER_TICK;
+		} else {
+			new_coord = actual_coord + *increment;
+			*increment = 0;
+		}
+	} else {
+		new_coord = actual_coord;
+	}
+	return new_coord;
+}
+
+/**
+ * @brief Centerpiece of animation.
+ *
+ * This method is called when timer emits signal timeout().
+ * It updates steps (dx, dy) that object must do, and updates
+ * graphical coordinates of object. If there is no steps to perform,
+ * method disconnects timer from this method.
+ */
+void SpriteObject::animate() {
+	int x_coord;
+	int y_coord;
+
+	x_coord = CalculateCoord(&dx_, x());
+	y_coord = CalculateCoord(&dy_, y());
+
+	setPos(x_coord, y_coord);
+
+	if((!dx_) && (!dy_)) {
+		QObject::disconnect(timer_, SIGNAL(timeout()), this, SLOT(animate()));
+		emit AnimationFinished();
+	}
+}
+
+bool SpriteObject::IsMoving()
+{
+	bool ret = false;
+		if (dx_ || dy_)
+			ret = true;
+	return ret;
+}
+
+

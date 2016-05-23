@@ -37,4 +37,26 @@ public slots:
 	void animate();
 };
 
+class SpriteObject : public QObject, public QGraphicsPixmapItem {
+	Q_OBJECT
+private:
+	const int id_;
+	int dx_;
+	int dy_;
+	QTimer *timer_;
+
+	int CalculateCoord(int *increment, int actual_coord);
+public:
+	SpriteObject(const uint id, const int x, const int y, QGraphicsScene *scene, 
+		     QTimer *timer, QString path);
+	virtual ~SpriteObject();
+	void move(const int x, const int y);
+	uint id();
+	bool IsMoving();
+signals:
+	void AnimationFinished();
+public slots:
+	void animate();
+};
+
 #endif //_ROUNDOBJECT_HPP_
