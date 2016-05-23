@@ -3,7 +3,7 @@
 /**
  * @brief INCREMENT_PER_TICK static global variable. Parameter to set speed of animation.
  */
-static const qreal INCREMENT_PER_TICK = 3;
+static const qreal INCREMENT_PER_TICK = 5.0;
 
 /**
  * @brief RoundObject constructor.
@@ -195,6 +195,8 @@ int SpriteObject::CalculateCoord(int *increment, int actual_coord) {
 	return new_coord;
 }
 
+#include <QtMath>
+
 /**
  * @brief Centerpiece of animation.
  *
@@ -204,11 +206,47 @@ int SpriteObject::CalculateCoord(int *increment, int actual_coord) {
  * method disconnects timer from this method.
  */
 void SpriteObject::animate() {
-	int x_coord;
-	int y_coord;
+	int x_coord = 0;
+	int y_coord = 0;
+	qreal angle = 0;
+	int dx = 0, dy = 0;
 
-	x_coord = CalculateCoord(&dx_, x());
-	y_coord = CalculateCoord(&dy_, y());
+	if (dx_ != 0 && dy_ != 0) {
+		angle = qAtan(qFabs((qreal)dx_)/qFabs((qreal)dy_));
+		dx = qFloor(INCREMENT_PER_TICK * qSin(angle));
+		dy = qFloor(INCREMENT_PER_TICK * qCos(angle));
+		
+		if (qAbs(dx_) <= INCREMENT_PER_TICK) {
+			dx = qAbs(dx_);
+		}
+		if (qAbs(dy_) <= INCREMENT_PER_TICK) {
+			dy = qAbs(dy_);
+		}
+
+		if (dx_ < 0) {
+			dx_ += dx;
+			x_coord = x() - dx;
+		} else if (dx_ > 0) {
+			dx_ -= dx;
+			x_coord = x() + dx;
+		} else {
+			x_coord = x();
+		}
+	
+		if (dy_ < 0) {
+			dy_ += dy;
+			y_coord = y() - dy;
+		} else if (dy_ > 0) {
+			dy_ -= dy;
+			y_coord = y() + dy;
+		} else {
+			y_coord = y();
+		}
+
+	} else {
+		x_coord = CalculateCoord(&dx_, x());
+		y_coord = CalculateCoord(&dy_, y());
+	}
 
 	setPos(x_coord, y_coord);
 
