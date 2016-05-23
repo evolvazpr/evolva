@@ -10,42 +10,19 @@
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsScene>
 #include <QPainter>
-
+#include <QtMath>
 /**
- * @brief The RoundObject class (GUI part).
+ * @brief The SpriteObject movable class (GUI part).
  */
-class RoundObject : public QObject, public QGraphicsEllipseItem {
-	Q_OBJECT
-private:
-	const int id_;
-	int dx_;
-	int dy_;
-	QTimer *timer_;
-
-	int CalculateCoord(int *increment, int actual_coord);
-public:
-	RoundObject(const uint id, const int x, const int y, const uint radius, 
-		    QGraphicsScene *scene, QTimer *timer, QColor color);
-	virtual ~RoundObject();
-	void move(const int x, const int y);
-	uint id();
-	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-	bool IsMoving();
-signals:
-	void AnimationFinished();
-public slots:
-	void animate();
-};
-
 class SpriteObject : public QObject, public QGraphicsPixmapItem {
 	Q_OBJECT
 private:
 	const int id_;
-	int dx_;
-	int dy_;
+	qreal dx_;
+	qreal dy_;
 	QTimer *timer_;
 
-	int CalculateCoord(int *increment, int actual_coord);
+	template <class T> T CalculateCoord(T *lasts, T increment, T actual_coord);
 public:
 	SpriteObject(const uint id, const int x, const int y, QGraphicsScene *scene, 
 		     QTimer *timer, QString path);

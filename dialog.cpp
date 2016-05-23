@@ -4,7 +4,7 @@
 #include "Tui.hpp"
 #include "CellObject.hpp"
 #include "EvolvaException.hpp"
-#include "RoundObject.hpp"
+#include "SpriteObject.hpp"
 
 /**
  * @brief ANIMATION_CLOCK static global variable. Parameter to setup freqency of animation (FPS or whatever).

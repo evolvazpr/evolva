@@ -49,7 +49,6 @@ private:
 	void IncrementAnimations(SpriteObject *roundObject);
 
 public:
-
 	enum class Ground {
 		WATER,
 		SAND,

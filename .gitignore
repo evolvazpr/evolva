@@ -20,8 +20,9 @@ test_CellObject_GetCoord
 test_CellObject_GetType
 test_XML_get_gui
 test_XML_wrong_file
+test_qt_remove_fieldpixmap
 *tui
 evolva_gole_gui.pro.user
 evolva_gole_gui.pro.user*
-moc_dialog.cpp
+moc*
 ui_dialog.h
