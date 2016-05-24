@@ -27,12 +27,14 @@ SpriteObject::SpriteObject(const uint id, const int x, const int y,
 {
 	actual_sprite_ = 0;
 	QPixmap pixmap(sprite_path);
-	pixmap = pixmap.scaled(50*sprites_cnt, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	pixmap = pixmap.scaled(50* sprites_cnt_, 50 * sprites_cnt_, Qt::IgnoreAspectRatio, 
+			       Qt::SmoothTransformation);
 	setPixmap(pixmap);	
 	scene->addItem(this);
 	dx_ = 0;
 	dy_ = 0;
-	direction_ = 2;
+	direction_ = 0;
+	actual_sprite_ = 0;
 	setPos(x, y);
 }
 
@@ -41,14 +43,8 @@ void SpriteObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 		           QWidget *widget) {
 	QPixmap pmap = pixmap();
 	QRectF target(0, 0, 50, 50);
-	QRectF source(actual_sprite_*50, 0, 50, 50);
-	QTransform transform = painter->transform();
+	QRectF source(actual_sprite_ * 50, 50 * direction_, 50, 50);
 	
-	if (direction_ == 0) {		//TODO XXX TODO XXX SHOULD I CARE HERE ABOUT direction_ == 3 or direction_ == 5489534??!!
-		transform.scale(-1, 1);
-		target = QRectF(-50, 0, 50, 50);
-	}
-	painter->setTransform(transform);
 	painter->drawPixmap(target, pmap, source);
 	(void)option;			//silencing "not used parameter" warning.
 	(void)widget;			//silencing "not used parameter" warning.
@@ -121,13 +117,24 @@ void SpriteObject::animate() {
 	x_coord = CalculateCoord(&dx_, dx, x()); 
 	y_coord = CalculateCoord(&dy_, dy, y());
 
-	actual_sprite_ = (actual_sprite_ + 1) % (sprites_cnt_ - 1);
-	if (dx_ < 0)
-		direction_ = 0;
-	else if (dx_ > 0)
-		direction_ = 2;
+	/* direction designation */
 
-	if ((!dx_) && (!dy_))
+	if (qFabs(dx_) > qFabs(dy_)) {
+		if (dx_ < 0)
+			direction_ = 1;
+		else if (dx_ > 0)
+			direction_ = 2;	
+	} else {
+		if (dy_ < 0)
+			direction_ = 3;
+		else if (dy_ > 0) 
+			direction_ = 0;
+	}
+	
+	
+	actual_sprite_ = (actual_sprite_ + 1) % (sprites_cnt_ - 1);
+	
+	if ((!dx_ && !dy_))
 		actual_sprite_ = 0;
 
 	setPos(x_coord, y_coord);

@@ -46,10 +46,10 @@
 
 	<herbivore>
 		<path>
-			/home/konrad/Programming/linux/workspace/evolva/sprites/herbivore.png
+			/home/konrad/Programming/linux/workspace/evolva/sprites/deer_all_directions.png
 		</path>
 		<sprite_cnt>
-			6
+			4
 	</sprite_cnt>
 	</herbivore>
 
@@ -64,10 +64,10 @@
 
 	<carnivore>
 		<path>
-			/home/konrad/Programming/linux/workspace/evolva/sprites/carnivore.png
+			/home/konrad/Programming/linux/workspace/evolva/sprites/tiger_all_directions.png
 		</path>
 		<sprite_cnt>
-			1
+			4
 		</sprite_cnt>
 	</carnivore>
 	
