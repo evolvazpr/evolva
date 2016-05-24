@@ -6,6 +6,7 @@ html
 *.exe
 *.db
 *.png
+*.jpeg
 test
 test_XML
 test_qt_RoundObjects

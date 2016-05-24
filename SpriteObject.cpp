@@ -32,6 +32,7 @@ SpriteObject::SpriteObject(const uint id, const int x, const int y,
 	scene->addItem(this);
 	dx_ = 0;
 	dy_ = 0;
+	direction_ = 2;
 	setPos(x, y);
 }
 
@@ -41,7 +42,16 @@ void SpriteObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 	QPixmap pmap = pixmap();
 	QRectF target(0, 0, 50, 50);
 	QRectF source(actual_sprite_*50, 0, 50, 50);
+	QTransform transform = painter->transform();
+	
+	if (direction_ == 0) {		//TODO XXX TODO XXX SHOULD I CARE HERE ABOUT direction_ == 3 or direction_ == 5489534??!!
+		transform.scale(-1, 1);
+		target = QRectF(-50, 0, 50, 50);
+	}
+	painter->setTransform(transform);
 	painter->drawPixmap(target, pmap, source);
+	(void)option;			//silencing "not used parameter" warning.
+	(void)widget;			//silencing "not used parameter" warning.
 }
 
 /**
@@ -111,8 +121,16 @@ void SpriteObject::animate() {
 	x_coord = CalculateCoord(&dx_, dx, x()); 
 	y_coord = CalculateCoord(&dy_, dy, y());
 
-	setPos(x_coord, y_coord);
 	actual_sprite_ = (actual_sprite_ + 1) % (sprites_cnt_ - 1);
+	if (dx_ < 0)
+		direction_ = 0;
+	else if (dx_ > 0)
+		direction_ = 2;
+
+	if ((!dx_) && (!dy_))
+		actual_sprite_ = 0;
+
+	setPos(x_coord, y_coord);
 	if((!dx_) && (!dy_)) {
 		QObject::disconnect(timer_, SIGNAL(timeout()), this, SLOT(animate()));
 		emit AnimationFinished();

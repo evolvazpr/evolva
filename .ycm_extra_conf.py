@@ -43,6 +43,7 @@ flags = [
 '-std=c++11',
 '-x',
 'c++',
+'-I', './tinyxml',
 '-isystem', '/usr/include/',
 '-isystem', '/usr/include/boost/',
 '-isystem', '/usr/include/x86_64-linux-gnu/qt5',

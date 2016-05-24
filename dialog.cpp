@@ -95,22 +95,26 @@ void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x,
 	int y_pos = calculateY(y);
 	int sprite_cnt = 1;
 	SpriteObject *sprite_object;
+	std::string obj_type;
 	QString sprite_path;
+
 	if (object->GetType(CellObject::Type::MOVABLE)) {
 		if (object->GetType(CellObject::Type::CARNIVORE)) 
-			sprite_path = QString::fromStdString(sprites["carnivore"]);
-		else if (object->GetType(CellObject::Type::HERBIVORE)) {
-			sprite_path = QString::fromStdString(sprites["herbivore"]);
-			sprite_cnt = 6;
-		}
+			obj_type = "carnivore";
+
+		else if (object->GetType(CellObject::Type::HERBIVORE)) 
+			obj_type = "herbivore";
+
 		else
-			sprite_path = QString::fromStdString(sprites["unit"]);
+			obj_type = "unit";
 	} else {
 		if (object->GetType(CellObject::Type::PLANT))
-			sprite_path = QString::fromStdString(sprites["tree"]);
+			obj_type = "tree";
 		else 
-			sprite_path = QString::fromStdString(sprites["stone"]);
+			obj_type = "stone";
 	}	
+	sprite_path = QString::fromStdString(sprites[obj_type]["path"]);
+	sprite_cnt = sprites[obj_type]["sprite_cnt"];
 	sprite_object = new SpriteObject(object->GetId(), x_pos, y_pos, scene, &timer, sprite_path, sprite_cnt);
 	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(AnimationFinished()), 
 			 this, SLOT(AnimationFinished()));
@@ -235,7 +239,7 @@ void Dialog::CreateGroundObject(const Dialog::Ground ground_type, const int x, c
 		break;	
 	}
 	
-	QPixmap pix_map(QString::fromStdString(sprites[xml_cmd]));
+	QPixmap pix_map(QString::fromStdString(sprites[xml_cmd]["path"]));
 
 	if (pix_map.isNull())
 		throw EvolvaException("Ground sprite could not have been loaded. Aborting program.\n");

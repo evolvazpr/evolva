@@ -23,6 +23,7 @@ private:
 	QTimer *timer_;
 	const int sprites_cnt_;
 	int actual_sprite_;
+	int direction_;
 
 	template <class T> T CalculateCoord(T *lasts, T increment, T actual_coord);
 public:
