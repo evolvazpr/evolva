@@ -238,8 +238,10 @@ void Dialog::CreateGroundObject(const Dialog::Ground ground_type, const int x, c
 		throw EvolvaException("Wrong ground_type in CreateGroundObject!");
 		break;	
 	}
-	
-	QPixmap pix_map(QString::fromStdString(sprites[xml_cmd]["path"]));
+	std::string test = sprites[xml_cmd]["path"];
+	file = QString::fromStdString(test);
+	std::cout << file.toStdString() << std::endl;
+	QPixmap pix_map(file);
 
 	if (pix_map.isNull())
 		throw EvolvaException("Ground sprite could not have been loaded. Aborting program.\n");

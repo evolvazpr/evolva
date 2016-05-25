@@ -21,12 +21,12 @@
 BOOST_AUTO_TEST_CASE(CyclicQueueUnitTest)
 {
 	XmlIo xml("gui.xml\0");
-	std::string out1 = xml["grass"];
-	BOOST_CHECK(out1 == "/home/konrad/Programming/linux/workspace/evolva/sprites/grass.png");
-	std::string out2 = xml["sand"];
-	BOOST_CHECK(out2 == "/home/konrad/Programming/linux/workspace/evolva/sprites/sand.png");	
-	std::string out3 = xml["water"];
-	BOOST_CHECK(out3 == "/home/konrad/Programming/linux/workspace/evolva/sprites/water.png");
-	std::string out4 = xml["soil"];
-	BOOST_CHECK(out4 == "/home/konrad/Programming/linux/workspace/evolva/sprites/soil.png");
+	std::string out1 = xml["grass"]["path"];
+	BOOST_CHECK(out1 == "/home/konrad/Programming/linux/workspace/evolva/scripts/sprites/grass.png");
+	std::string out2 = xml["sand"]["path"];
+	BOOST_CHECK(out2 == "/home/konrad/Programming/linux/workspace/evolva/scripts/sprites/sand.png");	
+	std::string out3 = xml["water"]["path"];
+	BOOST_CHECK(out3 == "/home/konrad/Programming/linux/workspace/evolva/scripts/sprites/water.png");
+	std::string out4 = xml["soil"]["path"];
+	BOOST_CHECK(out4 == "/home/konrad/Programming/linux/workspace/evolva/scripts/sprites/soil.png");
 } 
