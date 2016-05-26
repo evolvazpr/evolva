@@ -27,3 +27,5 @@ evolva_gole_gui.pro.user
 evolva_gole_gui.pro.user*
 moc*
 ui_dialog.h
+gui.xml
+script/sprites
