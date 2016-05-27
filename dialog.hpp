@@ -76,6 +76,7 @@ private slots:
 
 public slots:
 	void AnimationFinished();
+	void SpriteObjectClicked(int x, int y);
 };
 
 #endif // DIALOG_HPP

@@ -117,9 +117,12 @@ void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x,
 	}	
 	sprite_path = QString::fromStdString(sprites[obj_type]["path"]);
 	sprite_cnt = sprites[obj_type]["sprite_cnt"];
-	sprite_object = new SpriteObject(object->GetId(), x_pos, y_pos, scene, &timer, sprite_path, sprite_cnt);
+	sprite_object = new SpriteObject(object->GetId(), x_pos, y_pos, scene, &timer, sprite_path, 
+					sprite_cnt, PIXELS_PER_OBJECT);
 	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(AnimationFinished()), 
-			 this, SLOT(AnimationFinished()));
+			this, SLOT(AnimationFinished()));
+	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(wasClicked(int, int)), this, 
+			SLOT(SpriteObjectClicked(int, int)));
 }
 
 /**
@@ -243,7 +246,7 @@ void Dialog::CreateGroundObject(const Dialog::Ground ground_type, const int x, c
 	
 	QPixmap pix_map(QString::fromStdString(sprites[xml_cmd]["path"]));
 	if (pix_map.isNull())
-		throw EvolvaException("Sprite \"" + xml_cmd + "\" could not have been loaded. Aborting program.\n");
+		throw EvolvaException("Sprite \"" + xml_cmd + "\" could not have been loaded. Aborting program.\nCheck gui.xml file.");
 	
 	pix_map = pix_map.scaled(PIXELS_PER_OBJECT, PIXELS_PER_OBJECT, 
 				 Qt::KeepAspectRatio, 
@@ -275,4 +278,43 @@ Dialog& operator <<(Dialog& dialog, const std::string s) {
 Dialog& operator <<(Dialog& dialog, const char* s) {	
 	dialog.ui->log_textWindow->insertPlainText(s);
 	return dialog;
+}
+#include "CellObject.hpp"
+#include "Unit.hpp"
+#include <boost/format.hpp>
+
+//is this the best way how to recognize object? static_pointer_cast, written type into object? really?
+//hurva match, komon hurva. CZYJEWO BLYAT SUKA KAGDA JA ETO WIZU TAGDA U MJENIA RWOTA I PANOS
+//MAKE IT MORE CHEEKI BREEKI HARD BASS!
+void Dialog::SpriteObjectClicked(int x, int y) {
+	std::shared_ptr<Field> field = Field::GetInstance();
+	std::shared_ptr<FieldCell> cell = field->GetCell(x, y);
+	std::shared_ptr<CellObject> object;
+	std::shared_ptr<Unit> unit;
+	std::string message;
+	if(cell->IsEmpty()) {
+		message = "It's a ground!";
+	} else {
+		object = cell->GetObject();	
+		if (object->GetType(CellObject::Type::MOVABLE)) {
+			unit = std::static_pointer_cast<Unit>(object);
+			if (unit == nullptr)
+				throw EvolvaException("Dialog::SpriteObjectClicked");
+			
+			boost::format form("ID: %1%\nEnergy: %2%\nFat: %3%\nx: %4%\ny: %5%");
+			form % unit->GetId();
+			form % unit->GetEnergy();	
+			form % unit->GetFatigue();
+			form % unit->GetX();
+			form % unit->GetY();
+
+			message = form.str();
+		} else {
+			if(object->GetType(CellObject::Type::PLANT))
+				message = "It's a plant!";
+			else
+				message = "It's not a plant";	
+		}
+	}
+	ui->stats_textWindow->setPlainText(QString::fromStdString(message));
 }

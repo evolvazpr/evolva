@@ -21,13 +21,14 @@ static const qreal INCREMENT_PER_TICK = 5.0;
 
 SpriteObject::SpriteObject(const uint id, const int x, const int y,
 			QGraphicsScene *scene, QTimer *timer, const QString sprite_path,
-			const int sprites_cnt) : 
+			const int sprites_cnt, const uint pixsize) : 
 			QObject(scene->parent()), QGraphicsPixmapItem(),
-		       	id_(id), timer_(timer), sprites_cnt_(sprites_cnt) 
+		       	id_(id), timer_(timer), sprites_cnt_(sprites_cnt),
+			pixsize_(pixsize)	
 {
 	actual_sprite_ = 0;
 	QPixmap pixmap(sprite_path);
-	pixmap = pixmap.scaled(50* sprites_cnt_, 50 * sprites_cnt_, Qt::IgnoreAspectRatio, 
+	pixmap = pixmap.scaled(pixsize_ * sprites_cnt_, pixsize_ * sprites_cnt_, Qt::IgnoreAspectRatio, 
 			       Qt::SmoothTransformation);
 	setPixmap(pixmap);	
 	scene->addItem(this);
@@ -42,8 +43,8 @@ SpriteObject::SpriteObject(const uint id, const int x, const int y,
 void SpriteObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 		           QWidget *widget) {
 	QPixmap pmap = pixmap();
-	QRectF target(0, 0, 50, 50);
-	QRectF source(actual_sprite_ * 50, 50 * direction_, 50, 50);
+	QRectF target(0, 0, pixsize_, pixsize_);
+	QRectF source(actual_sprite_ * pixsize_, pixsize_ * direction_, pixsize_, pixsize_);
 	
 	painter->drawPixmap(target, pmap, source);
 	(void)option;			//silencing "not used parameter" warning.
@@ -152,4 +153,13 @@ bool SpriteObject::IsMoving()
 	return ret;
 }
 
+void SpriteObject::mousePressEvent(QGraphicsSceneMouseEvent *event) {
+	int x_pos = x()/pixsize_;
+	int y_pos = y()/pixsize_;
+	emit wasClicked(x_pos, y_pos);
+	(void)event;
+}
 
+QRectF SpriteObject::boundingRect() const {
+	return QRectF(0, 0, pixsize_, pixsize_);
+}

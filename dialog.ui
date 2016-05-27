@@ -78,7 +78,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QTextBrowser" name="stats_textWindow">
+      <widget class="QTextEdit" name="stats_textWindow">
        <property name="textInteractionFlags">
         <set>Qt::NoTextInteraction</set>
        </property>
