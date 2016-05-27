@@ -154,8 +154,8 @@ bool SpriteObject::IsMoving()
 }
 
 void SpriteObject::mousePressEvent(QGraphicsSceneMouseEvent *event) {
-	int x_pos = x()/pixsize_;
-	int y_pos = y()/pixsize_;
+	int x_pos = qFloor(x()/(qreal)pixsize_ + 0.5);
+	int y_pos = qFloor(y()/(qreal)pixsize_ + 0.5);
 	emit wasClicked(x_pos, y_pos);
 	(void)event;
 }
