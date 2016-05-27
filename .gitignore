@@ -22,6 +22,8 @@ test_CellObject_GetType
 test_XML_get_gui
 test_XML_wrong_file
 test_qt_remove_fieldpixmap
+test_qt_streamOperator_logWindow
+test_qt_logWindow
 *tui
 evolva_gole_gui.pro.user
 evolva_gole_gui.pro.user*

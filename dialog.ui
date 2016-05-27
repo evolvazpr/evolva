@@ -78,7 +78,11 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QTextBrowser" name="stats_textWindow"/>
+      <widget class="QTextBrowser" name="stats_textWindow">
+       <property name="textInteractionFlags">
+        <set>Qt::NoTextInteraction</set>
+       </property>
+      </widget>
      </item>
      <item>
       <spacer name="horizontalSpacer_3">
@@ -120,7 +124,11 @@
       </spacer>
      </item>
      <item>
-      <widget class="QTextBrowser" name="log_textWindow"/>
+      <widget class="QTextEdit" name="log_textWindow">
+       <property name="textInteractionFlags">
+        <set>Qt::NoTextInteraction</set>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -142,38 +150,5 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
- <connections>
-  <connection>
-   <sender>log_textWindow</sender>
-   <signal>textChanged()</signal>
-   <receiver>pushButton</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>851</x>
-     <y>488</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>770</x>
-     <y>749</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>stats_textWindow</sender>
-   <signal>textChanged()</signal>
-   <receiver>pushButton</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>142</x>
-     <y>508</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>199</x>
-     <y>736</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

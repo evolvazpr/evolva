@@ -65,7 +65,12 @@ public:
 	void MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void RemoveObject(std::shared_ptr<const CellObject> object);
+	void AppendTextToLog(std::string text);
 	void ClearField();
+
+	friend Dialog& operator <<(Dialog& dialog, std::string s);
+	friend Dialog& operator <<(Dialog& dialog, const char* s);
+
 private slots:
 	void on_pushButton_clicked();
 

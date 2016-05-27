@@ -7,7 +7,7 @@
 #include "SpriteObject.hpp"
 
 /**
- * @brief ANIMATION_CLOCK static global variable. Parameter to setup freqency of animation (FPS or whatever).
+ * @brief ANIMATION_CLOCK static global variable. Parameter to setup freqency of animation (FPS).
  */
 static const qreal ANIMATION_CLOCK = 1000/33;
 
@@ -27,9 +27,10 @@ static const uint PIXELS_PER_OBJECT = 50;
  */
 Dialog::Dialog(QWidget *parent) :
 	QDialog(parent), sprites("gui.xml"),
-	ui(new Ui::Dialog), width_(FIELD_SIZE), height_(FIELD_SIZE) {
+	ui(new Ui::Dialog), width_(FIELD_SIZE), height_(FIELD_SIZE) { 
 	QRect rect;
 	ui->setupUi(this);
+		
 	scene = new QGraphicsScene();
 	ui->graphicsView->setScene(scene);
 	scene->setSceneRect(0, 0, FIELD_SIZE * PIXELS_PER_OBJECT, FIELD_SIZE * PIXELS_PER_OBJECT);
@@ -40,6 +41,7 @@ Dialog::Dialog(QWidget *parent) :
 	ui->graphicsView->show();
 	animations_ = 0;
 	timer.start(ANIMATION_CLOCK);
+
 }
 
 /**
@@ -238,7 +240,7 @@ void Dialog::CreateGroundObject(const Dialog::Ground ground_type, const int x, c
 		throw EvolvaException("Wrong ground_type in CreateGroundObject!");
 		break;	
 	}
-
+	
 	QPixmap pix_map(QString::fromStdString(sprites[xml_cmd]["path"]));
 	if (pix_map.isNull())
 		throw EvolvaException("Sprite \"" + xml_cmd + "\" could not have been loaded. Aborting program.\n");
@@ -259,4 +261,18 @@ void Dialog::RemoveGroundObject(const int x, const int y)
 		return;
 	scene->removeItem(item);
 	delete(item);	
+}
+
+void Dialog::AppendTextToLog(const std::string text) {
+	ui->log_textWindow->append(QString::fromStdString(text));
+}
+
+Dialog& operator <<(Dialog& dialog, const std::string s) {	
+	dialog.ui->log_textWindow->insertPlainText(QString::fromStdString(s));
+	return dialog;
+}
+
+Dialog& operator <<(Dialog& dialog, const char* s) {	
+	dialog.ui->log_textWindow->insertPlainText(s);
+	return dialog;
 }
