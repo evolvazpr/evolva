@@ -42,7 +42,7 @@ private:
 	QList<QGraphicsItem *> to_remove_;
 	QTimer timer;
 	QAtomicInt animations_;
-
+	QMutex remove_mutex_;
 
 	SpriteObject* SearchObject(const uint id);
 	int CalculateX(const int x);

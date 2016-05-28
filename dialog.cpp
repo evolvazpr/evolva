@@ -190,9 +190,11 @@ void Dialog::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x,
  */
 void Dialog::RemoveObject(std::shared_ptr<const CellObject> object) {
 	SpriteObject *roundObject = SearchObject(object->GetId());
+	QMutexLocker lock(&remove_mutex_);
 	if (!roundObject) 
 		throw EvolvaException("Dialog::removeObject - object not found!\n");	
 	to_remove_.push_back(roundObject);
+	lock.unlock();
 	if (!animations_.fetchAndAddAcquire(0))
 		ClearField();
 }
@@ -202,14 +204,12 @@ void Dialog::RemoveObject(std::shared_ptr<const CellObject> object) {
  * was on-going.
  */
 void Dialog::ClearField() {
-	static QMutex mutex; //TODO RAII!!
-	mutex.lock();
+	QMutexLocker lock(&remove_mutex_);
 	for(auto &it : to_remove_) {
 		scene->removeItem(it);
 		delete(it);
 	}
 	to_remove_.clear();
-	mutex.unlock();
 }
 
 /**
