@@ -5,6 +5,7 @@
 #include "CellObject.hpp"
 #include "EvolvaException.hpp"
 #include "SpriteObject.hpp"
+#include "Unit.hpp"
 
 /**
  * @brief ANIMATION_CLOCK static global variable. Parameter to setup freqency of animation (FPS).
@@ -52,7 +53,13 @@ Dialog::~Dialog() {
 	delete ui;
 }
 
-void Dialog::on_pushButton_clicked() {          //what happens when we click the "Kolejna tura" button
+
+/**
+ * @brief pushButton action method.
+ * Method called when "Kolejna tura" button was clicked.
+ * It calls Field::Next() method and other method for debug.
+ */
+void Dialog::on_pushButton_clicked() {  
 	static Tui tui;
 	std::shared_ptr<MovableObject> next;
 	next = field->Next();
@@ -66,7 +73,7 @@ void Dialog::on_pushButton_clicked() {          //what happens when we click the
  * @param x - field's x coordinate.
  * @return  - graphical x coordinate.
  */
-int Dialog::calculateX(const int x) {
+int Dialog::CalculateX(const int x) {
 	return ((qreal)x) / ((qreal)width_ )* scene->width();
 }
 
@@ -75,16 +82,8 @@ int Dialog::calculateX(const int x) {
  * @param y - field's y coordinate.
  * @return  - graphical y coordinate.
  */
-int Dialog::calculateY(const int y) {
+int Dialog::CalculateY(const int y) {
 	return ((qreal)y) / ((qreal)height_) * scene->height();
-}
-
-/**
- * @brief Graphical radius coordinate calculation.
- * @return
- */
-uint Dialog::calculateRadius() {
-	return  scene->height()/(qreal)height_;
 }
 
 /**
@@ -94,8 +93,8 @@ uint Dialog::calculateRadius() {
  * @param y - field's y coordinate of object.
  */
 void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
-	int x_pos = calculateX(x);
-	int y_pos = calculateY(y);
+	int x_pos = CalculateX(x);
+	int y_pos = CalculateY(y);
 	int sprite_cnt = 1;
 	SpriteObject *sprite_object;
 	std::string obj_type;
@@ -127,9 +126,9 @@ void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x,
 }
 
 /**
- * @brief RoundObject object search method.
+ * @brief SpriteObject object search method.
  * @param id - object's id.
- * @return pointer to RoundObject. If there is RoundObject with passed id, nullptr is returned.
+ * @return pointer to SpriteObject. If there is no SpriteObject with passed id, nullptr is returned.
  */
 SpriteObject* Dialog::SearchObject(const uint id) {
 	QList<QGraphicsItem *> obj_list = scene->items();
@@ -142,13 +141,6 @@ SpriteObject* Dialog::SearchObject(const uint id) {
 		}
 	}
 	return nullptr;
-}
-
-void Dialog::IncrementAnimations(SpriteObject *roundObject){
-	if (roundObject->IsMoving())
-		animations_.fetchAndAddAcquire(0);
-	else
-		animations_.fetchAndAddAcquire(1);
 }
 
 /**
@@ -166,7 +158,7 @@ void Dialog::MoveObject(std::shared_ptr<const CellObject> object, const int x, c
 
 	IncrementAnimations(roundObject);	
 
-	roundObject->move(calculateX(x), calculateY(y));
+	roundObject->move(CalculateX(x), CalculateY(y));
 }
 
 /**
@@ -186,14 +178,14 @@ void Dialog::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x,
 	x_old = roundObject->x();
 	y_old = roundObject->y();
 
-	dx = calculateX(x) - x_old;
-	dy = calculateY(y) - y_old;
+	dx = CalculateX(x) - x_old;
+	dy = CalculateY(y) - y_old;
 	
 	roundObject->move(dx, dy);
 }
 
 /**
- * @brief Remove (delete) specific RoundObject.
+ * @brief Remove (delete) specific SpriteObject.
  * @param object - shared_ptr to object which will be deleted from GUI.
  */
 void Dialog::RemoveObject(std::shared_ptr<const CellObject> object) {
@@ -205,6 +197,10 @@ void Dialog::RemoveObject(std::shared_ptr<const CellObject> object) {
 		ClearField();
 }
 
+/**
+ * @brief ClearField from object, that should be removed, but weren't, because animation
+ * was on-going.
+ */
 void Dialog::ClearField() {
 	static QMutex mutex; //TODO RAII!!
 	mutex.lock();
@@ -216,6 +212,29 @@ void Dialog::ClearField() {
 	mutex.unlock();
 }
 
+/**
+ * @brief Incrementation of animating object counter.
+ *
+ * This was made to eliminate bug which caused to early object remove from QGraphicsScene.
+ * Without it, firstly object A was removed, then object B (which is a cause of object remove)
+ * was moved to object A. Now order is reached - firstly object B is moved to A, secondly object
+ * A is removed from screen.
+ *
+ * @param roundObject - pointer to SpriteObject to get information wether this object is moving.
+ */ 
+void Dialog::IncrementAnimations(SpriteObject *roundObject){
+	if (roundObject->IsMoving())
+		animations_.fetchAndAddAcquire(0);
+	else
+		animations_.fetchAndAddAcquire(1);
+}
+
+
+/**
+ * @brief Decrementation of animating objects counter.
+ *
+ * Reason for this counter is described in Dialog::IncrementAnimations method description.
+ */
 void Dialog::AnimationFinished() {
 	if (animations_.fetchAndAddAcquire(0))
 		animations_.fetchAndAddAcquire(-1);
@@ -223,6 +242,14 @@ void Dialog::AnimationFinished() {
 		ClearField();
 }
 
+
+/**
+ * @brief Creation of graphic surface.
+ *	
+ * @param ground_type - Type of surface to create.
+ * @param x - x coordinate.
+ * @param y - y coordinate.
+ */
 void Dialog::CreateGroundObject(const Dialog::Ground ground_type, const int x, const int y) {
 	QString file;
 	std::string xml_cmd;
@@ -253,69 +280,125 @@ void Dialog::CreateGroundObject(const Dialog::Ground ground_type, const int x, c
 				 Qt::KeepAspectRatio, 
 				 Qt::SmoothTransformation);
 	QGraphicsPixmapItem *rect = new QGraphicsPixmapItem(pix_map);
-	rect->setOffset(calculateX(x), calculateY(y));
+	rect->setOffset(CalculateX(x), CalculateY(y));
 	scene->addItem(rect);
 }
 
+/**
+ * @brief Deletion of graphic surface.
+ * @param x - x coordinate.
+ * @param y - y coordinate.
+ */
 void Dialog::RemoveGroundObject(const int x, const int y)
 {
 	QTransform test;
-	QGraphicsItem *item = scene->itemAt(calculateX(x), calculateY(y), test);
+	QGraphicsItem *item = scene->itemAt(CalculateX(x), CalculateY(y), test);
 	if (!item)
 		return;
 	scene->removeItem(item);
 	delete(item);	
 }
 
+
+/**
+ * @brief Method to append text to log window.
+ * @param text - text to append.
+ */
 void Dialog::AppendTextToLog(const std::string text) {
 	ui->log_textWindow->append(QString::fromStdString(text));
 }
 
+/**
+ * @brief stream operator overload.
+ * Used to append text to log window.
+ * @param s - std::string to append.
+ */
 Dialog& operator <<(Dialog& dialog, const std::string s) {	
 	dialog.ui->log_textWindow->insertPlainText(QString::fromStdString(s));
 	return dialog;
 }
 
+/**
+ * @brief stream operator overload.
+ * Used to append text to log window.
+ * @param s - char pointer to append.
+ */
 Dialog& operator <<(Dialog& dialog, const char* s) {	
 	dialog.ui->log_textWindow->insertPlainText(s);
 	return dialog;
 }
-#include "CellObject.hpp"
-#include "Unit.hpp"
-#include <boost/format.hpp>
 
-//is this the best way how to recognize object? static_pointer_cast, written type into object? really?
-//hurva match, komon hurva. CZYJEWO BLYAT SUKA KAGDA JA ETO WIZU TAGDA U MJENIA RWOTA I PANOS
-//MAKE IT MORE CHEEKI BREEKI HARD BASS!
+
+/**
+ * @brief method used when sprite object was clicked (so stats window will be updated).
+ * This method creates content of stats window.
+ * param cell - Field's cell in which object, represented by clicked sprite, resides.
+ */
+boost::format Dialog::CreateStatistics(std::shared_ptr<FieldCell> cell) {
+	std::shared_ptr<CellObject> object;
+	std::shared_ptr<Unit> unit;
+	std::shared_ptr<Plant> plant;
+	boost::format form;
+	object = cell->GetObject();
+		
+	if (object.use_count() == 0)
+		throw EvolvaException("Dialog::CreateStatistics, cell->IsEmpty() failed.");
+
+	form = boost::format("Id: %1%\nx: %2%\ny: %3%\nEnergy: %4%\nFatigue: %5%\nType: %6%");
+	form % object->GetId();
+	form % object->GetX();
+	form % object->GetY();
+	
+	if (object->GetType(CellObject::Type::MOVABLE)) {
+		unit = std::dynamic_pointer_cast<Unit>(object); 
+		/* Above line proofs wrong interface of CellObject.
+		 * I should write there GetEnergy() and GetFatigue() virtual methods also.
+		 * Without it, I must cast...
+		 */
+		if (unit.use_count() == 0)
+			throw EvolvaException("Dialog::CreateStatistics, object->GetType(MOVABLE) failed");
+		form % unit->GetEnergy();	
+		form % unit->GetFatigue();
+		if (unit->GetType(CellObject::Type::HERBIVORE))
+			form % "Herbivore";
+		else
+			form % "Carnivore";
+	} else {
+
+		if(object->GetType(CellObject::Type::PLANT)) {
+			plant = std::dynamic_pointer_cast<Plant>(object);
+			if (plant.use_count() == 0)
+				throw EvolvaException("Dialog::CreateStatistics, object->GetType(PLANT) failed.");		
+			form % plant->GetEnergy();
+			form % 0;
+			form % "Plant";
+		} else {
+			form % 0;
+			form % 0;
+			form % "Terrain object.";
+		}	
+	}
+	return form;
+}
+
+/**
+ * @brief Method called when sprite object was clicked. 
+ *
+ * Method is invoked because of connection between SpriteObject Qt signal and this Qt slot.
+ * Method used for text insertion into stats window. 
+ *
+ * @param x - x coordinate of sprite object.
+ * @param y - y coordinate of sprite object.
+ */
 void Dialog::SpriteObjectClicked(int x, int y) {
 	std::shared_ptr<Field> field = Field::GetInstance();
 	std::shared_ptr<FieldCell> cell = field->GetCell(x, y);
-	std::shared_ptr<CellObject> object;
-	std::shared_ptr<Unit> unit;
-	std::string message;
+	boost::format form;
 	if(cell->IsEmpty()) {
-		message = "It's a ground!";
+		form = boost::format("Cell is empty.");
 	} else {
-		object = cell->GetObject();	
-		if (object->GetType(CellObject::Type::MOVABLE)) {
-			unit = std::static_pointer_cast<Unit>(object);
-			if (unit == nullptr)
-				throw EvolvaException("Dialog::SpriteObjectClicked");
-			
-			boost::format form("ID: %1%\nEnergy: %2%\nFat: %3%\nx: %4%\ny: %5%");
-			form % unit->GetId();
-			form % unit->GetEnergy();	
-			form % unit->GetFatigue();
-			form % unit->GetX();
-			form % unit->GetY();
-
-			message = form.str();
-		} else {
-			if(object->GetType(CellObject::Type::PLANT))
-				message = "It's a plant!";
-			else
-				message = "It's not a plant";	
-		}
+		form = CreateStatistics(cell);
 	}
-	ui->stats_textWindow->setPlainText(QString::fromStdString(message));
+
+	ui->stats_textWindow->setPlainText(QString::fromStdString(form.str()));		
 }

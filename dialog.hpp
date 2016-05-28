@@ -11,6 +11,7 @@
 #include <iostream>
 #include <memory>
 #include <QMutex>
+#include <boost/format.hpp>
 
 #include "XmlIo.hpp"
 
@@ -18,6 +19,7 @@ class RoundObject;
 class Field;
 class CellObject;
 class SpriteObject;
+class FieldCell;
 
 namespace Ui {
 	class Dialog;
@@ -37,18 +39,22 @@ private:
 	QGraphicsScene *scene;
 	const unsigned int width_;
 	const unsigned int height_;
-
-	SpriteObject* SearchObject(const uint id);
-	int calculateX(const int x);
-	int calculateY(const int y);
-	uint calculateRadius();
 	QList<QGraphicsItem *> to_remove_;
 	QTimer timer;
 	QAtomicInt animations_;
+
+
+	SpriteObject* SearchObject(const uint id);
+	int CalculateX(const int x);
+	int CalculateY(const int y);
 	void RemoveObject(const uint id);
 	void IncrementAnimations(SpriteObject *roundObject);
+	boost::format CreateStatistics(std::shared_ptr<FieldCell> cell);
 
 public:
+	/**
+	 * @brief enum class to describe possible surface types.
+	 */
 	enum class Ground {
 		WATER,
 		SAND,

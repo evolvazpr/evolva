@@ -6,7 +6,7 @@
 static const qreal INCREMENT_PER_TICK = 5.0;
 
 /**
- * @brief RoundObject constructor.
+ * @brief SpriteObject constructor.
  * @param id - object's id.
  * @param x - object's graphical x coordinate (it is not field coordinate!).
  * To calculate graphical coordinates use Dialog::calculateX method.
@@ -16,7 +16,9 @@ static const qreal INCREMENT_PER_TICK = 5.0;
  * To calculate graphical radius use Dialog::calculateRadius method.
  * @param scene - pointer to scene.
  * @param timer - pointer to timer. It is needed, because on each move there is
- * established connection between timer signal timout() and RoundObject slot animate() (to animate or whatever).
+ * established connection between timer signal timout() and SpriteObject slot animate().
+ * @param sprites_cnt - describes dimension of sprite's matrix.
+ * @param pixsize - describes graphics cell size
  */
 
 SpriteObject::SpriteObject(const uint id, const int x, const int y,
@@ -39,7 +41,9 @@ SpriteObject::SpriteObject(const uint id, const int x, const int y,
 	setPos(x, y);
 }
 
-
+/**
+ * @brief Paint method which sets proper sprite to be drawn. Arguments not important for user.
+ */
 void SpriteObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 		           QWidget *widget) {
 	QPixmap pmap = pixmap();
@@ -80,6 +84,13 @@ uint SpriteObject::id() {
 	return id_;
 }
 
+
+/**
+ * @brief meta-method used by animate() method to get new position of object.
+ * @param lasts - describes distance to final place of object.
+ * @param increment - describes single size of step, which is made per animate() call.
+ * @param actual_cord - describes actual coordinate of graphic object.
+ */
 template <class T> T SpriteObject::CalculateCoord(T *lasts, T increment, T actual_coord) {
 	T new_coord;
 	if (qFabs(increment) <= qFabs(*lasts)) {
@@ -145,6 +156,11 @@ void SpriteObject::animate() {
 	}
 }
 
+/**
+ * @brief checks whether object has animation to perform.
+ *
+ * @ret returns true if animation is on-going, false if not.
+ */  
 bool SpriteObject::IsMoving()
 {
 	bool ret = false;
@@ -153,6 +169,10 @@ bool SpriteObject::IsMoving()
 	return ret;
 }
 
+/**
+ * @brief Method called when SpriteObject was clicked by mouse.
+ * Method used only internally.
+ */
 void SpriteObject::mousePressEvent(QGraphicsSceneMouseEvent *event) {
 	int x_pos = qFloor(x()/(qreal)pixsize_ + 0.5);
 	int y_pos = qFloor(y()/(qreal)pixsize_ + 0.5);
@@ -160,6 +180,9 @@ void SpriteObject::mousePressEvent(QGraphicsSceneMouseEvent *event) {
 	(void)event;
 }
 
+/**
+ * @brief Method returns bounding rectangle of an object.
+ */
 QRectF SpriteObject::boundingRect() const {
 	return QRectF(0, 0, pixsize_, pixsize_);
 }

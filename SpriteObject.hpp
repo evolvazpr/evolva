@@ -12,7 +12,7 @@
 #include <QPainter>
 #include <QtMath>
 /**
- * @brief The SpriteObject movable class (GUI part).
+ * @brief Implementation of sprite image graphic representation.
  */
 class SpriteObject : public QObject, public QGraphicsPixmapItem {
 	Q_OBJECT
