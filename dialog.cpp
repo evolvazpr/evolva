@@ -274,7 +274,7 @@ void Dialog::CreateGroundObject(const Dialog::Ground ground_type, const int x, c
 	
 	QPixmap pix_map(QString::fromStdString(sprites[xml_cmd]["path"]));
 	if (pix_map.isNull())
-		throw EvolvaException("Sprite \"" + xml_cmd + "\" could not have been loaded. Aborting program.\nCheck gui.xml file.");
+		throw EvolvaException("Sprite \"" + xml_cmd + "\" could not have been loaded. Aborting program.\nCheck if gui.xml is correct.");
 	
 	pix_map = pix_map.scaled(PIXELS_PER_OBJECT, PIXELS_PER_OBJECT, 
 				 Qt::KeepAspectRatio, 
