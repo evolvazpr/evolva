@@ -42,6 +42,7 @@ Dialog::Dialog(QWidget *parent) :
 	animations_ = 0;
 	timer.start(ANIMATION_CLOCK);
 
+	QDialog::setWindowFlags(Qt::WindowTitleHint);
 }
 
 /**
