@@ -246,29 +246,29 @@ void Dialog::AnimationFinished() {
 /**
  * @brief Creation of graphic surface.
  *	
- * @param ground_type - Type of surface to create.
+ * @param surface_type - Type of surface to create.
  * @param x - x coordinate.
  * @param y - y coordinate.
  */
-void Dialog::CreateGroundObject(const Dialog::Ground ground_type, const int x, const int y) {
+void Dialog::CreateSurfaceObject(const Dialog::Surface surface_type, const int x, const int y) {
 	QString file;
 	std::string xml_cmd;
 
-	switch (ground_type) {
-	case Dialog::Ground::GRASS :
+	switch (surface_type) {
+	case Dialog::Surface::GRASS :
 		xml_cmd = "grass";
 		break;
-	case Dialog::Ground::SAND :
+	case Dialog::Surface::SAND :
 		xml_cmd = "sand";
 		break;
-	case Dialog::Ground::WATER :
+	case Dialog::Surface::WATER :
 		xml_cmd = "water";
 		break;
-	case Dialog::Ground::SOIL :
+	case Dialog::Surface::SOIL :
 		xml_cmd = "soil";
 		break;
 	default:
-		throw EvolvaException("Wrong ground_type in CreateGroundObject!");
+		throw EvolvaException("Wrong surface_type in CreateSurfaceObject!");
 		break;	
 	}
 	
@@ -289,7 +289,7 @@ void Dialog::CreateGroundObject(const Dialog::Ground ground_type, const int x, c
  * @param x - x coordinate.
  * @param y - y coordinate.
  */
-void Dialog::RemoveGroundObject(const int x, const int y)
+void Dialog::RemoveSurfaceObject(const int x, const int y)
 {
 	QTransform test;
 	QGraphicsItem *item = scene->itemAt(CalculateX(x), CalculateY(y), test);

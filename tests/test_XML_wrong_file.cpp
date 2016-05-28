@@ -16,5 +16,5 @@
 
 BOOST_AUTO_TEST_CASE(CyclicQueueUnitTest)
 {
-	XmlIo xml("wrongname.xml\0");
+	BOOST_CHECK_THROW(XmlIo xml("wrongname.xml\0"), std::exception);
 }

@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(CyclicQueueUnitTest)
 	std::string out2 = xml["sand"]["path"];
 	BOOST_CHECK(out2 == "/home/konrad/Programming/linux/workspace/evolva/scripts/sprites/sand.png");	
 	std::string out3 = xml["water"]["path"];
-	BOOST_CHECK(out3 == "/home/konrad/Programming/linux/workspace/evolva/scripts/sprites/water.png");
+	BOOST_CHECK(out3 == "/home/konrad/Programming/linux/workspace/evolva/scripts/sprites/water.jpg");
 	std::string out4 = xml["soil"]["path"];
 	BOOST_CHECK(out4 == "/home/konrad/Programming/linux/workspace/evolva/scripts/sprites/soil.png");
 } 

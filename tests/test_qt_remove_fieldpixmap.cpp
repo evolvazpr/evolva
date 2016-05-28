@@ -42,11 +42,11 @@ void EvolvaInit(Dialog* w) {
 	field->InsertNmo(std::make_shared<Tree>(24.0), 9, 9);
 	field->InsertNmo(std::make_shared<Tree>(500.0), 1, 0);
 
-	w->RemoveGroundObject(9, 9);
-	w->RemoveGroundObject(0, 0);
-	w->RemoveGroundObject(1, 5);
-	w->CreateGroundObject(Dialog::Ground::SAND, 9, 9);
-	w->RemoveGroundObject(9, 9);
+	w->RemoveSurfaceObject(9, 9);
+	w->RemoveSurfaceObject(0, 0);
+	w->RemoveSurfaceObject(1, 5);
+	w->CreateSurfaceObject(Dialog::Surface::SAND, 9, 9);
+	w->RemoveSurfaceObject(9, 9);
 	field->BeginCycle();
 	field->Play();
 	Unit *xz = u[0].get();

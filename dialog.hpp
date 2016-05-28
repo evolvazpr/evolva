@@ -55,7 +55,7 @@ public:
 	/**
 	 * @brief enum class to describe possible surface types.
 	 */
-	enum class Ground {
+	enum class Surface {
 		WATER,
 		SAND,
 		GRASS,
@@ -66,8 +66,8 @@ public:
 	virtual ~Dialog();
 
 	void CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y);
-	void CreateGroundObject(const Dialog::Ground ground_type, const int x, const int y);
-	void RemoveGroundObject(const int x, const int y);
+	void CreateSurfaceObject(const Dialog::Surface ground_type, const int x, const int y);
+	void RemoveSurfaceObject(const int x, const int y);
 	void MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void RemoveObject(std::shared_ptr<const CellObject> object);
