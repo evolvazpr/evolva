@@ -18,7 +18,7 @@
  * TODO: do something with it. Somehow.
  */
 
-BOOST_AUTO_TEST_CASE(CyclicQueueUnitTest)
+BOOST_AUTO_TEST_CASE(gui_xml_file_test)
 {
 	XmlIo xml("gui.xml\0");
 	std::string out1 = xml["grass"]["path"];

@@ -20,8 +20,8 @@ export PATH := $(QT_PATH)/bin:$(PATH)
 CC            = gcc
 CXX           = g++
 DEFINES       = -DUNICODE -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CONCURRENT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -DTIXML_USE_STL -DOS_WINDOWS
-CFLAGS        = -pipe  -O3  $(DEFINES) -fno-keep-inline-dllexport -Wall
-CXXFLAGS      = -pipe  -std=c++11 -O3 -frtti  -mthreads $(DEFINES) -fno-keep-inline-dllexport -Wall
+CFLAGS        = -pipe  -O0 -g3  $(DEFINES) -fno-keep-inline-dllexport -Wall
+CXXFLAGS      = -pipe  -std=c++11 -O0 -g3 -frtti  -mthreads $(DEFINES) -fno-keep-inline-dllexport -Wall
 INCPATH       = -I. -I.. -I$(QT_INC_PATH) -I$(QT_INC_PATH)/QtWidgets -I$(QT_INC_PATH)/QtGui 
 INCPATH 	 += -I$(QT_INC_PATH)/QtANGLE -I$(QT_INC_PATH)/QtConcurrent -I$(QT_INC_PATH)/QtCore 
 INCPATH		 += -Irelease -I. -I$(QT_PATH)/mkspecs/win32-g++ -I$(BOOST_INCLUDE_PATH)

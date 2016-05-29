@@ -11,8 +11,9 @@ function create_node() {
 	FILE=`printf "%s\n%s\n \n" "$FILE" "</$1>"`
 }
 
-mkdir sprites
-cd sprites
+mkdir ../sprites
+cd ../sprites
+
 wget -O herbivore.png http://www.guelnika.net/images/charset/noel/reindeer_eva2.png
 wget -O carnivore.png http://eragon-forum.3dn.ru/_fr/6/0245600.png
 wget -O grass.png http://cdn.photonesta.com/images/4.bp.blogspot.com/-ggkSFkq3ky4/UXO1HwBEtZI/AAAAAAAAM9M/JuxFjeDrJwk/s1600/Sprite_FX_Grass_0001.png
@@ -39,6 +40,8 @@ create_node "stone" "png" "1"
 
 FILE+="</evolva>"
 
-cd ..
+cd ../tests
 
 echo -e "$FILE" > gui.xml
+
+echo "file gui.xml is located in \"tests\" directory"

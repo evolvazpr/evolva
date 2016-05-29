@@ -45,8 +45,8 @@ private:
 	QMutex remove_mutex_;
 
 	SpriteObject* SearchObject(const uint id);
-	int CalculateX(const int x);
-	int CalculateY(const int y);
+	qreal CalculateX(const int x);
+	qreal CalculateY(const int y);
 	void RemoveObject(const uint id);
 	void IncrementAnimations(SpriteObject *roundObject);
 	boost::format CreateStatistics(std::shared_ptr<FieldCell> cell);

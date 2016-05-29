@@ -31,3 +31,4 @@ moc*
 ui_dialog.h
 gui.xml
 scripts/sprites/
+sprites/

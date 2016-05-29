@@ -29,9 +29,10 @@ static const uint PIXELS_PER_OBJECT = 50;
 Dialog::Dialog(QWidget *parent) :
 	QDialog(parent), sprites("gui.xml"),
 	ui(new Ui::Dialog), width_(FIELD_SIZE), height_(FIELD_SIZE) { 
-	QRect rect;
+	Qt::WindowFlags flags = Qt::WindowTitleHint | Qt::WindowSystemMenuHint;
+	flags |= Qt::WindowCloseButtonHint | Qt::WindowMinMaxButtonsHint;
+	
 	ui->setupUi(this);
-		
 	scene = new QGraphicsScene();
 	ui->graphicsView->setScene(scene);
 	scene->setSceneRect(0, 0, FIELD_SIZE * PIXELS_PER_OBJECT, FIELD_SIZE * PIXELS_PER_OBJECT);
@@ -43,7 +44,7 @@ Dialog::Dialog(QWidget *parent) :
 	animations_ = 0;
 	timer.start(ANIMATION_CLOCK);
 
-	QDialog::setWindowFlags(Qt::WindowTitleHint);
+	QDialog::setWindowFlags(flags);
 }
 
 /**
@@ -73,7 +74,7 @@ void Dialog::on_pushButton_clicked() {
  * @param x - field's x coordinate.
  * @return  - graphical x coordinate.
  */
-int Dialog::CalculateX(const int x) {
+qreal Dialog::CalculateX(const int x) {
 	return ((qreal)x) / ((qreal)width_ )* scene->width();
 }
 
@@ -82,7 +83,7 @@ int Dialog::CalculateX(const int x) {
  * @param y - field's y coordinate.
  * @return  - graphical y coordinate.
  */
-int Dialog::CalculateY(const int y) {
+qreal Dialog::CalculateY(const int y) {
 	return ((qreal)y) / ((qreal)height_) * scene->height();
 }
 
@@ -277,7 +278,7 @@ void Dialog::CreateSurfaceObject(const Dialog::Surface surface_type, const int x
 		throw EvolvaException("Sprite \"" + xml_cmd + "\" could not have been loaded. Aborting program.\nCheck if gui.xml is correct.");
 	
 	pix_map = pix_map.scaled(PIXELS_PER_OBJECT, PIXELS_PER_OBJECT, 
-				 Qt::KeepAspectRatio, 
+				 Qt::IgnoreAspectRatio, 
 				 Qt::SmoothTransformation);
 	QGraphicsPixmapItem *rect = new QGraphicsPixmapItem(pix_map);
 	rect->setOffset(CalculateX(x), CalculateY(y));
