@@ -29,8 +29,6 @@ void EvolvaInit(Dialog* w) {
 	Tui tui;
 	field = Field::GetInstance(10, 10, w);
 	std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();
-	DnaCode &dna = *dna_ptr;
-
 
 	DnaGenerator gen(dna_ptr);
 

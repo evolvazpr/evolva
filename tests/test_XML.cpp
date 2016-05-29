@@ -52,7 +52,7 @@ int main(void) {
 		if(print_start())
 			return -1;
 		
-		system("cp ./test.xml ./OLDtest.xml");
+		ret = system("cp ./test.xml ./OLDtest.xml");
 		XmlIo xml("test.xml\0");
 		test = xml["Field"]["Width"];
 		std::cout << "Field width: " << test << "\n";
@@ -64,7 +64,7 @@ int main(void) {
 		
 		if(print_end()) 
 			ret = -2;
-		system("mv ./OLDtest.xml ./test.xml");
+		ret = system("mv ./OLDtest.xml ./test.xml");
 		
 	} catch (std::exception& exception) {
 		std::cout << exception.what() << std::endl;
