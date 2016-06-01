@@ -53,6 +53,7 @@ private:
 	void IncrementAnimations(SpriteObject *roundObject);
 	boost::format CreateStatistics(std::shared_ptr<FieldCell> cell);
 	explicit Dialog(QWidget *parent = 0);
+
 public:
 	/**
 	 * @brief enum class to describe possible surface types.

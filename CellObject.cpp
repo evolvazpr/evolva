@@ -92,3 +92,8 @@ NonPlant::NonPlant() : NonMovableObject() {
 Creature::Creature() : MovableObject() {
 	SetType(Type::CREATURE, true);
 }
+
+Flesh::Flesh(const Type type) : NonMovableObject() {
+	SetType(Type::FLESH, true);
+	SetType(type, true);	
+}

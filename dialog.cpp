@@ -104,6 +104,7 @@ qreal Dialog::CalculateY(const int y) {
 
 /**
  * @brief RoundObject object creation.
+ * This method scales badly.
  * @param id - object's id.
  * @param x - field's x coordinate of object.
  * @param y - field's y coordinate of object.
@@ -116,23 +117,23 @@ void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x,
 	std::string obj_type;
 	QString sprite_path;
 
-	if (object->GetType(CellObject::Type::MOVABLE)) {
-		if (object->GetType(CellObject::Type::CARNIVORE)) 
-			obj_type = "carnivore";
-
-		else if (object->GetType(CellObject::Type::HERBIVORE)) 
-			obj_type = "herbivore";
-
+	if (object->GetType(CellObject::Type::CARNIVORE)) { 
+		if (object->GetType(CellObject::Type::FLESH))
+			obj_type = "carnivore_dead";
 		else
-			obj_type = "unit";
+			obj_type = "carnivore";
+	} else if (object->GetType(CellObject::Type::HERBIVORE)) {
+		if (object->GetType(CellObject::Type::FLESH))
+			obj_type = "herbivore_dead";
+		else
+			obj_type = "herbivore";
+	} else if (object->GetType(CellObject::Type::PLANT)) {
+		obj_type = "tree";
 	} else {
-		if (object->GetType(CellObject::Type::PLANT))
-			obj_type = "tree";
-		else 
-			obj_type = "stone";
-	}	
-	sprite_path = QString::fromStdString(sprites[obj_type]["path"]);
-	sprite_cnt = sprites[obj_type]["sprite_cnt"];
+		obj_type = "stone";
+	}
+	sprite_path = QString::fromStdString(sprites[obj_type][std::string("path")]);
+	sprite_cnt = sprites[obj_type][std::string("sprite_cnt")];
 	sprite_object = new SpriteObject(object->GetId(), x_pos, y_pos, scene, &timer, sprite_path, 
 					sprite_cnt, PIXELS_PER_OBJECT);
 	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(AnimationFinished()), 
@@ -150,8 +151,10 @@ SpriteObject* Dialog::SearchObject(const uint id) {
 	QList<QGraphicsItem *> obj_list = scene->items();
 	SpriteObject *ptr;
 	for (auto &it : obj_list) {
-		if (it->type() == QGraphicsPixmapItem::Type) {
-			ptr = static_cast<SpriteObject *>(it);
+		if (it->type() != QGraphicsPixmapItem::Type) {
+			ptr = dynamic_cast<SpriteObject *>(it);
+			if (ptr == nullptr)
+				throw EvolvaException("Dialog::SearchObject! IT SHOULD NOT OCCURE!");
 			if(ptr->id() == id)
 				return ptr;
 		}
@@ -369,7 +372,7 @@ boost::format Dialog::CreateStatistics(std::shared_ptr<FieldCell> cell) {
 		unit = std::dynamic_pointer_cast<Unit>(object); 
 		/* Above line proofs wrong interface of CellObject.
 		 * I should write there GetEnergy() and GetFatigue() virtual methods also.
-		 * Without it, I must cast...
+		 * Without it, I must cast.
 		 */
 		if (unit.use_count() == 0)
 			throw EvolvaException("Dialog::CreateStatistics, object->GetType(MOVABLE) failed");

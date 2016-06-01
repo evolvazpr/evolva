@@ -23,6 +23,8 @@ wget -O stone.png http://www.autoglas-specialist.nl/img/stone.png
 wget -O water.jpg http://www.sharecg.com/images/medium/3020.jpg
 wget -O tree.png http://vignette2.wikia.nocookie.net/herebemonsters/images/4/40/Mango-Tree-Sprite.png/revision/latest?cb=20140328231536
 wget -O unit.png http://www.serwo.pl/images/promo1.png
+wget -O carnivore_dead.png http://s33.postimg.org/yxxyz4o8b/carnivore_dead.png
+wget -O herbivore_dead.png http://s33.postimg.org/mkl4s7yjv/herbivore_dead.png 
 
 PATH=`pwd`
 
@@ -37,7 +39,8 @@ create_node "herbivore" "png" "4"
 create_node "carnivore" "png" "4"
 create_node "unit" "png" "1"
 create_node "stone" "png" "1"
-
+create_node "carnivore_dead" "png" "1"
+create_node "herbivore_dead" "png" "1"
 FILE+="</evolva>"
 
 cd ../tests

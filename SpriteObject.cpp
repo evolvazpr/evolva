@@ -186,3 +186,11 @@ void SpriteObject::mousePressEvent(QGraphicsSceneMouseEvent *event) {
 QRectF SpriteObject::boundingRect() const {
 	return QRectF(0, 0, pixsize_, pixsize_);
 }
+
+/**
+ * @brief Override of QGraphicsPixmapItem method.
+ * It is needed by Dialog::SearchObject.
+ */ 
+int SpriteObject::type() const {
+	return Type;
+}

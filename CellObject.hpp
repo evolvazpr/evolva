@@ -9,12 +9,12 @@ class Field;
 
 class CellObject : public std::enable_shared_from_this<CellObject> {
 public:
-	bool types_[8];
+	bool types_[9];
 	enum class Type : unsigned char {
 		MOVABLE = 0,
-		NON_MOVABLE,
+		NON_MOVABLE = 7,
 		PLANT = 1,
-		NON_PLANT,
+		NON_PLANT = 8,
 		FLESH = 2,
 		UNIT = 3,
 		CARNIVORE = 4,
@@ -89,6 +89,8 @@ public:
 };
 
 class Flesh : public NonMovableObject {
+public:
+	Flesh(const Type type);
 };
 
 #endif //_CELL_OBJECT_H_

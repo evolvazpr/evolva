@@ -40,6 +40,9 @@ public:
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 		           QWidget *wdiget) Q_DECL_OVERRIDE;
 	virtual QRectF boundingRect() const Q_DECL_OVERRIDE;
+
+	enum {Type = UserType + 1};
+	virtual int type() const Q_DECL_OVERRIDE;
 signals:
 	void AnimationFinished();
 	void wasClicked(int x, int y);
