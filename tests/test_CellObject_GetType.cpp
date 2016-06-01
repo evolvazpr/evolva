@@ -47,8 +47,8 @@ void DnaInit(DnaCode &dna)
 	dna["pregnancy_time"] = 2.0;
 }
 
-void EvolvaInit(Dialog* w) {
-	field = Field::GetInstance(10, 10, w);
+void EvolvaInit() {
+	field = Field::GetInstance(10, 10);
 	std::shared_ptr<DnaCode> dna_herb_ptr = std::make_shared<DnaCode>();
 	std::shared_ptr<DnaCode> dna_carn_ptr = std::make_shared<DnaCode>();
 
@@ -127,6 +127,6 @@ BOOST_AUTO_TEST_CASE(GetType)
 	char *argv[2];
 	argv[0] = (char *)"insert";
 	QApplication a(argc, argv); //only for QApplication creation
-	Dialog w;
-	EvolvaInit(&w);
+	Dialog::GetInstance(); //no need to get Instance, right now only initalization
+	EvolvaInit();
 }

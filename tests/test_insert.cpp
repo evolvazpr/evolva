@@ -20,8 +20,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-void EvolvaInit(Dialog* w) {
-	field = Field::GetInstance(10, 10, w);
+void EvolvaInit() {
+	field = Field::GetInstance(10, 10);
 	std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();
 
 	DnaGenerator gen(dna_ptr);
@@ -46,6 +46,6 @@ BOOST_AUTO_TEST_CASE(insert)
 	char *argv[2];
 	argv[0] = (char *)"insert";
 	QApplication a(argc, argv); //only for QApplication creation
-	Dialog w;
-	EvolvaInit(&w);
+	Dialog::GetInstance();
+	EvolvaInit();
 }

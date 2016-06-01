@@ -20,8 +20,22 @@
 
 #include <boost/test/unit_test.hpp>
 
-void EvolvaInit(Dialog* w) {
-	field = Field::GetInstance(10, 10, w);
+void EvolvaInit() {
+
+}
+
+BOOST_AUTO_TEST_CASE(GetCoord)
+{
+	int argc = 1;
+	char *argv[2];
+	argv[0] = (char *)"insert";
+	QApplication a(argc, argv); //only for QApplication creation
+	Dialog* w = Dialog::GetInstance();
+	(void)w;
+
+	field = Field::GetInstance(10, 10); 
+	//somewhere is defined global std::shared_ptr<Field> field.
+	//I think this global should be removed. (Konrad Gotfryd)
 	std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();
 
 	DnaGenerator gen(dna_ptr);
@@ -47,14 +61,5 @@ void EvolvaInit(Dialog* w) {
 	BOOST_CHECK(t[0]->GetY() == 1);
 	BOOST_CHECK(t[1]->GetX() == 1);
 	BOOST_CHECK(t[1]->GetY() == 9);
-}
 
-BOOST_AUTO_TEST_CASE(GetCoord)
-{
-	int argc = 1;
-	char *argv[2];
-	argv[0] = (char *)"insert";
-	QApplication a(argc, argv); //only for QApplication creation
-	Dialog w;
-	EvolvaInit(&w);
 }

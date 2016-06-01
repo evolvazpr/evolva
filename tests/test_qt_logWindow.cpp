@@ -16,8 +16,8 @@
 
 #include "../dialog.hpp"
 
-void EvolvaInit(Dialog* w) {
-	field = Field::GetInstance(10, 10, w);
+void Test(Dialog *w) {
+	field = Field::GetInstance(10, 10);
 	std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();
 
 	DnaGenerator gen(dna_ptr);
@@ -53,14 +53,13 @@ void EvolvaInit(Dialog* w) {
 	field->Play();
 	Unit *xz = u[0].get();
 	xz->IsRemoved();
-
 }
 
 int main(int argc, char *argv[]) {
 	QApplication a(argc, argv);
-	Dialog w;
-	EvolvaInit(&w);
-	w.show();
+	Dialog* dialog = Dialog::GetInstance();
+	Test(dialog);
+	dialog->show();
 	a.exec();
 	return 0;
 }

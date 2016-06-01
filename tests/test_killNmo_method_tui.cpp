@@ -41,8 +41,15 @@ void KillNmoTest(std::shared_ptr <Unit> u, std::shared_ptr<Tree> t, int x, int y
 	tui.PrintField();
 }
 
-void EvolvaInit(Dialog* w) {
-	field = Field::GetInstance(10, 10, w);
+BOOST_AUTO_TEST_CASE(kill)
+{
+	int argc = 1;
+	char *argv[2];
+	argv[0] = (char *)"kill"; //only for creating QApplication
+	QApplication a(argc, argv);
+	Dialog::GetInstance();
+	
+	field = Field::GetInstance(10, 10);
 	std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();
 	DnaCode &dna = *dna_ptr;
 	dna["intelligence"] = 45.0;
@@ -96,15 +103,5 @@ void EvolvaInit(Dialog* w) {
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(500.0), 1, 0) == true);
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(100.0), 1, 0) == false);
 	KillNmoTest(u[0], tree, 0, 0);
-}
-
-BOOST_AUTO_TEST_CASE(kill)
-{
-	int argc = 1;
-	char *argv[2];
-	argv[0] = (char *)"kill"; //only for creating QApplication
-	QApplication a(argc, argv);
-	Dialog w;
-	EvolvaInit(&w);
 
 }

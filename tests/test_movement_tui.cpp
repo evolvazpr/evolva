@@ -51,8 +51,8 @@ void MoveObjects(std::shared_ptr <Unit> u[])
 	tui.PrintField();
 }
 
-void EvolvaInit(Dialog* w) {
-	field = Field::GetInstance(10, 10, w);
+void Test() {
+	field = Field::GetInstance(10, 10);
 	std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();
 	DnaCode &dna = *dna_ptr;
 	dna["intelligence"] = 45.0;
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(movement)
 	char *argv[2];
 	argv[0] = (char *)"insert"; //only for QApplication creation
 	QApplication a(argc, argv);
-	Dialog w;
-	EvolvaInit(&w);
+	Dialog::GetInstance();
+	Test();
 
 }

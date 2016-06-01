@@ -43,8 +43,8 @@ void KillTest(std::shared_ptr <Unit> u[], int x, int y) {
 	tui.PrintField();
 }
 
-void EvolvaInit(Dialog* w) {
-	field = Field::GetInstance(10, 10, w);
+void Test() {
+	field = Field::GetInstance(10, 10);
 	std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();
 	DnaCode &dna = *dna_ptr;
 	dna["intelligence"] = 45.0;
@@ -89,8 +89,6 @@ void EvolvaInit(Dialog* w) {
 	u[1]->dna_["normal_weight"] = 200.0;
 	BOOST_CHECK(field->InsertObject(u[1], 7, 7) == true);
 
-
-
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(50.0), 0, 0) == true);
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(80.0), 0, 9) == true);
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(20.0), 9, 0) == true);
@@ -106,7 +104,6 @@ BOOST_AUTO_TEST_CASE(kill)
 	char *argv[2];
 	argv[0] = (char *)"kill"; //only for creating QApplication
 	QApplication a(argc, argv);
-	Dialog w;
-	EvolvaInit(&w);
-
+	Dialog::GetInstance();
+	Test();
 }
