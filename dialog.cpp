@@ -7,6 +7,8 @@
 #include "SpriteObject.hpp"
 #include "Unit.hpp"
 
+Dialog* Dialog::dialog_ = nullptr;
+
 /**
  * @brief ANIMATION_CLOCK static global variable. Parameter to setup freqency of animation (FPS).
  */
@@ -52,6 +54,19 @@ Dialog::Dialog(QWidget *parent) :
  */
 Dialog::~Dialog() {
 	delete ui;
+}
+
+
+/**
+ * @brief Singleton method to get pointer to object. 
+ * @param parent - optional parameter used in object's first initalization. Used to set parent
+ *		   of dialog.
+ */
+Dialog * Dialog::GetInstance(QWidget *parent) {
+	if (dialog_ == nullptr) {
+		dialog_ = new Dialog(parent);
+	}
+	return dialog_;
 }
 
 

@@ -44,13 +44,15 @@ private:
 	QAtomicInt animations_;
 	QMutex remove_mutex_;
 
+	static Dialog * dialog_;
+
 	SpriteObject* SearchObject(const uint id);
 	qreal CalculateX(const int x);
 	qreal CalculateY(const int y);
 	void RemoveObject(const uint id);
 	void IncrementAnimations(SpriteObject *roundObject);
 	boost::format CreateStatistics(std::shared_ptr<FieldCell> cell);
-
+	explicit Dialog(QWidget *parent = 0);
 public:
 	/**
 	 * @brief enum class to describe possible surface types.
@@ -61,10 +63,8 @@ public:
 		GRASS,
 		SOIL		
 	};
-
-	explicit Dialog(QWidget *parent = 0);
 	virtual ~Dialog();
-
+	static Dialog * GetInstance(QWidget *parent = 0);
 	void CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void CreateSurfaceObject(const Dialog::Surface ground_type, const int x, const int y);
 	void RemoveSurfaceObject(const int x, const int y);
@@ -74,7 +74,7 @@ public:
 	void AppendTextToLog(std::string text);
 	void ClearField();
 
-	friend Dialog& operator <<(Dialog& dialog, std::string s);
+	friend Dialog& operator <<(Dialog& dialog, const std::string s);
 	friend Dialog& operator <<(Dialog& dialog, const char* s);
 
 private slots:
