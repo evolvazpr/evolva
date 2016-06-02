@@ -12,19 +12,18 @@
 #include <memory>
 #include <QMutex>
 #include <boost/format.hpp>
-
+#include <unordered_map>
 #include "XmlIo.hpp"
+#include "CellObject.hpp"
 
 class RoundObject;
 class Field;
-class CellObject;
 class SpriteObject;
 class FieldCell;
 
 namespace Ui {
 	class Dialog;
 }
-
 
 /**
  * @brief The Dialog class (GUI part)
@@ -52,6 +51,8 @@ private:
 	void RemoveObject(const uint id);
 	void IncrementAnimations(SpriteObject *roundObject);
 	boost::format CreateStatistics(std::shared_ptr<FieldCell> cell);
+	std::string GetTypeName(std::shared_ptr<const CellObject> object); //it should be somewhere else
+
 	explicit Dialog(QWidget *parent = 0);
 
 public:

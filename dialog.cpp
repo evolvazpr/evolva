@@ -2,7 +2,6 @@
 #include "ui_dialog.h"
 #include "Field.hpp"
 #include "Tui.hpp"
-#include "CellObject.hpp"
 #include "EvolvaException.hpp"
 #include "SpriteObject.hpp"
 #include "Unit.hpp"
@@ -104,7 +103,7 @@ qreal Dialog::CalculateY(const int y) {
 
 /**
  * @brief RoundObject object creation.
- * This method scales badly.
+ * To get better scalability GetTypeName method was created, but it is not the best idea.
  * @param id - object's id.
  * @param x - field's x coordinate of object.
  * @param y - field's y coordinate of object.
@@ -116,22 +115,7 @@ void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x,
 	SpriteObject *sprite_object;
 	std::string obj_type;
 	QString sprite_path;
-
-	if (object->GetType(CellObject::Type::CARNIVORE)) { 
-		if (object->GetType(CellObject::Type::FLESH))
-			obj_type = "carnivore_dead";
-		else
-			obj_type = "carnivore";
-	} else if (object->GetType(CellObject::Type::HERBIVORE)) {
-		if (object->GetType(CellObject::Type::FLESH))
-			obj_type = "herbivore_dead";
-		else
-			obj_type = "herbivore";
-	} else if (object->GetType(CellObject::Type::PLANT)) {
-		obj_type = "tree";
-	} else {
-		obj_type = "stone";
-	}
+	obj_type = GetTypeName(object);
 	sprite_path = QString::fromStdString(sprites[obj_type][std::string("path")]);
 	sprite_cnt = sprites[obj_type][std::string("sprite_cnt")];
 	sprite_object = new SpriteObject(object->GetId(), x_pos, y_pos, scene, &timer, sprite_path, 
@@ -378,10 +362,6 @@ boost::format Dialog::CreateStatistics(std::shared_ptr<FieldCell> cell) {
 			throw EvolvaException("Dialog::CreateStatistics, object->GetType(MOVABLE) failed");
 		form % unit->GetEnergy();	
 		form % unit->GetFatigue();
-		if (unit->GetType(CellObject::Type::HERBIVORE))
-			form % "Herbivore";
-		else
-			form % "Carnivore";
 	} else {
 
 		if(object->GetType(CellObject::Type::PLANT)) {
@@ -390,13 +370,12 @@ boost::format Dialog::CreateStatistics(std::shared_ptr<FieldCell> cell) {
 				throw EvolvaException("Dialog::CreateStatistics, object->GetType(PLANT) failed.");		
 			form % plant->GetEnergy();
 			form % 0;
-			form % "Plant";
 		} else {
 			form % 0;
 			form % 0;
-			form % "Terrain object.";
 		}	
 	}
+	form % GetTypeName(object);	
 	return form;
 }
 
@@ -420,4 +399,24 @@ void Dialog::SpriteObjectClicked(int x, int y) {
 	}
 
 	ui->stats_textWindow->setPlainText(QString::fromStdString(form.str()));		
+}
+
+std::string Dialog::GetTypeName(std::shared_ptr<const CellObject> object) {
+	std::string obj_type;
+	if (object->GetType(CellObject::Type::CARNIVORE)) { 
+		if (object->GetType(CellObject::Type::FLESH))
+			obj_type = "carnivore_dead";
+		else
+			obj_type = "carnivore";
+	} else if (object->GetType(CellObject::Type::HERBIVORE)) {
+		if (object->GetType(CellObject::Type::FLESH))
+			obj_type = "herbivore_dead";
+		else
+			obj_type = "herbivore";
+	} else if (object->GetType(CellObject::Type::PLANT)) {
+		obj_type = "tree";
+	} else {
+		obj_type = "stone";
+	}	
+	return obj_type;
 }
