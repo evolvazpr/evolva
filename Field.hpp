@@ -5,9 +5,9 @@
 #include <random>
 
 #include "EvolvaException.hpp"
+#include "DialogProxy.hpp"
 
 class CellObject;
-class MovableObject;
 class NonMovableObject;
 class FieldCell;
 class Unit;
@@ -29,9 +29,13 @@ private:
 	Field(const Field&) = delete;
 	Field& operator=(const Field &) = delete;
 
-	mutable std::default_random_engine random_generator_;
+	mutable std::default_random_engine random_generator_; //!TODO: apply generator to all randoms
 	double mutability_;
 	bool InsertCellObject(std::shared_ptr<CellObject> object, const size_t x, const size_t y);
+	bool new_grass_[9];
+	bool keep_grass_[9];
+	bool new_tree_[9];
+	bool keep_tree_[9];
 
 public:
 	inline const size_t GetFfid() const { return ++ffid_; };
@@ -40,25 +44,27 @@ public:
 	size_t GetHeight() const;
 	bool IsCorrect(const size_t x, const size_t y) const;
 	std::shared_ptr<FieldCell> GetCell(const size_t x, const size_t y);
-	bool InsertObject(std::shared_ptr<MovableObject> object, const size_t x, const size_t y);
+	bool InsertObject(std::shared_ptr<Unit> object, const size_t x, const size_t y);
 	bool InsertObject(std::shared_ptr<NonMovableObject> object, const size_t x, const size_t y);
 	inline bool InsertNmo(std::shared_ptr<NonMovableObject> object, const size_t x, const size_t y) { return InsertObject(object, x, y);};
-	bool MoveObject(std::shared_ptr<MovableObject> object, const long x_steps, const long y_steps, const bool trim = false);
-	bool MoveObjectTo(std::shared_ptr<MovableObject> object, size_t x, size_t y, const bool trim = false);
+	bool MoveObject(std::shared_ptr<Unit> object, const long x_steps, const long y_steps, const bool trim = false);
+	bool MoveObjectTo(std::shared_ptr<Unit> object, size_t x, size_t y, const bool trim = false);
 	inline std::default_random_engine& Random() const { return random_generator_; };
 	inline double Mutability() const { return mutability_; };
-	bool Kill(std::shared_ptr<Unit> unit);
+	bool Kill(std::shared_ptr<Unit> unit, const size_t reason);
 	bool KillNmo(std::shared_ptr<NonMovableObject> object);
 	bool BeginCycle();
 	void Pause();
 	void Play();
 	bool IsPauseLoop() const;
 	size_t GetGlobalTurnCounter() const;
-	std::shared_ptr<MovableObject> GetCurrentObject();
-	std::shared_ptr<Unit> GetCurrentUnit();
-	std::shared_ptr<MovableObject> Next();
+	std::shared_ptr<Unit> GetCurrentObject();
+	bool Next();
 	std::shared_ptr<Unit> NextUnit();
 	bool IsCycleEnd() const;
+	void GrowPlants();
+	void LogAllUnits() const;
+
 	void f1();
 	void f2();
 };

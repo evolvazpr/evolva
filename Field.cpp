@@ -10,7 +10,6 @@
 
 #include <iostream>
 
-
 class FieldPimpl {
 friend class Field;
 private:
@@ -28,9 +27,36 @@ private:
 	FieldPimpl() = delete;
 	bool pause_;
 	size_t global_turns_;
+
+	const std::string GetReason(const size_t number) const;
 public:
 	~FieldPimpl();
 };
+
+const std::string FieldPimpl::GetReason(const size_t number) const {
+	switch(number) {
+		case 0:
+			return "age";
+		case 1:
+			return "battle injury";
+		case 2:
+			return "health";
+		case 3:
+			return "poison";
+		case 4:
+			return "maternal death";
+		case 5:
+			return "post maternal death";
+		case 6:
+			return "perinatal death";
+		case 7:
+			return "fatigue";
+		case 8:
+			return "lack of energy";
+		default:
+			return "unknown reason";
+	}
+}
 
 FieldPimpl::FieldPimpl(const size_t x, const size_t y) : width_(x), height_(y), cells_(boost::extents[x][y]) {
 	pause_ = true;
@@ -42,7 +68,7 @@ FieldPimpl::~FieldPimpl() {
 
 std::shared_ptr<Field> Field::instance_ = nullptr;
 
-Field::Field(const size_t x, const size_t y) : pimpl_(new FieldPimpl(x, y)) {
+Field::Field(const size_t x, const size_t y) : pimpl_(new FieldPimpl(x, y)), keep_grass_({0, 0, 0, 1, 1, 1, 0, 0, 0}), new_grass_({0, 0, 1, 0, 0, 0, 0, 0, 0}), keep_tree_({0, 0, 1, 1, 0, 0, 0, 0, 0}), new_tree_({0, 0, 1, 0, 0, 0, 0, 0, 0}) {
 	for (size_t i = 0; i < x; i++) {
 		for (size_t j = 0; j < y; j++) {
 			pimpl_->cells_[i][j] = std::make_shared<FieldCell>(i, j);
@@ -69,46 +95,15 @@ bool Field::InsertCellObject(std::shared_ptr<CellObject> object, const size_t x,
 	std::shared_ptr<FieldCell> cell = GetCell(x, y);
 	if (cell->IsEmpty()){
 		cell->SetObject(object);
-//		object->cell_->x_ = x; //the same as in MoveObjectTo????
-//		object->cell_->y_ = y;
 		return true;
 	}
-/*	else {
-		std::cout << "!!!!!!!   " << x << "  " << y << "  !!!!!!!!!!!!\n\n";
-		char c;
-		std::cin >> c;
-		return false;
-	}/**/
+	return false;
 }
 
-bool Field::InsertObject(std::shared_ptr<MovableObject> object, const size_t x, const size_t y) {
-//	auto grr = object.get();
-//	auto mhm = std::static_pointer_cast<CellObject>(object).get();
+bool Field::InsertObject(std::shared_ptr<Unit> object, const size_t x, const size_t y) {
 	bool insertion = InsertCellObject(std::static_pointer_cast<CellObject>(object), x, y);
-//	bool insertion = true;
 	if (insertion){
-		std::cout << "xxx\n";
-		f1();
 		pimpl_->movable_objects_.Insortion(object);
-		f1();
-		std::cout << "yyy\n";
-	/*	{
-			auto p1 = pimpl_->movable_objects_.position_;
-//			auto p2 = pimpl_->movable_objects_.previous_position_;
-//			auto p3 = pimpl_->movable_objects_.pushed_end_;
-			auto p4 = pimpl_->movable_objects_.end_;
-			pimpl_->movable_objects_.Begin();
-			std::cout << "que:\n";
-            while (1) {
-				std::cout << pimpl_->movable_objects_.Get()->GetId() << "\n";
-				if (pimpl_->movable_objects_.IsEnd()) break;
-				else pimpl_->movable_objects_.Next();
-            }
-            std::cout << "\n";
-            pimpl_->movable_objects_.position_ = p1;
-//            pimpl_->movable_objects_.previous_position_ = p2;
-            pimpl_->movable_objects_.end_ = p4;
-		}/**/
 		return true;
 	}
 	else return false;
@@ -118,12 +113,13 @@ bool Field::InsertObject(std::shared_ptr<NonMovableObject> object, const size_t 
 	bool insertion = InsertCellObject(std::static_pointer_cast<CellObject>(object), x, y);
 	if (insertion){
 		pimpl_->non_movable_objects_.push_back(object);
+		NonMovableObject &grr = *(pimpl_->non_movable_objects_.back().get());
 		return true;
 	}
 	else return false;
 }
 
-bool Field::MoveObjectTo(std::shared_ptr<MovableObject> object, size_t x, size_t y, const bool trim) {
+bool Field::MoveObjectTo(std::shared_ptr<Unit> object, size_t x, size_t y, const bool trim) {
 	std::shared_ptr<FieldCell> source_cell = object->cell_.lock();
 	if (source_cell->object_ != object) {
 		throw EvolvaException("Serious memory problem.");
@@ -146,35 +142,41 @@ bool Field::MoveObjectTo(std::shared_ptr<MovableObject> object, size_t x, size_t
 	return true;
 }
 
-bool Field::Kill(std::shared_ptr<Unit> unit) {
+bool Field::Kill(std::shared_ptr<Unit> unit, const size_t reason) {
 	auto cell = GetCell(unit->GetX(), unit->GetY());
 	if (cell->GetUnit() == unit) {
-		std::cout << unit->GetId() << " is dead\n";
+		logger << "Unit "<< unit->GetId() << " is dead: " << pimpl_->GetReason(reason) << "\n";
+		const size_t x = unit->GetX();
+		const size_t y = unit->GetY();
+		const double energy = unit->GetDna("normal_weight");
 		cell->RemoveObject();
-		unit->removed_ = true;
 		unit->alive_ = false;
+		std::cout << "nmobjs: " << pimpl_->non_movable_objects_.size() << "\n";
+		std::cout << "\n\nINSERT FLESH!!!! :  " << energy << "  " << InsertNmo(std::make_shared<Flesh>(energy), x, y) << "\n\n";
+		std::cout << "flesh: " << std::static_pointer_cast<Flesh>(GetCell(x, y)->GetObject())->GetDefaultEnergy() << "\n";
+		std::cout << "nmobjs: " << pimpl_->non_movable_objects_.size() << "\n";
+		return true;
 	}
-	else throw; //wow problem memory
+	else {
+		logger << "\nERROR: Possible lose of some object. Program will continue.\n";
+		return false;
+	}
 }
 
 bool Field::KillNmo(std::shared_ptr<NonMovableObject> object) {
 	for (size_t i = 0; i < pimpl_->non_movable_objects_.size(); ++i) {
 		if (object ==  pimpl_->non_movable_objects_[i]) {
-			GetCell(object->GetX(), object->GetY())->RemoveObject();
+			auto cell = GetCell(object->GetX(), object->GetY());
+			if (cell == nullptr) {
+				logger << "\nERROR: Possible lose of NonMovableObject. Program will continue.\n";
+				return false;
+			}
+			cell->RemoveObject();
 			if (pimpl_->non_movable_objects_.size() == 1) pimpl_->non_movable_objects_.clear();
 			else if (i + 1 ==  pimpl_->non_movable_objects_.size())  pimpl_->non_movable_objects_.pop_back();
 			else {
-				std::cout << "usuwanie\n";
-				std::cout << "x: " << pimpl_->non_movable_objects_[i]->GetX() << " y: " << pimpl_->non_movable_objects_[i]->GetY() << "\n";
-				std::cout << "x: " << object->GetX() << " y: " << object->GetY() << "\n";
-			//	pimpl_->non_movable_objects_[i].reset();
-			//	GetCell(object->GetX(), object->GetY())->RemoveObject();
-//				object->GetCell()->RemoveObject();
-		//		object.reset();
 				pimpl_->non_movable_objects_[i] =  pimpl_->non_movable_objects_.back();
 				pimpl_->non_movable_objects_.pop_back();
-				std::cout << "x: " << pimpl_->non_movable_objects_[i]->GetX() << " y: " << pimpl_->non_movable_objects_[i]->GetY() << "\n";
-
 			}
 			return true;
 		}
@@ -188,10 +190,13 @@ bool Field::IsCorrect(const size_t x, const size_t y) const {
 
 
 std::shared_ptr<FieldCell> Field::GetCell(const size_t x, const size_t y) {
+	if (x >= GetWidth() || y >= GetHeight()) {
+		return nullptr;
+	}
 	return pimpl_->cells_[x][y];
 }
 
-bool Field::MoveObject(std::shared_ptr<MovableObject> object, const long x_steps, const long y_steps, const bool trim) {
+bool Field::MoveObject(std::shared_ptr<Unit> object, const long x_steps, const long y_steps, const bool trim) {
 	const bool x_trim = (x_steps < 0 && static_cast<size_t>(-x_steps) > object->GetX());
 	const bool y_trim = (y_steps < 0 && static_cast<size_t>(-y_steps) > object->GetY());
 	if (trim) {
@@ -206,21 +211,17 @@ bool Field::BeginCycle() {
 	return true;
 }
 
-std::shared_ptr<MovableObject> Field::GetCurrentObject() {
+std::shared_ptr<Unit> Field::GetCurrentObject() {
 	return pimpl_->movable_objects_.Get();
 }
 
-std::shared_ptr<Unit> Field::GetCurrentUnit() {
-	return std::dynamic_pointer_cast<Unit>(GetCurrentObject());
-}
-
-std::shared_ptr<MovableObject> Field::Next() {
+bool Field::Next() {
 	// Take next turn. Then check whether the field is paused. Only non-paused
 	// field pass methods such Update() and Think().
 	pimpl_->movable_objects_.Next();
 	if (pimpl_->movable_objects_.empty()) {
 		std::cout << "NIOH!\n";
-		return nullptr;
+		return false;
 	}
 	if (!pimpl_->pause_) {
 		// If loop reaches its end, then increment global turn counter,
@@ -229,24 +230,28 @@ std::shared_ptr<MovableObject> Field::Next() {
 			pimpl_->global_turns_++;
 			pimpl_->movable_objects_.Sort();
 			pimpl_->movable_objects_.Begin();
+			//First, let the plants (and fleshes) grow.
+			GrowPlants();
+			for (size_t i = 0; i < pimpl_->non_movable_objects_.size(); ++i) {
+				auto nmo = pimpl_->non_movable_objects_[i];
+				if (nmo->GetType(CellObject::Type::EATABLE)) {
+					std::static_pointer_cast<Eatable>(nmo)->Grow();
+				}
+			}
 		}
-		// First, check is object an unit, then update object (body-related
+		// Then, check is object an unit, then update object (body-related
 		// issues, recalculating movement priority. Then, let an unit think.
 		if (pimpl_->movable_objects_.Get()->GetType(CellObject::Type::UNIT)) {
 			auto unit = std::dynamic_pointer_cast<Unit>(pimpl_->movable_objects_.Get());
-			if (unit->GetId() == 9) {
-				std::cout << "YOU!\n";
-			}
 			unit->Update();
-//			unit->Think();
 		}
 	}
-	// Method returns next object.
-	return field->GetCurrentObject();
+	return true;
 }
 
 std::shared_ptr<Unit> Field::NextUnit() {
-	return std::dynamic_pointer_cast<Unit>(Next());
+	Next();
+	return GetCurrentObject();
 }
 
 void Field::Play() {
@@ -278,6 +283,7 @@ void Field::f1() {
 void Field::f2() {
 	auto z = std::dynamic_pointer_cast<Unit>(pimpl_->movable_objects_.Get());
 	auto h = z;
+	Pause();
 	while (1) {
 		std::cout << z->GetId() << "\n";
 		std::cout << "preg: " << z->pregnant_ << "\n";
@@ -287,10 +293,108 @@ void Field::f2() {
 		pimpl_->movable_objects_.Next();
 		z = std::dynamic_pointer_cast<Unit>(pimpl_->movable_objects_.Get());
 		if (z == nullptr) break;
-		if (h->IsRemoved()) {
+		if (!h->IsAlive()) {
 			h = z;
 			z = std::dynamic_pointer_cast<Unit>(pimpl_->movable_objects_.Get());
 		}
 		if (z == h) break;
 	}
+	Play();
+}
+
+#define ADD_NEIGHBOUR(i, j) if (IsCorrect(i, j) && GetCell(i, j)->GetGroundType() == FieldCell::Ground::GRASS) ++neighbours
+#define ADD_NEIGHBOUR_TREE(i, j) if (IsCorrect(i, j) && !GetCell(i, j)->IsEmpty() && GetCell(i, j)->GetObject()->GetType(CellObject::Type::TREE)) ++neighbours
+
+void Field::GrowPlants() {
+	// Algorithm is inefficient and will fail if a new ground type is added
+	const size_t width = GetWidth();
+	const size_t height = GetHeight();
+	boost::multi_array<int, 2> cells(boost::extents[width][height]);
+	for (size_t i = 0; i < width; ++i) {
+		for (size_t j = 0; j < height; ++j) {
+			auto cell = GetCell(i, j);
+			int neighbours = 0;
+			ADD_NEIGHBOUR(i - 1, j - 1);
+			ADD_NEIGHBOUR(i - 1, j);
+			ADD_NEIGHBOUR(i - 1, j + 1);
+			ADD_NEIGHBOUR(i, j - 1);
+			ADD_NEIGHBOUR(i, j + 1);
+			ADD_NEIGHBOUR(i + 1, j - 1);
+			ADD_NEIGHBOUR(i + 1, j);
+			ADD_NEIGHBOUR(i + 1, j + 1);
+			if (cell->GetGroundType() == FieldCell::Ground::GRASS && neighbours == 8 && cell->IsEmpty()) {
+				std::cout << "New tree (in grass) at: " << i << ", " << j << "\n";
+				InsertNmo(std::make_shared<Tree>(100.0), i, j);
+			}
+			if (cell->GetGroundType() == FieldCell::Ground::GROUND && new_grass_[neighbours]){
+				cells[i][j] = 1;
+			}
+			else if (cell->GetGroundType() == FieldCell::Ground::GRASS && keep_grass_[neighbours]) {
+				cells[i][j] = 1;
+			}
+			else {
+				cells[i][j] = 0;
+			}
+		}
+	}
+	for (size_t i = 0; i < width; ++i) {
+		for (size_t j = 0; j < height; ++j) {
+			if (rand() % 1000 == 0) {
+				GetCell(i, j)->SetGroundType(FieldCell::Ground::GRASS);
+			}
+			else {
+				GetCell(i, j)->SetGroundType(cells[i][j] == 1 ? FieldCell::Ground::GRASS : FieldCell::Ground::GROUND);
+			}
+			cells[i][j] = 0;
+		}
+	}
+	for (size_t i = 0; i < width; ++i) {
+		for (size_t j = 0; j < height; ++j) {
+            auto cell = GetCell(i, j);
+			int neighbours = 0;
+			ADD_NEIGHBOUR_TREE(i - 1, j - 1);
+			ADD_NEIGHBOUR_TREE(i - 1, j);
+			ADD_NEIGHBOUR_TREE(i - 1, j + 1);
+			ADD_NEIGHBOUR_TREE(i, j - 1);
+			ADD_NEIGHBOUR_TREE(i, j + 1);
+			ADD_NEIGHBOUR_TREE(i + 1, j - 1);
+			ADD_NEIGHBOUR_TREE(i + 1, j);
+			ADD_NEIGHBOUR_TREE(i + 1, j + 1);
+			if (cell->IsEmpty() && new_tree_[neighbours]) {
+				cells[i][j] = 1;
+			}
+			else if (!cell->IsEmpty() && cell->GetObject()->GetType(CellObject::Type::TREE) && keep_tree_[neighbours]) {
+				cells[i][j] = 1;
+			}
+			else {
+				cells[i][j] = 0;
+			}
+		}
+	}
+	for (size_t i = 0; i < width; ++i) {
+		for (size_t j = 0; j < height; ++j) {
+			auto cell = GetCell(i, j);
+			if (rand() % 800 == 0) {
+				if (cell->IsEmpty()) {
+					std::cout << "New tree (random) at: " << i << ", " << j << "\n";
+					InsertNmo(std::make_shared<Tree>(100.0), i, j);
+				}
+			}
+			else {
+				if (cell->IsEmpty() && cells[i][j]) {
+				//	std::cout << "NEW TREEE!\n";
+					InsertNmo(std::make_shared<Tree>(100.0), i, j);
+				}
+				else if (!cell->IsEmpty()) {
+					if (cell->GetObject()->GetType(CellObject::Type::TREE) && !cells[i][j]) {
+						KillNmo(cell->GetNmo());
+					}
+				}
+			}
+		}
+	}
+}
+
+void Field::LogAllUnits() const {
+	return;
 }

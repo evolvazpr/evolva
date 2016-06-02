@@ -1,12 +1,17 @@
 #include "Field.hpp"
 #include "CellObject.hpp"
+#include <cstring>
 
 // CellObject
 
 CellObject::CellObject() : id_(field->GetFfid()) {
+	// Zero types
+	memset(&types_, 0, sizeof(bool) * 11);
 }
 
 CellObject::CellObject(const size_t id) : id_(id) {
+	// Zero types
+	memset(&types_, 0, sizeof(bool) * 11);
 }
 
 CellObject::~CellObject() {
@@ -18,24 +23,6 @@ bool CellObject::GetType(const CellObject::Type bit) const {
 
 void CellObject::SetType(const CellObject::Type bit, const bool value) {
 	types_[static_cast<unsigned char>(bit)] = value;
-}
-
-// MovableObject
-
-MovableObject::MovableObject() : CellObject() {
-	SetType(Type::MOVABLE, true);
-	removed_ = false;
-}
-
-MovableObject::~MovableObject() {
-}
-
-double MovableObject::GetMovePriority() const {
-	return 0.0;
-}
-
-bool MovableObject::Move(const int x, const int y, const bool trim) {
-	return field->MoveObject(std::static_pointer_cast<MovableObject>(shared_from_this()), x, y, trim);
 }
 
 // NonMovableObject
@@ -50,7 +37,7 @@ NonMovableObject::~NonMovableObject() {
 
 // Plant
 
-Plant::Plant() : NonMovableObject() {
+Plant::Plant(const double energy) : Eatable(0, -7.0, 28.0, 35.0, 5) {
 	SetType(Type::PLANT, true);
 }
 
@@ -70,7 +57,8 @@ double Plant::Eat(double energy) {
 
 // Tree
 
-Tree::Tree(double energy) : Plant() {
+Tree::Tree(double energy) : Plant(energy) {
+	SetType(Type::TREE, true);
 	default_energy_ = energy;
 	energy_ = default_energy_;
 }
@@ -85,8 +73,14 @@ NonPlant::NonPlant() : NonMovableObject() {
 	SetType(Type::PLANT, false);
 }
 
-// Creature
+// Flesh
 
-Creature::Creature() : MovableObject() {
-	SetType(Type::CREATURE, true);
+Flesh::Flesh(const double energy) : Eatable(energy, -5.24, 0.0, 0.0, -1) {
+	// -5.24 and zeros are chosen because: using this equation
+	// simple flesh with 100 energy will stand for 3 turns and
+	// disappear on 4th turn
+	SetType(Type::FLESH, true);
+}
+
+Flesh::~Flesh() {
 }

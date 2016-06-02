@@ -6,8 +6,9 @@
 #include <cmath>
 #include <vector>
 
-class Unit : public DnaUnit, public Creature {
+class Unit : public DnaUnit, public CellObject {
 friend class Field;
+friend class Tui;
 public:
 	Unit();
 	Unit(std::shared_ptr<DnaCode> dna_code);
@@ -15,6 +16,7 @@ public:
 	inline double GetEnergy() const { return energy_; };
 	inline double GetFatigue() const { return fatigue_; };
 	inline bool IsAlive() const { return alive_; };
+	bool operator <= (const std::shared_ptr<Unit> object) const;
 private:
 	/*< Configuration for thinking and updating functions. It provides several
 	parameters using to describe the behaviour of one given unit. It is inherited
@@ -45,7 +47,7 @@ private:
 	void CalculateDeathTime();
 	//! TODO: intelligence? swarm? :(
 	size_t Think(const double intelligence = NAN, std::shared_ptr<Unit> attacker = nullptr);
-	virtual double GetMovePriority() const;
+	double GetMovePriority() const;
 	bool Pregnant(std::shared_ptr<DnaCode> dna);
 	size_t Explore(double steps);
 	inline std::shared_ptr<Unit> GetUnit(){ return std::static_pointer_cast<Unit>(shared_from_this()); };
@@ -54,6 +56,9 @@ private:
 	template <class SC, class F> std::shared_ptr<SC> Action(double steps_limit, double max_steps, double radius, double efficiency, F conditions);
 	void GiveBirth(const int x, const int y);
 	void Miscarry();
+	inline bool IsCarnivore() const { return dna_["carnivore"] >= 50.0; };
+	inline bool IsHerbivore() const { return dna_["herbivore"] >= 50.0; };
+	size_t death_reason_;
 };
 
 #endif // _UNIT_HPP_

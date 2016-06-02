@@ -8,6 +8,8 @@ public:
 	using DnaUnit::DnaUnit;
 	using DnaUnit::dna_;
 	double variability_;
+	/*< Generates new dna codes based on given codes.
+	Codes are accessable as fields of class.*/
 	std::shared_ptr<DnaCode> Generate() const;
 };
 
