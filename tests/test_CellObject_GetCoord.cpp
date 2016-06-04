@@ -61,5 +61,4 @@ BOOST_AUTO_TEST_CASE(GetCoord)
 	BOOST_CHECK(t[0]->GetY() == 1);
 	BOOST_CHECK(t[1]->GetX() == 1);
 	BOOST_CHECK(t[1]->GetY() == 9);
-
 }

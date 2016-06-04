@@ -170,14 +170,13 @@ int main(int argc, char *argv[]) {
 //	field->KillNmo(field->GetCell(2,8)->GetNmo());
 
 	Tui tui;
-
+	gui->show();
 	for (int i = 0; i < 10; ++i) field->GrowPlants();
 	field->BeginCycle();
 	field->Play();
 
 //	Unit *xz = u[0].get();
 //	xz->IsRemoved();
-	gui->show();
 	a.exec();
 	return 0;
 }
