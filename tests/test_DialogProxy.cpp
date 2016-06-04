@@ -55,9 +55,6 @@ void Test() {
 	proxy << "fifth " << "sixth";
 	field->BeginCycle();
 	field->Play();
-	Unit *xz = u[0].get();
-	xz->IsRemoved();
-
 }
 
 int main(int argc, char *argv[]) {

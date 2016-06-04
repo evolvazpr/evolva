@@ -88,7 +88,6 @@ void EvolvaInit() {
 	BOOST_CHECK(u[0]->GetType(CellObject::Type::UNIT) == true);
 	BOOST_CHECK(u[0]->GetType(CellObject::Type::CARNIVORE) == false);
 	BOOST_CHECK(u[0]->GetType(CellObject::Type::HERBIVORE) == true);
-	BOOST_CHECK(u[0]->GetType(CellObject::Type::CREATURE) == true);
 
 	BOOST_CHECK(u[1]->GetType(CellObject::Type::MOVABLE) == true);
 	BOOST_CHECK(u[1]->GetType(CellObject::Type::NON_MOVABLE) == false);
@@ -98,7 +97,6 @@ void EvolvaInit() {
 	BOOST_CHECK(u[1]->GetType(CellObject::Type::UNIT) == true);
 	BOOST_CHECK(u[1]->GetType(CellObject::Type::CARNIVORE) == true);
 	BOOST_CHECK(u[1]->GetType(CellObject::Type::HERBIVORE) == false);
-	BOOST_CHECK(u[1]->GetType(CellObject::Type::CREATURE) == true);
 
 	BOOST_CHECK(t[0]->GetType(CellObject::Type::MOVABLE) == false);
 	BOOST_CHECK(t[0]->GetType(CellObject::Type::NON_MOVABLE) == true);
@@ -108,7 +106,6 @@ void EvolvaInit() {
 	BOOST_CHECK(t[0]->GetType(CellObject::Type::UNIT) == false);
 	BOOST_CHECK(t[0]->GetType(CellObject::Type::CARNIVORE) == false);
 	BOOST_CHECK(t[0]->GetType(CellObject::Type::HERBIVORE) == false);
-	BOOST_CHECK(t[0]->GetType(CellObject::Type::CREATURE) == false);
 
 	BOOST_CHECK(t[1]->GetType(CellObject::Type::MOVABLE) == false);
 	BOOST_CHECK(t[1]->GetType(CellObject::Type::NON_MOVABLE) == true);
@@ -118,7 +115,6 @@ void EvolvaInit() {
 	BOOST_CHECK(t[1]->GetType(CellObject::Type::UNIT) == false);
 	BOOST_CHECK(t[1]->GetType(CellObject::Type::CARNIVORE) == false);
 	BOOST_CHECK(t[1]->GetType(CellObject::Type::HERBIVORE) == false);
-	BOOST_CHECK(t[1]->GetType(CellObject::Type::CREATURE) == false);
 }
 
 BOOST_AUTO_TEST_CASE(GetType)

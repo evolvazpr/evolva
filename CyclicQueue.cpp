@@ -1,8 +1,14 @@
 #include "CyclicQueue.hpp"
 #include "CellObject.hpp"
+#include "Unit.hpp"
+#include <iostream>
+#include "EvolvaException.hpp"
+#include <limits>
 
 bool CyclicQueue::Next() {
-	if (empty()) return (end_ = true); // ?
+	if (empty()) {
+		return (end_ = true); // ?
+	}
 	++position_;
 	end_ = false;
 	while (!empty()) {
@@ -10,7 +16,9 @@ bool CyclicQueue::Next() {
 			position_ = begin();
 			end_ = true;
 		}
-		if ((*position_)->IsRemoved()) Remove();
+		if (!(*position_)->IsAlive()) {
+			Remove();
+		}
 		else return end_;
 	}
 	return end_;
@@ -21,31 +29,59 @@ void CyclicQueue::Begin() {
 	end_ = false;
 }
 
-void CyclicQueue::Begin(CyclicQueue::iterator beggining) {
-//	splice_after(before_begin(), *this, beggining, end());
-	Begin();
-}
-
-#include <iostream>
-
-void CyclicQueue::Insortion(std::shared_ptr<MovableObject> new_object) {
-	std::cout << "cq size bf: " << size() << "\n";
+void CyclicQueue::Insortion(std::shared_ptr<Unit> new_object, const bool keep_position) {
 	if (empty()) {
 		push_back(new_object);
 		position_ = begin();
-		std::cout << "cq size af: " << size() << "\n";
 		return;
+	}
+	size_t position_id = std::numeric_limits<size_t>::max();
+	if (keep_position) {
+		end_ = false;
+		bool empty_queue = false;
+		while (!((*position_)->IsAlive())) {
+			if (!Next()) {
+				empty_queue = true;
+				break;
+			}
+		}
+		if (empty_queue) {
+			push_back(new_object);
+			position_ = begin();
+			return;
+		}
+		position_id = (*position_)->GetId();
 	}
 	bool inserted = false;
 	for (iterator i = begin(); i != end(); ++i) {
-		if (!new_object->operator <= (**i)) {
+		bool condition = false;
+		try {
+			condition = !new_object->operator <= (*i);
+		}
+		catch (const EvolvaException &e) {
+			//tolog
+			std::cout << "\nERROR: Possible lost of cyclic queue data.\n Cyclic queue is corrupted but program will continue.\nDetails: " << e.what() << "\n";
+		}
+		if (condition) {
 			insert(i, new_object);
 			inserted = true;
 			break;
 		}
 	}
 	if (!inserted) push_back(new_object);
-	std::cout << "cq size af: " << size() << "\n";
+	if (keep_position) {
+		Begin();
+		if (position_id != std::numeric_limits<size_t>::max()) {
+			while ((*position_)->GetId() != position_id) {
+				if (!Next()) {
+					Begin();
+					break;
+				}
+			}
+		}
+	}
+
+	/*
 	auto address = &(*position_);
 	position_ = begin();
 	int i = 0;
@@ -54,30 +90,11 @@ void CyclicQueue::Insortion(std::shared_ptr<MovableObject> new_object) {
 		else ++position_;
 	}
 	position_ = begin();
-	std::cout << "real size: " << i << "\n";
 	while (1) {
 		auto b = &(*position_);
 		if (b != address) ++position_;
 		else break;
-	}
-
-/*
-	iterator j = before_begin();
-	for (iterator i = begin(); i != end(); ++i) {
-		if (!new_object->operator <= (**i)) {
-			if (j == position_) {
-				insert(j, new_object);
-				++(--position_);
-			}
-	/*		else if (j == previous_position_) {
-				previous_position_ = insert_after(j, new_object);
-			}
-			else /**insert_after(j, new_object);
-			return;
-		}
-		j = i;
-	}
-	insert_after(j, new_object); // dobrze?/**/
+	}/**/
 }
 
 void CyclicQueue::Remove() {
@@ -99,17 +116,10 @@ void CyclicQueue::Sort() {
 	CyclicQueue queue;
 	Begin();
 	do {
-		std::shared_ptr<MovableObject> object = *position_;
-		queue.Insortion(object);
+		std::shared_ptr<Unit> object = *position_;
+		queue.Insortion(object, false);
 	} while(!Next());
 	clear();
 	operator = (queue);
+	Begin();
 }
-/*
-CyclicQueue::CyclicQueue(const CyclicQueue &object) : list(object) {
-	end_ = object.end_;
-	std::advance(previous_position_, std::distance(object.begin(), object.previous_position_);
-	std::advance(position_, std::distance(object.begin(), object.position_);
-	std::advance(pushed_end_, std::distance(object.begin(), object.pushed_end_);
-}
-/**/

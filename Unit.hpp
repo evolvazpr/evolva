@@ -1,17 +1,14 @@
 #ifndef _UNIT_HPP_
 #define _UNIT_HPP_
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
-
 #include "CellObject.hpp"
 #include "DnaUnit.hpp"
-
+#include <cmath>
 #include <vector>
 
-class Unit : public DnaUnit, public Creature {
+class Unit : public DnaUnit, public CellObject {
 friend class Field;
+friend class Tui;
 public:
 	Unit();
 	Unit(std::shared_ptr<DnaCode> dna_code);
@@ -19,6 +16,7 @@ public:
 	inline double GetEnergy() const { return energy_; };
 	inline double GetFatigue() const { return fatigue_; };
 	inline bool IsAlive() const { return alive_; };
+	bool operator <= (const std::shared_ptr<Unit> object) const;
 private:
 	/*< Configuration for thinking and updating functions. It provides several
 	parameters using to describe the behaviour of one given unit. It is inherited
@@ -26,15 +24,15 @@ private:
 	from the DNA generator. */
 	/*< Status contains transitory status of a unit. It is update each turn
 	using Update() method. */
-		size_t turns_;				/*< Current lifetime in turns */
-		bool sleep_;				/*< Is unit sleeping. */
-		double fatigue_;			/*< Level of fatigue (0 - 100). */
-		double health_;				/*< Level of health (0 - 100). */
-		double speed_;				/*< Calculated level of speed (0 - 100). */
-		double attractiveness_;			/*< Calculated level of attractiveness (0 - 100). */
-		double strength_;			/*< Calculated level of strength. */
-		double energy_;				/*< Level stored in nutritions in organism. */
-		double poison_;				/*< Level of poison. */
+		size_t turns_;										/*< Current lifetime in turns */
+		bool sleep_;										/*< Is unit sleeping. */
+		double fatigue_;									/*< Level of fatigue (0 - 100). */
+		double health_;										/*< Level of health (0 - 100). */
+		double speed_;										/*< Calculated level of speed (0 - 100). */
+		double attractiveness_;								/*< Calculated level of attractiveness (0 - 100). */
+		double strength_;									/*< Calculated level of strength. */
+		double energy_;										/*< Level stored in nutritions in organism. */
+		double poison_;										/*< Level of poison. */
 		size_t death_;
 		bool pregnant_;
 		std::shared_ptr<DnaCode> child_dna_code_;
@@ -48,8 +46,8 @@ private:
 	void UpdateSpeed();
 	void CalculateDeathTime();
 	//! TODO: intelligence? swarm? :(
-	size_t Think(const double intelligence = std::isnan(0.0), std::shared_ptr<Unit> attacker = nullptr);
-	virtual double GetMovePriority() const;
+	size_t Think(const double intelligence = NAN, std::shared_ptr<Unit> attacker = nullptr);
+	double GetMovePriority() const;
 	bool Pregnant(std::shared_ptr<DnaCode> dna);
 	size_t Explore(double steps);
 	inline std::shared_ptr<Unit> GetUnit(){ return std::static_pointer_cast<Unit>(shared_from_this()); };
@@ -58,6 +56,9 @@ private:
 	template <class SC, class F> std::shared_ptr<SC> Action(double steps_limit, double max_steps, double radius, double efficiency, F conditions);
 	void GiveBirth(const int x, const int y);
 	void Miscarry();
+	inline bool IsCarnivore() const { return dna_["carnivore"] >= 50.0; };
+	inline bool IsHerbivore() const { return dna_["herbivore"] >= 50.0; };
+	size_t death_reason_;
 };
 
 #endif // _UNIT_HPP_

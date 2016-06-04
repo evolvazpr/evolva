@@ -35,7 +35,7 @@ void KillTest(std::shared_ptr <Unit> u[], int x, int y) {
 	Tui tui;
 	tui.PrintField();
 	BOOST_CHECK(field->MoveObjectTo(u[1], x, y, 1) == false);
-	field->Kill(u[0]);
+	field->Kill(u[0], 8);
 	sleep(1);
 	tui.PrintField();
 	sleep(1);

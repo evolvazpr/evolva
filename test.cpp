@@ -8,15 +8,47 @@
 #undef protected
 #undef private
 #include <iostream>
-#include "dialog.hpp"
-#include <QApplication>
+
+
+
+
+    #include <unistd.h>   //_getch*/
+    #include <termios.h>  //_getch*/
+
+
+
+char getch(){
+    char buf=0;
+    struct termios old={0};
+    fflush(stdout);
+    if(tcgetattr(0, &old)<0)
+        perror("tcsetattr()");
+    old.c_lflag&=~ICANON;
+    old.c_lflag&=~ECHO;
+    old.c_cc[VMIN]=1;
+    old.c_cc[VTIME]=0;
+    if(tcsetattr(0, TCSANOW, &old)<0)
+        perror("tcsetattr ICANON");
+    if(read(0,&buf,1)<0)
+        perror("read()");
+    old.c_lflag|=ICANON;
+    old.c_lflag|=ECHO;
+    if(tcsetattr(0, TCSADRAIN, &old)<0)
+        perror ("tcsetattr ~ICANON");
+//    printf("%c\n",buf);
+    return buf;
+ }
+
+
 #include "CyclicQueue.hpp"
 
 
-int main(int argc, char *argv[]) {
-	QApplication a(argc, argv);
-	Dialog *gui = Dialog::GetInstance(nullptr, 30, 30);
-	field = Field::GetInstance(30, 30);
+std::shared_ptr<Field> field;
+
+int main(void) {
+
+	field = Field::GetInstance(60, 20);
+
 	{
 
 		std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();
@@ -177,7 +209,16 @@ int main(int argc, char *argv[]) {
 
 //	Unit *xz = u[0].get();
 //	xz->IsRemoved();
-	gui->show();
-	a.exec();
+
+	while(1) {
+		tui.PrintField();
+	//	field->f2();
+//		field->LogAllUnits();
+		if (getch() == ' ') break;
+		if (!field->Next()) break;
+	}
+//	std::cout << "kuniec, c:" << u[0].use_count() << "\n" << u[1].use_count() << "\n\n";
+
+
 	return 0;
 }

@@ -11,6 +11,7 @@ class DnaUnit {
 public:
 	DnaUnit();
 	virtual ~DnaUnit();
+	inline double GetDna(const std::string &entry) { return dna_[entry]; };
 protected:
 	DnaUnit(std::shared_ptr<DnaCode> dna_code);
 	std::shared_ptr<DnaCode> dna_code_;

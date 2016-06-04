@@ -45,13 +45,10 @@ void Test(Dialog* dialog) {
 	dialog->RemoveSurfaceObject(9, 9);
 	dialog->RemoveSurfaceObject(0, 0);
 	dialog->RemoveSurfaceObject(1, 5);
-	dialog->CreateSurfaceObject(Dialog::Surface::SAND, 9, 9);
+	dialog->CreateSurfaceObject(FieldCell::Ground::GROUND, 9, 9);
 	dialog->RemoveSurfaceObject(9, 9);
 	field->BeginCycle();
 	field->Play();
-	Unit *xz = u[0].get();
-	xz->IsRemoved();
-
 }
 
 int main(int argc, char *argv[]) {

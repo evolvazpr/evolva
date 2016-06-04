@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(GetCoord)
 	char *argv[2];
 	argv[0] = (char *)"insert";
 	QApplication a(argc, argv); //only for QApplication creation
-	Dialog* w = Dialog::GetInstance();
+	Dialog* w = Dialog::GetInstance(nullptr, 10, 10);
 	(void)w;
 
 	field = Field::GetInstance(10, 10); 

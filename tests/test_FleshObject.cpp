@@ -21,8 +21,8 @@ int main(int argc, char *argv[]) {
 	Dialog* dialog = Dialog::GetInstance();
 	field = Field::GetInstance(10, 10);
 	std::shared_ptr<Flesh> u[2];
-	u[0] = std::make_shared<Flesh>(CellObject::Type::HERBIVORE);
-	u[1] = std::make_shared<Flesh>(CellObject::Type::CARNIVORE);
+	u[0] = std::make_shared<Flesh>(0.3);
+	u[1] = std::make_shared<Flesh>(0.4);
 	field->InsertNmo(u[0], 2, 2);
 	field->InsertNmo(u[1], 3, 3);
 	dialog->show();

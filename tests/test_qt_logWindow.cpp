@@ -51,8 +51,6 @@ void Test(Dialog *w) {
 	w->AppendTextToLog("test_3");
 	field->BeginCycle();
 	field->Play();
-	Unit *xz = u[0].get();
-	xz->IsRemoved();
 }
 
 int main(int argc, char *argv[]) {
