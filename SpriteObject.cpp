@@ -39,7 +39,6 @@ SpriteObject::SpriteObject(QMutex *mut, QObject * parent, const uint id, const i
 	actual_sprite_ = 0;
 	setPos(x, y);
 	setZValue(1);
-	mutex = mut;
 }
 
 /**

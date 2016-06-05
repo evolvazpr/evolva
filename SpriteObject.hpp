@@ -19,7 +19,6 @@
 class SpriteObject : public QObject, public QGraphicsPixmapItem {
 	Q_OBJECT
 private:
-	QMutex *mutex;
 	const int id_;
 	qreal dx_;
 	qreal dy_;
@@ -33,7 +32,7 @@ protected:
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
 
 public:
-	SpriteObject(QMutex *mutex, QObject* parent, const uint id, const int x, const int y, 
+	SpriteObject(QObject* parent, const uint id, const int x, const int y, 
 		    QString path, const int sprites_cnt, const uint pixsize);
 	virtual ~SpriteObject();
 	void move(const int x, const int y);
