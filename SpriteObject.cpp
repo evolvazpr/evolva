@@ -22,7 +22,7 @@ static const qreal INCREMENT_PER_TICK = 5.0;
  * @param pixsize - describes graphics cell size
  */
 
-SpriteObject::SpriteObject(QMutex *mut, QObject * parent, const uint id, const int x, const int y, 
+SpriteObject::SpriteObject(QObject * parent, const uint id, const int x, const int y, 
 		          const QString sprite_path, const int sprites_cnt, const uint pixsize) : 
 			  QObject(parent), QGraphicsPixmapItem(),
 		       	  id_(id), sprites_cnt_(sprites_cnt),

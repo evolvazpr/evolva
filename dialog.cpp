@@ -23,8 +23,7 @@ static const uint PIXELS_PER_OBJECT = 25;
  * @param parent - parent for Qt API (no need to call delete thanks to it).
  */
 Dialog::Dialog(QWidget *parent, const int width, const int height) :
-	QDialog(parent), settings_("gui.xml"),
-	ui(new Ui::Dialog), width_(width), height_(height) { 
+	QDialog(parent), ui(new Ui::Dialog), width_(width), height_(height) { 
 	Qt::WindowFlags flags = Qt::WindowTitleHint | Qt::WindowSystemMenuHint;
 	flags |= Qt::WindowCloseButtonHint | Qt::WindowMinMaxButtonsHint;
 	
@@ -71,7 +70,7 @@ Dialog * Dialog::GetInstance(QWidget *parent, const int width, const int height)
  * @brief pushButton action method.
  * Method called when "Kolejna tura" button was clicked.
  */
-void Dialog::on_pushButton_clicked() {  
+void Dialog::on_pushButton_clicked() {	
 	emit NextLogicIteration();
 }
 /**
@@ -100,27 +99,23 @@ qreal Dialog::CalculateY(const int y) {
  * @param x - field's x coordinate of object.
  * @param y - field's y coordinate of object.
  */
-void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
+void Dialog::CreateObject(const uint id, QString path, uint sprite_cnt, const int x, const int y) {
 	int x_pos = CalculateX(x);
 	int y_pos = CalculateY(y);
-	int sprite_cnt = 1;
-	QMutexLocker lock(&gui_mutex_);
 	SpriteObject *sprite_object;
 	std::string obj_type;
 	QString sprite_path;
-	obj_type = GetTypeName(object);
-	sprite_path = QString::fromStdString(settings_[obj_type][std::string("path")]);
-	sprite_cnt = settings_[obj_type][std::string("sprite_cnt")];
-	sprite_object = new SpriteObject(&gui_mutex_, scene->parent(), object->GetId(), x_pos, y_pos, 
-					sprite_path, sprite_cnt, PIXELS_PER_OBJECT);
+	sprite_object = new SpriteObject(scene->parent(), id, x_pos, y_pos, 
+					path, sprite_cnt, PIXELS_PER_OBJECT);
 	scene->addItem(sprite_object);
 	
 	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(AnimationFinished()), 
-			this, SLOT(AnimationFinished()));
+			this, SIGNAL(ClearMutex()));
 	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(wasClicked(int, int)), this, 
 			SLOT(SpriteObjectClicked(int, int)));
 	QObject::connect(&timer_, SIGNAL(timeout()), dynamic_cast<QObject *>(sprite_object), 
 			SLOT(animate()));
+	emit ClearMutex();
 }
 
 /**
@@ -133,7 +128,7 @@ SpriteObject* Dialog::SearchObject(const uint id) {
 	SpriteObject *ptr;
 	for (auto &it : obj_list) {
 		if (it->type() != QGraphicsPixmapItem::Type) {
-			ptr = dynamic_cast<SpriteObject *>(it);
+			ptr = dynamic_cast<SpriteObject *>(it); //How to not to cast?
 			if (ptr == nullptr)
 				throw EvolvaException("Dialog::SearchObject! IT SHOULD NOT OCCURE!");
 			if(ptr->id() == id)
@@ -151,11 +146,9 @@ SpriteObject* Dialog::SearchObject(const uint id) {
  * @param x - <b>realative field (not graphical) steps</b> in x direction to make.
  * @param y - <b>realative field (not graphical) steps</b> in y direction to make.
  */
-void Dialog::MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
-	gui_mutex_.lock();
-	SpriteObject *roundObject = SearchObject(object->GetId());
+void Dialog::MoveObject(const uint id, const int x, const int y) {
+	SpriteObject *roundObject = SearchObject(id);
 	if (!roundObject) {
-		gui_mutex_.unlock();
 		throw EvolvaException("Dialog::moveObject - object not found!\n");
 	}
 	roundObject->move(CalculateX(x), CalculateY(y));	
@@ -167,23 +160,18 @@ void Dialog::MoveObject(std::shared_ptr<const CellObject> object, const int x, c
  * @param x - <b>real field's x coordinate</b> in which RoundObject will be placed.
  * @param y - <b>real field's y coordinate</b> in which RoundObject will be placed.
  */
-void Dialog::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y) {
-	gui_mutex_.lock();
-	SpriteObject *roundObject = SearchObject(object->GetId());
+void Dialog::MoveObjectTo(const uint id, const int x, const int y) {
+	SpriteObject *roundObject = SearchObject(id);
 	int x_old, y_old, dx, dy;
-	if (!object) {
-		gui_mutex_.unlock();
+	if (!roundObject) {
 		throw EvolvaException("Dialog::moveObjectTo - object not found!\n");
 	}
-	//IncrementAnimations(roundObject);
 
 	x_old = roundObject->x();
 	y_old = roundObject->y();
 
 	dx = CalculateX(x) - x_old;
 	dy = CalculateY(y) - y_old;
-
-
 
 	roundObject->move(dx, dy);
 }
@@ -192,15 +180,15 @@ void Dialog::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x,
  * @brief Remove (delete) specific SpriteObject.
  * @param object - shared_ptr to object which will be deleted from GUI.
  */
-void Dialog::RemoveObject(std::shared_ptr<const CellObject> object) {
-	QMutexLocker lock(&gui_mutex_);
-	SpriteObject *roundObject = SearchObject(object->GetId());
+void Dialog::RemoveObject(const uint id) {
+	SpriteObject *roundObject = SearchObject(id);
 
 	if (!roundObject) 
 		throw EvolvaException("Dialog::removeObject - object not found!\n");	
 
 	scene->removeItem(roundObject);
 	delete(roundObject);
+	emit ClearMutex();
 }
 
 /**
@@ -209,7 +197,7 @@ void Dialog::RemoveObject(std::shared_ptr<const CellObject> object) {
  * Reason for this counter is described in Dialog::IncrementAnimations method description.
  */
 void Dialog::AnimationFinished() {
-	gui_mutex_.unlock();
+	emit ClearMutex();
 }
 
 
@@ -220,25 +208,11 @@ void Dialog::AnimationFinished() {
  * @param x - x coordinate.
  * @param y - y coordinate.
  */
-void Dialog::CreateSurfaceObject(const FieldCell::Ground surface, const int x, const int y) {
-	QString file;
-	std::string xml_cmd;
-	QMutexLocker lock(&gui_mutex_);
-	switch (surface) {
-	case FieldCell::Ground::GRASS :
-		xml_cmd = "grass";
-		break;
-	case FieldCell::Ground::GROUND :
-		xml_cmd = "soil";
-		break;
-	default:
-		throw EvolvaException("Wrong surface_type in CreateSurfaceObject!");
-		break;	
-	}
-	
-	QPixmap pix_map(QString::fromStdString(settings_[xml_cmd]["path"]));
+void Dialog::CreateSurfaceObject(const QString path, const int x, const int y) {	
+	QPixmap pix_map(path);
 	if (pix_map.isNull())
-		throw EvolvaException("Sprite \"" + xml_cmd + "\" could not have been loaded. Aborting program.\nCheck if gui.xml is correct.");
+		throw EvolvaException("Sprite could not have been loaded." 
+			"Aborting program.\nCheck if gui.xml is correct.");
 	
 	pix_map = pix_map.scaled(PIXELS_PER_OBJECT, PIXELS_PER_OBJECT, 
 				 Qt::IgnoreAspectRatio, 
@@ -246,6 +220,7 @@ void Dialog::CreateSurfaceObject(const FieldCell::Ground surface, const int x, c
 	QGraphicsPixmapItem *rect = new QGraphicsPixmapItem(pix_map);
 	rect->setOffset(CalculateX(x), CalculateY(y));
 	scene->addItem(rect);
+	emit ClearMutex();
 }
 
 /**
@@ -255,13 +230,13 @@ void Dialog::CreateSurfaceObject(const FieldCell::Ground surface, const int x, c
  */
 void Dialog::RemoveSurfaceObject(const int x, const int y)
 {
-	QMutexLocker lock(&gui_mutex_);
 	QTransform test;
 	QGraphicsItem *item = scene->itemAt(CalculateX(x), CalculateY(y), test);
 	if (!item)
 		return;
 	scene->removeItem(item);
-	delete(item);	
+	delete(item);
+	emit ClearMutex();	
 }
 
 
@@ -337,7 +312,7 @@ boost::format Dialog::CreateStatistics(std::shared_ptr<FieldCell> cell) {
 			form % 0;
 		}	
 	}
-	form % GetTypeName(object);	
+	form % "does not work";	
 	return form;
 }
 
@@ -363,22 +338,4 @@ void Dialog::SpriteObjectClicked(int x, int y) {
 	ui->stats_textWindow->setPlainText(QString::fromStdString(form.str()));		
 }
 
-std::string Dialog::GetTypeName(std::shared_ptr<const CellObject> object) {
-	std::string obj_type;
-	if (object->GetType(CellObject::Type::CARNIVORE)) { 
-		if (object->GetType(CellObject::Type::FLESH))
-			obj_type = "carnivore_dead";
-		else
-			obj_type = "carnivore";
-	} else if (object->GetType(CellObject::Type::HERBIVORE)) {
-		if (object->GetType(CellObject::Type::FLESH))
-			obj_type = "herbivore_dead";
-		else
-			obj_type = "herbivore";
-	} else if (object->GetType(CellObject::Type::PLANT)) {
-		obj_type = "tree";
-	} else {
-		obj_type = "stone";
-	}	
-	return obj_type;
-}
+

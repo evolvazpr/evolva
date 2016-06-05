@@ -7,7 +7,7 @@
 #include "Unit.hpp"
 #include <vector>
 #include <boost/multi_array.hpp>
-#include "dialog.hpp"
+#include "Application.hpp"
 
 #include <iostream>
 std::shared_ptr<Field> field;
@@ -94,7 +94,7 @@ size_t Field::GetHeight() const {
 }
 
 bool Field::InsertCellObject(std::shared_ptr<CellObject> object, const size_t x, const size_t y) {
-	Dialog* gui = Dialog::GetInstance();
+	Logic* gui = Logic::GetInstance();
 	std::shared_ptr<FieldCell> cell = GetCell(x, y);
 	if (cell->IsEmpty()){
 		cell->SetObject(object);
@@ -124,7 +124,7 @@ bool Field::InsertObject(std::shared_ptr<NonMovableObject> object, const size_t 
 }
 
 bool Field::MoveObjectTo(std::shared_ptr<Unit> object, size_t x, size_t y, const bool trim) {
-	Dialog* gui = Dialog::GetInstance();
+	Logic* gui = Logic::GetInstance();
 	std::shared_ptr<FieldCell> source_cell = object->cell_.lock();
 	if (source_cell->object_ != object) {
 		throw EvolvaException("Serious memory problem.");
@@ -148,7 +148,7 @@ bool Field::MoveObjectTo(std::shared_ptr<Unit> object, size_t x, size_t y, const
 }
 
 bool Field::Kill(std::shared_ptr<Unit> unit, const size_t reason) {
-	Dialog* gui = Dialog::GetInstance();
+	Logic* gui = Logic::GetInstance();
 	auto cell = GetCell(unit->GetX(), unit->GetY());
 	if (cell->GetUnit() == unit) {
 		//logger << "Unit "<< unit->GetId() << " is dead: " << pimpl_->GetReason(reason) << "\n";
@@ -171,7 +171,7 @@ bool Field::Kill(std::shared_ptr<Unit> unit, const size_t reason) {
 }
 
 bool Field::KillNmo(std::shared_ptr<NonMovableObject> object) {
-	Dialog* gui = Dialog::GetInstance();
+	Logic* gui = Logic::GetInstance();
 	for (size_t i = 0; i < pimpl_->non_movable_objects_.size(); ++i) {
 		if (object ==  pimpl_->non_movable_objects_[i]) {
 			auto cell = GetCell(object->GetX(), object->GetY());
@@ -315,7 +315,7 @@ void Field::f2() {
 #define ADD_NEIGHBOUR_TREE(i, j) if (IsCorrect(i, j) && !GetCell(i, j)->IsEmpty() && GetCell(i, j)->GetObject()->GetType(CellObject::Type::TREE)) ++neighbours
 
 void Field::GrowPlants() {
-	Dialog *gui = Dialog::GetInstance();
+	Logic *gui = Logic::GetInstance();
 	// Algorithm is inefficient and will fail if a new ground type is added
 	const size_t width = GetWidth();
 	const size_t height = GetHeight();
