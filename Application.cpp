@@ -19,34 +19,33 @@ Logic::Logic(QMutex *mutex) : QObject(), mutex_(mutex) {}
 
 void Logic::LogicIteration() {
 	Tui tui;
-	std::cout << "LOGIC!\n";
 	field_->Next();
 	tui.PrintField();
 }
 
 void Logic::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
-//	mutex_->lock();
+	mutex_->lock();
 	emit CreateObject_s(object->GetId(), GetObjectType(object), x, y);
 }
 void Logic::CreateSurfaceObject(const FieldCell::Ground ground_type, const int x, const int y) {
-//	mutex_->lock();
+	mutex_->lock();
 	emit CreateSurfaceObject_s(GetGroundType(ground_type), x, y);
 }
 void Logic::RemoveSurfaceObject(const int x, const int y) {
-//	mutex_->lock();
+	mutex_->lock();
 	emit RemoveSurfaceObject_s(x, y);
 }
 void Logic::MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
-//	mutex_->lock();
+	mutex_->lock();
 	emit MoveObject_s(object->GetId(), x, y);
 }
 void Logic::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y) {
-//	mutex_->lock();
+	mutex_->lock();
 	emit MoveObjectTo_s(object->GetId(), x, y);
 }
 
 void Logic::RemoveObject(std::shared_ptr<const CellObject> object) {
-//	mutex_->lock();
+	mutex_->lock();
 	emit RemoveObject_s(object->GetId());
 }
 
@@ -219,12 +218,32 @@ void Application::CreateObject(const uint id, const QString type, const int x, c
 	QString path = QString::fromStdString(gui_settings_[type_s]["path"]);
 	int sprite_cnt = gui_settings_[type_s]["sprite_cnt"];
 	dialog_->CreateObject(id, path, sprite_cnt, x, y);	
+	ClearMutex();
 }
 
 void Application::CreateSurfaceObject(const QString type, const int x, const int y) {
 	std::string type_s = type.toStdString();
 	QString path = QString::fromStdString(gui_settings_[type_s]["path"]);
 	dialog_->CreateSurfaceObject(path, x, y);
+	ClearMutex();
+}
+
+void Application::RemoveSurfaceObject(const int x, const int y) {
+	dialog_->RemoveSurfaceObject(x, y);
+	ClearMutex();
+}
+
+void Application::MoveObject(const uint id, const int x, const int y) {
+	dialog_->MoveObject(id, x, y);
+}
+
+void Application::MoveObjectTo(const uint id, const int x, const int y) {
+	dialog_->MoveObjectTo(id, x, y);
+}
+
+void Application::RemoveObject(const uint id) {
+	dialog_->RemoveObject(id);
+	ClearMutex();		
 }
 
 void Application::ConnectSignals() {
@@ -233,11 +252,13 @@ void Application::ConnectSignals() {
 		this, SLOT(CreateObject(const uint, const QString, const int, const int)));
 	connect(logic_, SIGNAL(CreateSurfaceObject_s(const QString, const int, const int)),
 		this, SLOT(CreateSurfaceObject(const QString, const int, const int)));
+	connect(logic_, SIGNAL(RemoveSurfaceObject_s(const int, const int)),
+		this, SLOT(RemoveSurfaceObject(const int, const int)));
 	connect(logic_, SIGNAL(MoveObject_s(const uint, const int, const int)), 
-		dialog_, SLOT(MoveObject(const uint, const int, const int)));
+		this, SLOT(MoveObject(const uint, const int, const int)));
 	connect(logic_, SIGNAL(MoveObjectTo_s(const uint, const int, const int)),
-		dialog_, SLOT(MoveObjectTo(const uint, const int, const int)));
-	connect(logic_, SIGNAL(RemoveObject_s(const uint)), dialog_, SLOT(RemoveObject(const uint)));
+		this, SLOT(MoveObjectTo(const uint, const int, const int)));
+	connect(logic_, SIGNAL(RemoveObject_s(const uint)), this, SLOT(RemoveObject(const uint)));
 	connect(dialog_, SIGNAL(ClearMutex()), this, SLOT(ClearMutex()));
 }
 

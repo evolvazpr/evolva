@@ -63,6 +63,10 @@ public:
 public slots:
 	void CreateObject(const uint id, const QString type, const int x, const int y);
 	void CreateSurfaceObject(const QString type, const int x, const int y);
+	void RemoveSurfaceObject(const int x, const int y);
+	void MoveObject(const uint id, const int x, const int y);
+	void MoveObjectTo(const uint id, const int x, const int y);
+	void RemoveObject(const uint id);
 	void ClearMutex();
 };
 

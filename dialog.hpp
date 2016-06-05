@@ -63,14 +63,15 @@ public:
 
 	void CreateObject(const uint id, QString path, uint sprite_cnt, const int x, const int y);
 	void CreateSurfaceObject(const QString path, const int x, const int y);
-private slots:
-	void on_pushButton_clicked();
 	void RemoveSurfaceObject(const int x, const int y);
 	void MoveObject(const uint id, const int x, const int y);
 	void MoveObjectTo(const uint id, const int x, const int y);
 	void RemoveObject(const uint id);
+
+private slots:
+	void on_pushButton_clicked();
+
 public slots:
-	void AnimationFinished();
 	void SpriteObjectClicked(int x, int y);
 
 signals:

@@ -192,16 +192,6 @@ void Dialog::RemoveObject(const uint id) {
 }
 
 /**
- * @brief Decrementation of animating objects counter.
- *
- * Reason for this counter is described in Dialog::IncrementAnimations method description.
- */
-void Dialog::AnimationFinished() {
-	emit ClearMutex();
-}
-
-
-/**
  * @brief Creation of graphic surface.
  *	
  * @param surface_type - Type of surface to create.
