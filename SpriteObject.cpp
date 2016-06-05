@@ -1,5 +1,6 @@
 #include "SpriteObject.hpp"
-
+#include <iostream>
+#include <QThread>
 /**
  * @brief INCREMENT_PER_TICK static global variable. Parameter to set speed of animation.
  */
@@ -21,24 +22,24 @@ static const qreal INCREMENT_PER_TICK = 5.0;
  * @param pixsize - describes graphics cell size
  */
 
-SpriteObject::SpriteObject(const uint id, const int x, const int y,
-			QGraphicsScene *scene, QTimer *timer, const QString sprite_path,
-			const int sprites_cnt, const uint pixsize) : 
-			QObject(scene->parent()), QGraphicsPixmapItem(),
-		       	id_(id), timer_(timer), sprites_cnt_(sprites_cnt),
-			pixsize_(pixsize)	
+SpriteObject::SpriteObject(QMutex *mut, QObject * parent, const uint id, const int x, const int y, 
+		          const QString sprite_path, const int sprites_cnt, const uint pixsize) : 
+			  QObject(parent), QGraphicsPixmapItem(),
+		       	  id_(id), sprites_cnt_(sprites_cnt),
+			  pixsize_(pixsize)	
 {
 	actual_sprite_ = 0;
 	QPixmap pixmap(sprite_path);
 	pixmap = pixmap.scaled(pixsize_ * sprites_cnt_, pixsize_ * sprites_cnt_, Qt::IgnoreAspectRatio, 
 			       Qt::SmoothTransformation);
 	setPixmap(pixmap);	
-	scene->addItem(this);
 	dx_ = 0;
 	dy_ = 0;
 	direction_ = 0;
 	actual_sprite_ = 0;
 	setPos(x, y);
+	setZValue(1);
+	mutex = mut;
 }
 
 /**
@@ -71,9 +72,10 @@ SpriteObject::~SpriteObject() {
  * @param dy - how many steps in pixels to take into y direction.
  */
 void SpriteObject::move(const int dx, const int dy) {
+	std::cout << "SpriteObj LOCK: " << QThread::currentThreadId() << std::endl;
+	mutex->lock();
 	dx_ = dx;
 	dy_ = dy;
-	QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(animate()));
 }
 
 /**
@@ -117,6 +119,9 @@ void SpriteObject::animate() {
 	qreal angle = 0;
 	qreal dx = 0, dy = 0;
 
+	if((!dx_) && (!dy_)) 
+		return;
+	std::cout << "ANIM: " << QThread::currentThreadId() << std::endl;
 	angle = qAtan(qFabs((qreal)dx_)/qFabs((qreal)dy_));
 	dx = INCREMENT_PER_TICK * qSin(angle);
 	dy = INCREMENT_PER_TICK * qCos(angle);
@@ -151,7 +156,8 @@ void SpriteObject::animate() {
 
 	setPos(x_coord, y_coord);
 	if((!dx_) && (!dy_)) {
-		QObject::disconnect(timer_, SIGNAL(timeout()), this, SLOT(animate()));
+		mutex->unlock();
+		std::cout << "UNLOCK: " << QThread::currentThreadId() << std::endl;
 		emit AnimationFinished();
 	}
 }

@@ -11,16 +11,18 @@
 #include <QGraphicsScene>
 #include <QPainter>
 #include <QtMath>
+#include <QMutex>
+
 /**
  * @brief Implementation of sprite image graphic representation.
  */
 class SpriteObject : public QObject, public QGraphicsPixmapItem {
 	Q_OBJECT
 private:
+	QMutex *mutex;
 	const int id_;
 	qreal dx_;
 	qreal dy_;
-	QTimer *timer_;
 	const int sprites_cnt_;
 	int actual_sprite_;
 	int direction_;
@@ -31,8 +33,8 @@ protected:
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
 
 public:
-	SpriteObject(const uint id, const int x, const int y, QGraphicsScene *scene, 
-		     QTimer *timer, QString path, const int sprites_cnt, const uint pixsize);
+	SpriteObject(QMutex *mutex, QObject* parent, const uint id, const int x, const int y, 
+		    QString path, const int sprites_cnt, const uint pixsize);
 	virtual ~SpriteObject();
 	void move(const int x, const int y);
 	uint id();

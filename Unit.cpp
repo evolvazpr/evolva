@@ -28,14 +28,6 @@ double min3 (double a, double b, double c) {
 	}
 }
 
-
-
-
-
-
-
-
-
 class Sense {
 public:
 	class Cell {
@@ -65,7 +57,6 @@ public:
 	double efficiency_;
 
 	bool Fetch();
-
 
 	template <class F> void Foreach(F function);
 	bool IsRelativeEmpty(const int x, const int y) const; // works in foreach
@@ -159,13 +150,6 @@ bool Sense::Fetch() {
 	}
 	return true;
 }
-
-
-
-
-
-
-
 
 Unit::Unit() : DnaUnit(), CellObject() {
 	alive_ = true;
@@ -728,7 +712,7 @@ void Unit::GiveBirth(const int x, const int y) {
 }
 
 void Unit::Miscarry() {
-	logger << GetId() << " miscarried\n";
+	//logger << GetId() << " miscarried\n";
 	pregnant_ = false;
 	pregnant_turns_ = 0;
 	child_dna_code_.reset();
