@@ -14,11 +14,11 @@
 #include <memory>
 #include <QApplication>
 
-#include "../dialog.hpp"
+#include "../Gui.hpp"
 
 int main(int argc, char *argv[]) {
 	QApplication a(argc, argv);
-	Dialog* dialog = Dialog::GetInstance(nullptr, 10, 10);
+	Gui* dialog = Gui::GetInstance(nullptr, 10, 10);
 	dialog->show();
 	dialog->AppendTextToLog("test_1");
 	dialog->AppendTextToLog("test_2");

@@ -1,7 +1,7 @@
 #ifndef DIALOG_HPP
 #define DIALOG_HPP
 
-#include <QGui>
+#include <QDialog>
 #include <QGraphicsObject>
 #include <QTimer>
 #include <QColor>
@@ -15,11 +15,10 @@
 #include <unordered_map>
 #include "XmlIo.hpp"
 #include "CellObject.hpp"
+#include "FieldCell.hpp"
 
-class RoundObject;
 class Field;
 class SpriteObject;
-class FieldCell;
 
 namespace Ui {
 	class Gui;
@@ -53,22 +52,16 @@ private:
 	boost::format CreateStatistics(std::shared_ptr<FieldCell> cell);
 	std::string GetTypeName(std::shared_ptr<const CellObject> object); //it should be somewhere else
 
-	explicit Gui(QWidget *parent = 0);
+	explicit Gui(QWidget *parent = 0, const int width = 1, const int height = 1);
 
 public:
 	/**
 	 * @brief enum class to describe possible surface types.
 	 */
-	enum class Surface {
-		WATER,
-		SAND,
-		GRASS,
-		SOIL		
-	};
 	virtual ~Gui();
-	static Gui * GetInstance(QWidget *parent = 0);
+	static Gui * GetInstance(QWidget *parent = 0, const int width =10, const int height = 1);
 	void CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y);
-	void CreateSurfaceObject(const Gui::Surface ground_type, const int x, const int y);
+	void CreateSurfaceObject(const FieldCell::Ground ground_type, const int x, const int y);
 	void RemoveSurfaceObject(const int x, const int y);
 	void MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y);
@@ -76,8 +69,8 @@ public:
 	void AppendTextToLog(std::string text);
 	void ClearField();
 
-	friend Gui& operator <<(Dialog& gui, const std::string s);
-	friend Gui& operator <<(Dialog& gui, const char* s);
+	friend Gui& operator <<(Gui& gui, const std::string s);
+	friend Gui& operator <<(Gui& gui, const char* s);
 
 private slots:
 	void on_pushButton_clicked();

@@ -14,16 +14,16 @@
 #include <memory>
 #include <QApplication>
 
-#include "../dialog.hpp"
-#include "../DialogProxy.hpp"
+#include "../Gui.hpp"
+#include "../GuiProxy.hpp"
 
 void Test() {
 }
 
 int main(int argc, char *argv[]) {
 	QApplication a(argc, argv);
-	Dialog* w = Dialog::GetInstance();
-	DialogProxy proxy;
+	Gui* w = Gui::GetInstance();
+	GuiProxy proxy;
 	proxy << std::string("first\n");
 	proxy << std::string("second\n");
 	proxy << std::string("third\n");

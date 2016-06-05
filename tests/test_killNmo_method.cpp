@@ -14,7 +14,7 @@
 #include <memory>
 #include <QApplication>
 
-#include "../dialog.hpp"
+#include "../Gui.hpp"
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE insert_objects
 
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(kill)
 	char *argv[2];
 	argv[0] = (char *)"kill"; //only for creating QApplication
 	QApplication a(argc, argv);
-	Dialog::GetInstance();
+	Gui::GetInstance();
 
 	field = Field::GetInstance(10, 10);
 	std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();

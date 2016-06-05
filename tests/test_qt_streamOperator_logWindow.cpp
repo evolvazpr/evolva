@@ -14,11 +14,11 @@
 #include <memory>
 #include <QApplication>
 
-#include "../dialog.hpp"
+#include "../Gui.hpp"
 
 int main(int argc, char *argv[]) {
 	QApplication a(argc, argv);
-	Dialog* w = Dialog::GetInstance();
+	Gui* w = Gui::GetInstance();
 	*w << std::string("first\n");
 	*w << std::string("second\n");
 	*w << std::string("third");

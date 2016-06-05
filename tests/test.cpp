@@ -8,15 +8,16 @@
 #undef protected
 #undef private
 #include <iostream>
-#include "dialog.hpp"
+#include "Gui.hpp"
 #include <QApplication>
 #include "CyclicQueue.hpp"
 
 
 int main(int argc, char *argv[]) {
 	QApplication a(argc, argv);
-	Dialog *gui = Dialog::GetInstance(nullptr, 30, 30);
 	field = Field::GetInstance(30, 30);
+	Gui* gui = Gui::GetInstance(nullptr, 30, 30);
+	gui->show();
 	{
 
 		std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();
@@ -170,7 +171,6 @@ int main(int argc, char *argv[]) {
 //	field->KillNmo(field->GetCell(2,8)->GetNmo());
 
 	Tui tui;
-	gui->show();
 	for (int i = 0; i < 10; ++i) field->GrowPlants();
 	field->BeginCycle();
 	field->Play();

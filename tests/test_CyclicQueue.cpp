@@ -7,7 +7,7 @@
 #include "../Unit.hpp"
 #undef protected
 #undef private
-#include "../dialog.hpp"
+#include "../Gui.hpp"
 #include <QApplication>
 
 
@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(CyclicQueueUnitTest)
 	char *argv[2];
 	argv[0] = (char *)"insert"; //only for QApplication creation
 	QApplication a(argc, argv);
-	Dialog::GetInstance();
+	Gui::GetInstance();
 
 	field = Field::GetInstance(10, 10); 
 	CyclicQueue queue;

@@ -104,8 +104,8 @@ compiler_rcc_clean:
 compiler_moc_header_make_all: ../moc_dialog.cpp ../moc_SpriteObject.cpp
 compiler_moc_header_clean:
 	-$(DEL_FILE) ../moc_dialog.cpp ../moc_SpriteObject.cpp
-../moc_dialog.cpp: ../dialog.hpp
-	moc $(DEFINES) -D__GNUC__ -DWIN32 -I$(WIN_QT_PATH)/mkspecs/win32-g++ -I$(WIN_QT_PATH)/include -I$(WIN_QT_PATH)/include/QtWidgets -I$(WIN_QT_PATH)/include/QtGui -I$(WIN_QT_PATH)/include/QtANGLE -I$(WIN_QT_PATH)/include/QtConcurrent -I$(WIN_QT_PATH)/include/QtCore ../dialog.hpp -o ../moc_dialog.cpp
+../moc_dialog.cpp: ../Gui.hpp
+	moc $(DEFINES) -D__GNUC__ -DWIN32 -I$(WIN_QT_PATH)/mkspecs/win32-g++ -I$(WIN_QT_PATH)/include -I$(WIN_QT_PATH)/include/QtWidgets -I$(WIN_QT_PATH)/include/QtGui -I$(WIN_QT_PATH)/include/QtANGLE -I$(WIN_QT_PATH)/include/QtConcurrent -I$(WIN_QT_PATH)/include/QtCore ../Gui.hpp -o ../moc_dialog.cpp
 
 ../moc_SpriteObject.cpp: ../SpriteObject.hpp
 	moc $(DEFINES) -D__GNUC__ -DWIN32 -I$(WIN_QT_PATH)/mkspecs/win32-g++ -I$(WIN_QT_PATH)/include -I$(WIN_QT_PATH)/include/QtWidgets -I$(WIN_QT_PATH)/include/QtGui -I$(WIN_QT_PATH)/include/QtANGLE -I$(WIN_QT_PATH)/include/QtConcurrent -I$(WIN_QT_PATH)/include/QtCore ../SpriteObject.hpp -o ../moc_SpriteObject.cpp

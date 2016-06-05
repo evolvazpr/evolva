@@ -5,7 +5,7 @@
 #include <random>
 
 #include "EvolvaException.hpp"
-#include "DialogProxy.hpp"
+#include "GuiProxy.hpp"
 
 class CellObject;
 class NonMovableObject;

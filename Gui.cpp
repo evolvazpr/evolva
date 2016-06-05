@@ -1,4 +1,4 @@
-#include "gui.hpp"
+#include "Gui.hpp"
 #include "ui_gui.h"
 #include "Field.hpp"
 #include "Tui.hpp"
@@ -6,7 +6,7 @@
 #include "SpriteObject.hpp"
 #include "Unit.hpp"
 
-Gui* Dialog::gui_ = nullptr;
+Gui* Gui::gui_ = nullptr;
 
 /**
  * @brief ANIMATION_CLOCK static global variable. Parameter to setup freqency of animation (FPS).
@@ -27,9 +27,9 @@ static const uint PIXELS_PER_OBJECT = 50;
  * @brief Constructor.
  * @param parent - parent for Qt API (no need to call delete thanks to it).
  */
-Gui::Dialog(QWidget *parent) :
-	QGui(parent), sprites("gui.xml"),
-	ui(new Ui::Gui), width_(FIELD_SIZE), height_(FIELD_SIZE) { 
+Gui::Gui(QWidget *parent, const int width, const int height) :
+	QDialog(parent), sprites("gui.xml"),
+	ui(new Ui::Gui), width_(width), height_(height) { 
 	Qt::WindowFlags flags = Qt::WindowTitleHint | Qt::WindowSystemMenuHint;
 	flags |= Qt::WindowCloseButtonHint | Qt::WindowMinMaxButtonsHint;
 	
@@ -45,13 +45,13 @@ Gui::Dialog(QWidget *parent) :
 	animations_ = 0;
 	timer.start(ANIMATION_CLOCK);
 
-	QGui::setWindowFlags(flags);
+	QDialog::setWindowFlags(flags);
 }
 
 /**
  * @brief Deconstructor.
  */
-Gui::~Dialog() {
+Gui::~Gui() {
 	delete ui;
 }
 
@@ -61,9 +61,9 @@ Gui::~Dialog() {
  * @param parent - optional parameter used in object's first initalization. Used to set parent
  *		   of gui.
  */
-Gui * Dialog::GetInstance(QWidget *parent) {
+Gui * Gui::GetInstance(QWidget *parent, const int width, const int height) {
 	if (gui_ == nullptr) {
-		gui_ = new Gui(parent);
+		gui_ = new Gui(parent, width, height);
 	}
 	return gui_;
 }
@@ -75,13 +75,7 @@ Gui * Dialog::GetInstance(QWidget *parent) {
  * It calls Field::Next() method and other method for debug.
  */
 void Gui::on_pushButton_clicked() {  
-	static Tui tui;
-	std::shared_ptr<MovableObject> next;
-	next = field->Next();
-	if (next == nullptr)
-		exit(0);
-	tui.PrintField();
-	field->f2();
+	field->Next();
 }
 /**
  * @brief Graphical x coordinate calculation.
@@ -253,21 +247,15 @@ void Gui::AnimationFinished() {
  * @param x - x coordinate.
  * @param y - y coordinate.
  */
-void Gui::CreateSurfaceObject(const Dialog::Surface surface_type, const int x, const int y) {
+void Gui::CreateSurfaceObject(const FieldCell::Ground surface_type, const int x, const int y) {
 	QString file;
 	std::string xml_cmd;
 
 	switch (surface_type) {
-	case Gui::Surface::GRASS :
+	case FieldCell::Ground::GRASS :
 		xml_cmd = "grass";
 		break;
-	case Gui::Surface::SAND :
-		xml_cmd = "sand";
-		break;
-	case Gui::Surface::WATER :
-		xml_cmd = "water";
-		break;
-	case Gui::Surface::SOIL :
+	case FieldCell::Ground::GROUND :
 		xml_cmd = "soil";
 		break;
 	default:
@@ -316,7 +304,7 @@ void Gui::AppendTextToLog(const std::string text) {
  * Used to append text to log window.
  * @param s - std::string to append.
  */
-Gui& operator <<(Dialog& gui, const std::string s) {	
+Gui& operator <<(Gui& gui, const std::string s) {	
 	gui.ui->log_textWindow->insertPlainText(QString::fromStdString(s));
 	return gui;
 }
@@ -326,7 +314,7 @@ Gui& operator <<(Dialog& gui, const std::string s) {
  * Used to append text to log window.
  * @param s - char pointer to append.
  */
-Gui& operator <<(Dialog& gui, const char* s) {	
+Gui& operator <<(Gui& gui, const char* s) {	
 	gui.ui->log_textWindow->insertPlainText(s);
 	return gui;
 }

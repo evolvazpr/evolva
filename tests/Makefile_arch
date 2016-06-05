@@ -75,8 +75,8 @@ clean:compiler_clean
 
 compiler_moc_header_clean:
 	-$(DEL_FILE) ../moc_dialog.cpp ../moc_dialog.o
-../moc_dialog.cpp: ../dialog.hpp
-	$(QT_PATH_BIN)/bin/moc $(DEFINES) -I$(QT_PATH_BIN)/mkspecs/linux-g++-64 -I../ -I$(QT_PATH_INC) -I$(QT_PATH_INC)/QtWidgets -I$(QT_PATH_INC)/QtConcurrent -I$(QT_PATH_INC)/QtGui -I$(QT_PATH_INC)/QtCore -I. -I$(CPP_USR_INC) -I$(CPP_USR_INC_x86) -I$(CPP_USR_INC)/backward -I$(CPP_LIB)/include -I/usr/local/include -I$(CPP_LIB)/include-fixed -I$(CPP_USR_INC_x86)/../.. -I/usr/include ../dialog.hpp -o ../moc_dialog.cpp
+../moc_dialog.cpp: ../Gui.hpp
+	$(QT_PATH_BIN)/bin/moc $(DEFINES) -I$(QT_PATH_BIN)/mkspecs/linux-g++-64 -I../ -I$(QT_PATH_INC) -I$(QT_PATH_INC)/QtWidgets -I$(QT_PATH_INC)/QtConcurrent -I$(QT_PATH_INC)/QtGui -I$(QT_PATH_INC)/QtCore -I. -I$(CPP_USR_INC) -I$(CPP_USR_INC_x86) -I$(CPP_USR_INC)/backward -I$(CPP_LIB)/include -I/usr/local/include -I$(CPP_LIB)/include-fixed -I$(CPP_USR_INC_x86)/../.. -I/usr/include ../Gui.hpp -o ../moc_dialog.cpp
 
 compiler_uic_clean:
 	-$(DEL_FILE) ui_dialog.h
