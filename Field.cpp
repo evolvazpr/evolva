@@ -80,6 +80,7 @@ Field::Field(const size_t x, const size_t y) : pimpl_(new FieldPimpl(x, y)), kee
 std::shared_ptr<Field> Field::GetInstance(const size_t x, const size_t y) {
 	if (!instance_) {
 		instance_ = std::shared_ptr<Field>(new Field(x, y));
+		field = instance_;
 	}
 	return instance_;
 }

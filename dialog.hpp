@@ -41,10 +41,7 @@ private:
 	QGraphicsScene *scene;
 	const unsigned int width_;
 	const unsigned int height_;
-	QThread gui_thread_;
-	QList<QGraphicsItem *> to_remove_;
 	QTimer timer_;
-	QAtomicInt animations_;
 	QMutex gui_mutex_;
 	static Dialog* dialog_;
 
@@ -72,7 +69,6 @@ public:
 	void MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void RemoveObject(std::shared_ptr<const CellObject> object);
 	void AppendTextToLog(std::string text);
-	void UpdateField();
 
 	friend Dialog& operator <<(Dialog& dialog, const std::string s);
 	friend Dialog& operator <<(Dialog& dialog, const char* s);
@@ -83,6 +79,8 @@ private slots:
 public slots:
 	void AnimationFinished();
 	void SpriteObjectClicked(int x, int y);
+signals:
+	void NextLogicIteration();	
 };
 
 #endif // DIALOG_HPP

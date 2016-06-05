@@ -37,7 +37,6 @@ Dialog::Dialog(QWidget *parent, const int width, const int height) :
 	ui->graphicsView->setRenderHint(QPainter::Antialiasing);
 	ui->graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 	ui->graphicsView->show();
-	animations_ = 0;
 
 	QDialog::setWindowFlags(flags);
 	timer_.start(ANIMATION_CLOCK);		
@@ -71,10 +70,9 @@ Dialog * Dialog::GetInstance(QWidget *parent, const int width, const int height)
 /**
  * @brief pushButton action method.
  * Method called when "Kolejna tura" button was clicked.
- * It calls Field::Next() method and other method for debug.
  */
 void Dialog::on_pushButton_clicked() {  
-	field->Next();
+	emit NextLogicIteration();
 }
 /**
  * @brief Graphical x coordinate calculation.
@@ -106,9 +104,7 @@ void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x,
 	int x_pos = CalculateX(x);
 	int y_pos = CalculateY(y);
 	int sprite_cnt = 1;
-//	QMutexLocker lock(&gui_mutex_);
-//	gui_mutex_.lock();
-//	gui_mutex_.unlock();
+	QMutexLocker lock(&gui_mutex_);
 	SpriteObject *sprite_object;
 	std::string obj_type;
 	QString sprite_path;
@@ -156,12 +152,12 @@ SpriteObject* Dialog::SearchObject(const uint id) {
  * @param y - <b>realative field (not graphical) steps</b> in y direction to make.
  */
 void Dialog::MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
+	gui_mutex_.lock();
 	SpriteObject *roundObject = SearchObject(object->GetId());
-	if (!roundObject)
+	if (!roundObject) {
+		gui_mutex_.unlock();
 		throw EvolvaException("Dialog::moveObject - object not found!\n");
-
-	IncrementAnimations(roundObject);	
-
+	}
 	roundObject->move(CalculateX(x), CalculateY(y));	
 }
 
@@ -172,18 +168,23 @@ void Dialog::MoveObject(std::shared_ptr<const CellObject> object, const int x, c
  * @param y - <b>real field's y coordinate</b> in which RoundObject will be placed.
  */
 void Dialog::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y) {
+	gui_mutex_.lock();
 	SpriteObject *roundObject = SearchObject(object->GetId());
 	int x_old, y_old, dx, dy;
-	if (!object)
+	if (!object) {
+		gui_mutex_.unlock();
 		throw EvolvaException("Dialog::moveObjectTo - object not found!\n");
-
-	IncrementAnimations(roundObject);
+	}
+	//IncrementAnimations(roundObject);
 
 	x_old = roundObject->x();
 	y_old = roundObject->y();
 
 	dx = CalculateX(x) - x_old;
 	dy = CalculateY(y) - y_old;
+
+
+
 	roundObject->move(dx, dy);
 }
 
@@ -192,46 +193,15 @@ void Dialog::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x,
  * @param object - shared_ptr to object which will be deleted from GUI.
  */
 void Dialog::RemoveObject(std::shared_ptr<const CellObject> object) {
-	SpriteObject *roundObject = SearchObject(object->GetId());
 	QMutexLocker lock(&gui_mutex_);
+	SpriteObject *roundObject = SearchObject(object->GetId());
 
 	if (!roundObject) 
 		throw EvolvaException("Dialog::removeObject - object not found!\n");	
-	to_remove_.push_back(roundObject);
 
-	if (!animations_.fetchAndAddAcquire(0))
-		UpdateField();
+	scene->removeItem(roundObject);
+	delete(roundObject);
 }
-
-/**
- * @brief ClearField from object, that should be removed, but weren't, because animation
- * was on-going.
- */
-void Dialog::UpdateField() {
-	for(auto &it : to_remove_) {
-		scene->removeItem(it);
-		delete(it);
-	}
-	to_remove_.clear();
-}
-
-/**
- * @brief Incrementation of animating object counter.
- *
- * This was made to eliminate bug which caused to early object remove from QGraphicsScene.
- * Without it, firstly object A was removed, then object B (which is a cause of object remove)
- * was moved to object A. Now order is reached - firstly object B is moved to A, secondly object
- * A is removed from screen.
- *
- * @param roundObject - pointer to SpriteObject to get information wether this object is moving.
- */ 
-void Dialog::IncrementAnimations(SpriteObject *roundObject){
-	if (roundObject->IsMoving())
-		animations_.fetchAndAddAcquire(0);
-	else
-		animations_.fetchAndAddAcquire(1);
-}
-
 
 /**
  * @brief Decrementation of animating objects counter.
@@ -239,11 +209,7 @@ void Dialog::IncrementAnimations(SpriteObject *roundObject){
  * Reason for this counter is described in Dialog::IncrementAnimations method description.
  */
 void Dialog::AnimationFinished() {
-	if (animations_.fetchAndAddAcquire(0))
-		animations_.fetchAndAddAcquire(-1);
-	if (!animations_.fetchAndAddAcquire(0)) {
-		UpdateField();
-	}
+	gui_mutex_.unlock();
 }
 
 
@@ -257,7 +223,7 @@ void Dialog::AnimationFinished() {
 void Dialog::CreateSurfaceObject(const FieldCell::Ground surface, const int x, const int y) {
 	QString file;
 	std::string xml_cmd;
-
+	QMutexLocker lock(&gui_mutex_);
 	switch (surface) {
 	case FieldCell::Ground::GRASS :
 		xml_cmd = "grass";
@@ -288,7 +254,8 @@ void Dialog::CreateSurfaceObject(const FieldCell::Ground surface, const int x, c
  * @param y - y coordinate.
  */
 void Dialog::RemoveSurfaceObject(const int x, const int y)
-{//TODO QTransform test??
+{
+	QMutexLocker lock(&gui_mutex_);
 	QTransform test;
 	QGraphicsItem *item = scene->itemAt(CalculateX(x), CalculateY(y), test);
 	if (!item)
