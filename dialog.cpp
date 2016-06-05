@@ -41,8 +41,6 @@ Dialog::Dialog(QWidget *parent, const int width, const int height) :
 
 	QDialog::setWindowFlags(flags);
 	timer_.start(ANIMATION_CLOCK);		
-	timer_.moveToThread(&gui_thread_);
-	gui_thread_.start();
 }
 
 /**
@@ -121,8 +119,6 @@ void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x,
 					sprite_path, sprite_cnt, PIXELS_PER_OBJECT);
 	scene->addItem(sprite_object);
 	
-	sprite_object->moveToThread(&gui_thread_);
-	
 	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(AnimationFinished()), 
 			this, SLOT(AnimationFinished()));
 	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(wasClicked(int, int)), this, 
@@ -198,13 +194,11 @@ void Dialog::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x,
 void Dialog::RemoveObject(std::shared_ptr<const CellObject> object) {
 	SpriteObject *roundObject = SearchObject(object->GetId());
 	QMutexLocker lock(&gui_mutex_);
-	//std::cout << "RemoveObj LOCK: " << QThread::currentThreadId() << std::endl;
-	gui_mutex_.lock();
-	gui_mutex_.unlock();
+
 	if (!roundObject) 
 		throw EvolvaException("Dialog::removeObject - object not found!\n");	
 	to_remove_.push_back(roundObject);
-//	lock.unlock();
+
 	if (!animations_.fetchAndAddAcquire(0))
 		UpdateField();
 }
@@ -214,9 +208,6 @@ void Dialog::RemoveObject(std::shared_ptr<const CellObject> object) {
  * was on-going.
  */
 void Dialog::UpdateField() {
-//	QMutexLocker lock(&gui_mutex_);
-//	gui_mutex_.lock();
-//	gui_mutex_.unlock();	
 	for(auto &it : to_remove_) {
 		scene->removeItem(it);
 		delete(it);

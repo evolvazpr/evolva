@@ -24,25 +24,6 @@ class RoundObject;
 class Field;
 class FieldCell;
 
-class AnimationThread : public QThread {
-	Q_OBJECT
-	QTimer timer_;
-	int animation_clock_;
-	public:
-	AnimationThread(int animation_clock) : animation_clock_(animation_clock) {};
-	
-	void run()
-	{
-		timer_.start(animation_clock_);		
-		exec();
-	}
-	
-	void ConnectTimerAndObject(SpriteObject *object) {
-		QObject::connect(&timer_, SIGNAL(timeout()), dynamic_cast<QObject *>(object), 
-		SLOT(animate()));
-	}
-};
-
 namespace Ui {
 	class Dialog;
 }

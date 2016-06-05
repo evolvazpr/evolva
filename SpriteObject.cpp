@@ -72,8 +72,6 @@ SpriteObject::~SpriteObject() {
  * @param dy - how many steps in pixels to take into y direction.
  */
 void SpriteObject::move(const int dx, const int dy) {
-	std::cout << "SpriteObj LOCK: " << QThread::currentThreadId() << std::endl;
-	mutex->lock();
 	dx_ = dx;
 	dy_ = dy;
 }
@@ -121,7 +119,6 @@ void SpriteObject::animate() {
 
 	if((!dx_) && (!dy_)) 
 		return;
-	std::cout << "ANIM: " << QThread::currentThreadId() << std::endl;
 	angle = qAtan(qFabs((qreal)dx_)/qFabs((qreal)dy_));
 	dx = INCREMENT_PER_TICK * qSin(angle);
 	dy = INCREMENT_PER_TICK * qCos(angle);
@@ -156,8 +153,6 @@ void SpriteObject::animate() {
 
 	setPos(x_coord, y_coord);
 	if((!dx_) && (!dy_)) {
-		mutex->unlock();
-		std::cout << "UNLOCK: " << QThread::currentThreadId() << std::endl;
 		emit AnimationFinished();
 	}
 }
