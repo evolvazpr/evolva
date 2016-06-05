@@ -1,16 +1,16 @@
-#include "DialogProxy.hpp"
-#include "dialog.hpp"
+#include "GuiProxy.hpp"
+#include "gui.hpp"
 
-DialogProxy::DialogProxy() {
-	dialog_ = Dialog::GetInstance();
+GuiProxy::DialogProxy() {
+	gui_ = Gui::GetInstance();
 }
 
-DialogProxy& DialogProxy::operator <<(const std::string text){
-	*dialog_ << text;
+GuiProxy& DialogProxy::operator <<(const std::string text){
+	*gui_ << text;
 	return *this;
 }
 
-DialogProxy& DialogProxy::operator <<(const char* text) {
-	*dialog_ << text;
+GuiProxy& DialogProxy::operator <<(const char* text) {
+	*gui_ << text;
 	return *this;
 }

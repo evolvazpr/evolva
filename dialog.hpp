@@ -1,7 +1,7 @@
 #ifndef DIALOG_HPP
 #define DIALOG_HPP
 
-#include <QDialog>
+#include <QGui>
 #include <QGraphicsObject>
 #include <QTimer>
 #include <QColor>
@@ -22,19 +22,19 @@ class SpriteObject;
 class FieldCell;
 
 namespace Ui {
-	class Dialog;
+	class Gui;
 }
 
 /**
- * @brief The Dialog class (GUI part)
+ * @brief The Gui class (GUI part)
  */
-class Dialog : public QDialog
+class Gui : public QDialog
 {
 	Q_OBJECT
 
 private:
 	XmlIo sprites;
-	Ui::Dialog *ui;
+	Ui::Gui *ui;
 	QGraphicsScene *scene;
 	const unsigned int width_;
 	const unsigned int height_;
@@ -43,7 +43,7 @@ private:
 	QAtomicInt animations_;
 	QMutex remove_mutex_;
 
-	static Dialog * dialog_;
+	static Gui * gui_;
 
 	SpriteObject* SearchObject(const uint id);
 	qreal CalculateX(const int x);
@@ -53,7 +53,7 @@ private:
 	boost::format CreateStatistics(std::shared_ptr<FieldCell> cell);
 	std::string GetTypeName(std::shared_ptr<const CellObject> object); //it should be somewhere else
 
-	explicit Dialog(QWidget *parent = 0);
+	explicit Gui(QWidget *parent = 0);
 
 public:
 	/**
@@ -65,10 +65,10 @@ public:
 		GRASS,
 		SOIL		
 	};
-	virtual ~Dialog();
-	static Dialog * GetInstance(QWidget *parent = 0);
+	virtual ~Gui();
+	static Gui * GetInstance(QWidget *parent = 0);
 	void CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y);
-	void CreateSurfaceObject(const Dialog::Surface ground_type, const int x, const int y);
+	void CreateSurfaceObject(const Gui::Surface ground_type, const int x, const int y);
 	void RemoveSurfaceObject(const int x, const int y);
 	void MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y);
@@ -76,8 +76,8 @@ public:
 	void AppendTextToLog(std::string text);
 	void ClearField();
 
-	friend Dialog& operator <<(Dialog& dialog, const std::string s);
-	friend Dialog& operator <<(Dialog& dialog, const char* s);
+	friend Gui& operator <<(Dialog& gui, const std::string s);
+	friend Gui& operator <<(Dialog& gui, const char* s);
 
 private slots:
 	void on_pushButton_clicked();

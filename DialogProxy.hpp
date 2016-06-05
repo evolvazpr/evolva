@@ -2,15 +2,15 @@
 #define _DIALOGPROXXY_H_
 #include <string>
 
-class Dialog;
+class Gui;
 
-class DialogProxy {
+class GuiProxy {
 	private:
-	Dialog* dialog_;
+	Gui* gui_;
 	public:
-		DialogProxy();
-		DialogProxy& operator <<(const std::string text);
-		DialogProxy& operator <<(const char* text);
+		GuiProxy();
+		GuiProxy& operator <<(const std::string text);
+		GuiProxy& operator <<(const char* text);
 };
 
 #endif
