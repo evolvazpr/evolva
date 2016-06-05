@@ -1,10 +1,9 @@
 #include "dialog.hpp"
 #include "ui_dialog.h"
 #include "Field.hpp"
-#include "Tui.hpp"
 #include "EvolvaException.hpp"
-#include "SpriteObject.hpp"
 #include "Unit.hpp"
+
 
 Dialog* Dialog::dialog_ = nullptr;
 
@@ -14,38 +13,34 @@ Dialog* Dialog::dialog_ = nullptr;
 static const qreal ANIMATION_CLOCK = 1000/33;
 
 /**
- * @brief FIELD_SIZE temporary?
- */
-static const uint FIELD_SIZE = 10;
-
-/**
  * @brief Pixels per object
  */
-static const uint PIXELS_PER_OBJECT = 50;
+static const uint PIXELS_PER_OBJECT = 25;
+
 
 /**
  * @brief Constructor.
  * @param parent - parent for Qt API (no need to call delete thanks to it).
  */
-Dialog::Dialog(QWidget *parent) :
-	QDialog(parent), sprites("gui.xml"),
-	ui(new Ui::Dialog), width_(FIELD_SIZE), height_(FIELD_SIZE) { 
+Dialog::Dialog(QWidget *parent, const int width, const int height) :
+	QDialog(parent), settings_("gui.xml"),
+	ui(new Ui::Dialog), width_(width), height_(height) { 
 	Qt::WindowFlags flags = Qt::WindowTitleHint | Qt::WindowSystemMenuHint;
 	flags |= Qt::WindowCloseButtonHint | Qt::WindowMinMaxButtonsHint;
 	
 	ui->setupUi(this);
 	scene = new QGraphicsScene();
 	ui->graphicsView->setScene(scene);
-	scene->setSceneRect(0, 0, FIELD_SIZE * PIXELS_PER_OBJECT, FIELD_SIZE * PIXELS_PER_OBJECT);
+	scene->setSceneRect(0, 0, width_ * PIXELS_PER_OBJECT, height_ * PIXELS_PER_OBJECT);
 	ui->graphicsView->centerOn(scene->sceneRect().center());
 	ui->graphicsView->setCacheMode(QGraphicsView::CacheNone);
 	ui->graphicsView->setRenderHint(QPainter::Antialiasing);
 	ui->graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 	ui->graphicsView->show();
 	animations_ = 0;
-	timer.start(ANIMATION_CLOCK);
 
 	QDialog::setWindowFlags(flags);
+	timer_.start(ANIMATION_CLOCK);		
 }
 
 /**
@@ -60,10 +55,14 @@ Dialog::~Dialog() {
  * @brief Singleton method to get pointer to object. 
  * @param parent - optional parameter used in object's first initalization. Used to set parent
  *		   of dialog.
+ * @param width - width of field.
+ * @param height - height of field.
  */
-Dialog * Dialog::GetInstance(QWidget *parent) {
+Dialog * Dialog::GetInstance(QWidget *parent, const int width, const int height) {
 	if (dialog_ == nullptr) {
-		dialog_ = new Dialog(parent);
+		if (width == 0 || height == 0)
+			throw EvolvaException("Error: width or height of GUI field set to 0!");
+		dialog_ = new Dialog(parent, width, height);
 	}
 	return dialog_;
 }
@@ -75,13 +74,7 @@ Dialog * Dialog::GetInstance(QWidget *parent) {
  * It calls Field::Next() method and other method for debug.
  */
 void Dialog::on_pushButton_clicked() {  
-	static Tui tui;
-	std::shared_ptr<MovableObject> next;
-	next = field->Next();
-	if (next == nullptr)
-		exit(0);
-	tui.PrintField();
-	field->f2();
+	field->Next();
 }
 /**
  * @brief Graphical x coordinate calculation.
@@ -101,6 +94,7 @@ qreal Dialog::CalculateY(const int y) {
 	return ((qreal)y) / ((qreal)height_) * scene->height();
 }
 
+
 /**
  * @brief RoundObject object creation.
  * To get better scalability GetTypeName method was created, but it is not the best idea.
@@ -112,18 +106,25 @@ void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x,
 	int x_pos = CalculateX(x);
 	int y_pos = CalculateY(y);
 	int sprite_cnt = 1;
+//	QMutexLocker lock(&gui_mutex_);
+//	gui_mutex_.lock();
+//	gui_mutex_.unlock();
 	SpriteObject *sprite_object;
 	std::string obj_type;
 	QString sprite_path;
 	obj_type = GetTypeName(object);
-	sprite_path = QString::fromStdString(sprites[obj_type][std::string("path")]);
-	sprite_cnt = sprites[obj_type][std::string("sprite_cnt")];
-	sprite_object = new SpriteObject(object->GetId(), x_pos, y_pos, scene, &timer, sprite_path, 
-					sprite_cnt, PIXELS_PER_OBJECT);
+	sprite_path = QString::fromStdString(settings_[obj_type][std::string("path")]);
+	sprite_cnt = settings_[obj_type][std::string("sprite_cnt")];
+	sprite_object = new SpriteObject(&gui_mutex_, scene->parent(), object->GetId(), x_pos, y_pos, 
+					sprite_path, sprite_cnt, PIXELS_PER_OBJECT);
+	scene->addItem(sprite_object);
+	
 	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(AnimationFinished()), 
 			this, SLOT(AnimationFinished()));
 	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(wasClicked(int, int)), this, 
 			SLOT(SpriteObjectClicked(int, int)));
+	QObject::connect(&timer_, SIGNAL(timeout()), dynamic_cast<QObject *>(sprite_object), 
+			SLOT(animate()));
 }
 
 /**
@@ -161,7 +162,7 @@ void Dialog::MoveObject(std::shared_ptr<const CellObject> object, const int x, c
 
 	IncrementAnimations(roundObject);	
 
-	roundObject->move(CalculateX(x), CalculateY(y));
+	roundObject->move(CalculateX(x), CalculateY(y));	
 }
 
 /**
@@ -183,7 +184,6 @@ void Dialog::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x,
 
 	dx = CalculateX(x) - x_old;
 	dy = CalculateY(y) - y_old;
-	
 	roundObject->move(dx, dy);
 }
 
@@ -193,21 +193,21 @@ void Dialog::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x,
  */
 void Dialog::RemoveObject(std::shared_ptr<const CellObject> object) {
 	SpriteObject *roundObject = SearchObject(object->GetId());
-	QMutexLocker lock(&remove_mutex_);
+	QMutexLocker lock(&gui_mutex_);
+
 	if (!roundObject) 
 		throw EvolvaException("Dialog::removeObject - object not found!\n");	
 	to_remove_.push_back(roundObject);
-	lock.unlock();
+
 	if (!animations_.fetchAndAddAcquire(0))
-		ClearField();
+		UpdateField();
 }
 
 /**
  * @brief ClearField from object, that should be removed, but weren't, because animation
  * was on-going.
  */
-void Dialog::ClearField() {
-	QMutexLocker lock(&remove_mutex_);
+void Dialog::UpdateField() {
 	for(auto &it : to_remove_) {
 		scene->removeItem(it);
 		delete(it);
@@ -241,8 +241,9 @@ void Dialog::IncrementAnimations(SpriteObject *roundObject){
 void Dialog::AnimationFinished() {
 	if (animations_.fetchAndAddAcquire(0))
 		animations_.fetchAndAddAcquire(-1);
-	if (!animations_.fetchAndAddAcquire(0))
-		ClearField();
+	if (!animations_.fetchAndAddAcquire(0)) {
+		UpdateField();
+	}
 }
 
 
@@ -253,21 +254,15 @@ void Dialog::AnimationFinished() {
  * @param x - x coordinate.
  * @param y - y coordinate.
  */
-void Dialog::CreateSurfaceObject(const Dialog::Surface surface_type, const int x, const int y) {
+void Dialog::CreateSurfaceObject(const FieldCell::Ground surface, const int x, const int y) {
 	QString file;
 	std::string xml_cmd;
 
-	switch (surface_type) {
-	case Dialog::Surface::GRASS :
+	switch (surface) {
+	case FieldCell::Ground::GRASS :
 		xml_cmd = "grass";
 		break;
-	case Dialog::Surface::SAND :
-		xml_cmd = "sand";
-		break;
-	case Dialog::Surface::WATER :
-		xml_cmd = "water";
-		break;
-	case Dialog::Surface::SOIL :
+	case FieldCell::Ground::GROUND :
 		xml_cmd = "soil";
 		break;
 	default:
@@ -275,7 +270,7 @@ void Dialog::CreateSurfaceObject(const Dialog::Surface surface_type, const int x
 		break;	
 	}
 	
-	QPixmap pix_map(QString::fromStdString(sprites[xml_cmd]["path"]));
+	QPixmap pix_map(QString::fromStdString(settings_[xml_cmd]["path"]));
 	if (pix_map.isNull())
 		throw EvolvaException("Sprite \"" + xml_cmd + "\" could not have been loaded. Aborting program.\nCheck if gui.xml is correct.");
 	
@@ -293,7 +288,7 @@ void Dialog::CreateSurfaceObject(const Dialog::Surface surface_type, const int x
  * @param y - y coordinate.
  */
 void Dialog::RemoveSurfaceObject(const int x, const int y)
-{
+{//TODO QTransform test??
 	QTransform test;
 	QGraphicsItem *item = scene->itemAt(CalculateX(x), CalculateY(y), test);
 	if (!item)
