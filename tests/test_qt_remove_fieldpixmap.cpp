@@ -14,11 +14,11 @@
 #include <memory>
 #include <QApplication>
 
-#include "../Gui.hpp"
+#include "../dialog.hpp"
 
 int main(int argc, char *argv[]) {
 	QApplication a(argc, argv);
-	Gui* gui = Gui::GetInstance(nullptr, 10, 10);
+	Dialog *gui = Dialog::GetInstance(nullptr, 10, 10);
 	for (int i = 0; i < 10; i++) {
 		for (int j = 0; j < 10; j++) {
 			gui->CreateSurfaceObject(FieldCell::Ground::GROUND, i, j);			

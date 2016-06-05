@@ -95,8 +95,8 @@ compiler_moc_header_make_all: ../moc_dialog.cpp ../moc_SpriteObject.cpp
 compiler_moc_header_clean:
 	-$(DEL_FILE) ../moc_dialog.cpp ../moc_dialog.o ../moc_SpriteObject.cpp ../moc_SpriteObject.o
 
-../moc_dialog.cpp: ../Gui.hpp
-	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) $(INCPATH) -I/usr/include/c++/4.8 -I/usr/include/x86_64-linux-gnu/c++/4.8 -I/usr/include/c++/4.8/backward -I/usr/lib/gcc/x86_64-linux-gnu/4.8/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../Gui.hpp -o ../moc_dialog.cpp
+../moc_dialog.cpp: ../dialog.hpp
+	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) $(INCPATH) -I/usr/include/c++/4.8 -I/usr/include/x86_64-linux-gnu/c++/4.8 -I/usr/include/c++/4.8/backward -I/usr/lib/gcc/x86_64-linux-gnu/4.8/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../dialog.hpp -o ../moc_dialog.cpp
 
 ../moc_SpriteObject.cpp: ../SpriteObject.hpp
 	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) $(INCPATH) -I/usr/include/c++/4.8 -I/usr/include/x86_64-linux-gnu/c++/4.8 -I/usr/include/c++/4.8/backward -I/usr/lib/gcc/x86_64-linux-gnu/4.8/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../SpriteObject.hpp -o ../moc_SpriteObject.cpp

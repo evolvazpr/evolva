@@ -14,7 +14,7 @@
 #include <memory>
 #include <QApplication>
 
-#include "../Gui.hpp"
+#include "../dialog.hpp"
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE insert_objects
 
@@ -123,6 +123,6 @@ BOOST_AUTO_TEST_CASE(GetType)
 	char *argv[2];
 	argv[0] = (char *)"insert";
 	QApplication a(argc, argv); //only for QApplication creation
-	Gui::GetInstance(); //no need to get Instance, right now only initalization
+	Dialog::GetInstance(); //no need to get Instance, right now only initalization
 	EvolvaInit();
 }

@@ -14,11 +14,11 @@
 #include <memory>
 #include <QApplication>
 
-#include "../Gui.hpp"
+#include "../dialog.hpp"
 
 int main(int argc, char *argv[]) {
 	QApplication a(argc, argv);
-	Gui* dialog = Gui::GetInstance(nullptr, 10, 10);
+	Dialog* dialog = Dialog::GetInstance(nullptr, 10, 10);
 	field = Field::GetInstance(10, 10);
 	std::shared_ptr<Flesh> u[2];
 	u[0] = std::make_shared<Flesh>(0.3);

@@ -1,4 +1,4 @@
-#include "../Gui.hpp"
+#include "../dialog.hpp"
 #include <QApplication>
 #include <QThread>
 #include <QtConcurrentRun>
@@ -15,7 +15,7 @@ public:
 
 QAtomicInt run_thread(1);
 
-void test_thread(Gui** w) {
+void test_thread(Dialog* w) {
 	    while(run_thread.fetchAndAddAcquire(0)) {
 		    w->moveObjectTo(0, (size_t)1, (size_t)0);
 		    Sleeper::sleep(2);
@@ -37,7 +37,7 @@ void test_thread(Gui** w) {
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    Gui* w;
+    Dialog w;
     w.show();
     w.createObject(0, 0, 0, Qt::red);
     w.createObject(1, 0, 1, Qt::blue);

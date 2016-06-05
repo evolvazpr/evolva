@@ -728,7 +728,7 @@ void Unit::GiveBirth(const int x, const int y) {
 }
 
 void Unit::Miscarry() {
-	//logger << GetId() << " miscarried\n";
+	logger << GetId() << " miscarried\n";
 	pregnant_ = false;
 	pregnant_turns_ = 0;
 	child_dna_code_.reset();

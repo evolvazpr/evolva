@@ -7,10 +7,9 @@
 #include "Unit.hpp"
 #include <vector>
 #include <boost/multi_array.hpp>
-#include "Gui.hpp"
 
 #include <iostream>
-std::shared_ptr<Field> field;
+
 class FieldPimpl {
 friend class Field;
 private:
@@ -93,11 +92,9 @@ size_t Field::GetHeight() const {
 }
 
 bool Field::InsertCellObject(std::shared_ptr<CellObject> object, const size_t x, const size_t y) {
-	Gui* gui = Gui::GetInstance();
 	std::shared_ptr<FieldCell> cell = GetCell(x, y);
 	if (cell->IsEmpty()){
 		cell->SetObject(object);
-		gui->CreateObject(object, x, y);
 		return true;
 	}
 	return false;
@@ -123,7 +120,6 @@ bool Field::InsertObject(std::shared_ptr<NonMovableObject> object, const size_t 
 }
 
 bool Field::MoveObjectTo(std::shared_ptr<Unit> object, size_t x, size_t y, const bool trim) {
-	Gui* gui = Gui::GetInstance();
 	std::shared_ptr<FieldCell> source_cell = object->cell_.lock();
 	if (source_cell->object_ != object) {
 		throw EvolvaException("Serious memory problem.");
@@ -142,20 +138,18 @@ bool Field::MoveObjectTo(std::shared_ptr<Unit> object, size_t x, size_t y, const
 	cell->SetObject(object);
 //	object->x_ = x;
 //	object->y_ = y;
-	gui->MoveObjectTo(object, x, y);
+	//TODO: Gui move
 	return true;
 }
 
 bool Field::Kill(std::shared_ptr<Unit> unit, const size_t reason) {
-	Gui* gui = Gui::GetInstance();
 	auto cell = GetCell(unit->GetX(), unit->GetY());
 	if (cell->GetUnit() == unit) {
-		//logger << "Unit "<< unit->GetId() << " is dead: " << pimpl_->GetReason(reason) << "\n";
+		logger << "Unit "<< unit->GetId() << " is dead: " << pimpl_->GetReason(reason) << "\n";
 		const size_t x = unit->GetX();
 		const size_t y = unit->GetY();
 		const double energy = unit->GetDna("normal_weight");
 		cell->RemoveObject();
-		gui->RemoveObject(unit);
 		unit->alive_ = false;
 		std::cout << "nmobjs: " << pimpl_->non_movable_objects_.size() << "\n";
 		std::cout << "\n\nINSERT FLESH!!!! :  " << energy << "  " << InsertNmo(std::make_shared<Flesh>(energy), x, y) << "\n\n";
@@ -164,22 +158,20 @@ bool Field::Kill(std::shared_ptr<Unit> unit, const size_t reason) {
 		return true;
 	}
 	else {
-		//logger << "\nERROR: Possible lose of some object. Program will continue.\n";
+		logger << "\nERROR: Possible lose of some object. Program will continue.\n";
 		return false;
 	}
 }
 
 bool Field::KillNmo(std::shared_ptr<NonMovableObject> object) {
-	Gui* gui = Gui::GetInstance();
 	for (size_t i = 0; i < pimpl_->non_movable_objects_.size(); ++i) {
 		if (object ==  pimpl_->non_movable_objects_[i]) {
 			auto cell = GetCell(object->GetX(), object->GetY());
 			if (cell == nullptr) {
-				//logger << "\nERROR: Possible lose of NonMovableObject. Program will continue.\n";
+				logger << "\nERROR: Possible lose of NonMovableObject. Program will continue.\n";
 				return false;
 			}
 			cell->RemoveObject();
-			gui->RemoveObject(object);
 			if (pimpl_->non_movable_objects_.size() == 1) pimpl_->non_movable_objects_.clear();
 			else if (i + 1 ==  pimpl_->non_movable_objects_.size())  pimpl_->non_movable_objects_.pop_back();
 			else {
@@ -314,7 +306,6 @@ void Field::f2() {
 #define ADD_NEIGHBOUR_TREE(i, j) if (IsCorrect(i, j) && !GetCell(i, j)->IsEmpty() && GetCell(i, j)->GetObject()->GetType(CellObject::Type::TREE)) ++neighbours
 
 void Field::GrowPlants() {
-	Gui *gui = Gui::GetInstance();
 	// Algorithm is inefficient and will fail if a new ground type is added
 	const size_t width = GetWidth();
 	const size_t height = GetHeight();
@@ -350,13 +341,9 @@ void Field::GrowPlants() {
 		for (size_t j = 0; j < height; ++j) {
 			if (rand() % 1000 == 0) {
 				GetCell(i, j)->SetGroundType(FieldCell::Ground::GRASS);
-				gui->RemoveSurfaceObject(i, j);
-				gui->CreateSurfaceObject(FieldCell::Ground::GRASS, i, j);
 			}
 			else {
 				GetCell(i, j)->SetGroundType(cells[i][j] == 1 ? FieldCell::Ground::GRASS : FieldCell::Ground::GROUND);
-				gui->RemoveSurfaceObject(i, j);
-				gui->CreateSurfaceObject(cells[i][j] == 1 ? FieldCell::Ground::GRASS : FieldCell::Ground::GROUND, i, j);
 			}
 			cells[i][j] = 0;
 		}

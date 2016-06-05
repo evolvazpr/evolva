@@ -1,12 +1,12 @@
-#include "Gui.hpp"
-#include "ui_gui.h"
+#include "dialog.hpp"
+#include "ui_dialog.h"
 #include "Field.hpp"
 #include "Tui.hpp"
 #include "EvolvaException.hpp"
 #include "SpriteObject.hpp"
 #include "Unit.hpp"
 
-Gui* Gui::gui_ = nullptr;
+Dialog* Dialog::dialog_ = nullptr;
 
 /**
  * @brief ANIMATION_CLOCK static global variable. Parameter to setup freqency of animation (FPS).
@@ -27,9 +27,9 @@ static const uint PIXELS_PER_OBJECT = 50;
  * @brief Constructor.
  * @param parent - parent for Qt API (no need to call delete thanks to it).
  */
-Gui::Gui(QWidget *parent, const int width, const int height) :
+Dialog::Dialog(QWidget *parent) :
 	QDialog(parent), sprites("gui.xml"),
-	ui(new Ui::Gui), width_(width), height_(height) { 
+	ui(new Ui::Dialog), width_(FIELD_SIZE), height_(FIELD_SIZE) { 
 	Qt::WindowFlags flags = Qt::WindowTitleHint | Qt::WindowSystemMenuHint;
 	flags |= Qt::WindowCloseButtonHint | Qt::WindowMinMaxButtonsHint;
 	
@@ -51,7 +51,7 @@ Gui::Gui(QWidget *parent, const int width, const int height) :
 /**
  * @brief Deconstructor.
  */
-Gui::~Gui() {
+Dialog::~Dialog() {
 	delete ui;
 }
 
@@ -59,13 +59,13 @@ Gui::~Gui() {
 /**
  * @brief Singleton method to get pointer to object. 
  * @param parent - optional parameter used in object's first initalization. Used to set parent
- *		   of gui.
+ *		   of dialog.
  */
-Gui * Gui::GetInstance(QWidget *parent, const int width, const int height) {
-	if (gui_ == nullptr) {
-		gui_ = new Gui(parent, width, height);
+Dialog * Dialog::GetInstance(QWidget *parent) {
+	if (dialog_ == nullptr) {
+		dialog_ = new Dialog(parent);
 	}
-	return gui_;
+	return dialog_;
 }
 
 
@@ -74,15 +74,21 @@ Gui * Gui::GetInstance(QWidget *parent, const int width, const int height) {
  * Method called when "Kolejna tura" button was clicked.
  * It calls Field::Next() method and other method for debug.
  */
-void Gui::on_pushButton_clicked() {  
-	field->Next();
+void Dialog::on_pushButton_clicked() {  
+	static Tui tui;
+	std::shared_ptr<MovableObject> next;
+	next = field->Next();
+	if (next == nullptr)
+		exit(0);
+	tui.PrintField();
+	field->f2();
 }
 /**
  * @brief Graphical x coordinate calculation.
  * @param x - field's x coordinate.
  * @return  - graphical x coordinate.
  */
-qreal Gui::CalculateX(const int x) {
+qreal Dialog::CalculateX(const int x) {
 	return ((qreal)x) / ((qreal)width_ )* scene->width();
 }
 
@@ -91,7 +97,7 @@ qreal Gui::CalculateX(const int x) {
  * @param y - field's y coordinate.
  * @return  - graphical y coordinate.
  */
-qreal Gui::CalculateY(const int y) {
+qreal Dialog::CalculateY(const int y) {
 	return ((qreal)y) / ((qreal)height_) * scene->height();
 }
 
@@ -102,7 +108,7 @@ qreal Gui::CalculateY(const int y) {
  * @param x - field's x coordinate of object.
  * @param y - field's y coordinate of object.
  */
-void Gui::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
+void Dialog::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
 	int x_pos = CalculateX(x);
 	int y_pos = CalculateY(y);
 	int sprite_cnt = 1;
@@ -125,14 +131,14 @@ void Gui::CreateObject(std::shared_ptr<const CellObject> object, const int x, co
  * @param id - object's id.
  * @return pointer to SpriteObject. If there is no SpriteObject with passed id, nullptr is returned.
  */
-SpriteObject* Gui::SearchObject(const uint id) {
+SpriteObject* Dialog::SearchObject(const uint id) {
 	QList<QGraphicsItem *> obj_list = scene->items();
 	SpriteObject *ptr;
 	for (auto &it : obj_list) {
 		if (it->type() != QGraphicsPixmapItem::Type) {
 			ptr = dynamic_cast<SpriteObject *>(it);
 			if (ptr == nullptr)
-				throw EvolvaException("Gui::SearchObject! IT SHOULD NOT OCCURE!");
+				throw EvolvaException("Dialog::SearchObject! IT SHOULD NOT OCCURE!");
 			if(ptr->id() == id)
 				return ptr;
 		}
@@ -148,10 +154,10 @@ SpriteObject* Gui::SearchObject(const uint id) {
  * @param x - <b>realative field (not graphical) steps</b> in x direction to make.
  * @param y - <b>realative field (not graphical) steps</b> in y direction to make.
  */
-void Gui::MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
+void Dialog::MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
 	SpriteObject *roundObject = SearchObject(object->GetId());
 	if (!roundObject)
-		throw EvolvaException("Gui::moveObject - object not found!\n");
+		throw EvolvaException("Dialog::moveObject - object not found!\n");
 
 	IncrementAnimations(roundObject);	
 
@@ -164,11 +170,11 @@ void Gui::MoveObject(std::shared_ptr<const CellObject> object, const int x, cons
  * @param x - <b>real field's x coordinate</b> in which RoundObject will be placed.
  * @param y - <b>real field's y coordinate</b> in which RoundObject will be placed.
  */
-void Gui::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y) {
+void Dialog::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y) {
 	SpriteObject *roundObject = SearchObject(object->GetId());
 	int x_old, y_old, dx, dy;
 	if (!object)
-		throw EvolvaException("Gui::moveObjectTo - object not found!\n");
+		throw EvolvaException("Dialog::moveObjectTo - object not found!\n");
 
 	IncrementAnimations(roundObject);
 
@@ -185,11 +191,11 @@ void Gui::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, co
  * @brief Remove (delete) specific SpriteObject.
  * @param object - shared_ptr to object which will be deleted from GUI.
  */
-void Gui::RemoveObject(std::shared_ptr<const CellObject> object) {
+void Dialog::RemoveObject(std::shared_ptr<const CellObject> object) {
 	SpriteObject *roundObject = SearchObject(object->GetId());
 	QMutexLocker lock(&remove_mutex_);
 	if (!roundObject) 
-		throw EvolvaException("Gui::removeObject - object not found!\n");	
+		throw EvolvaException("Dialog::removeObject - object not found!\n");	
 	to_remove_.push_back(roundObject);
 	lock.unlock();
 	if (!animations_.fetchAndAddAcquire(0))
@@ -200,7 +206,7 @@ void Gui::RemoveObject(std::shared_ptr<const CellObject> object) {
  * @brief ClearField from object, that should be removed, but weren't, because animation
  * was on-going.
  */
-void Gui::ClearField() {
+void Dialog::ClearField() {
 	QMutexLocker lock(&remove_mutex_);
 	for(auto &it : to_remove_) {
 		scene->removeItem(it);
@@ -219,7 +225,7 @@ void Gui::ClearField() {
  *
  * @param roundObject - pointer to SpriteObject to get information wether this object is moving.
  */ 
-void Gui::IncrementAnimations(SpriteObject *roundObject){
+void Dialog::IncrementAnimations(SpriteObject *roundObject){
 	if (roundObject->IsMoving())
 		animations_.fetchAndAddAcquire(0);
 	else
@@ -230,9 +236,9 @@ void Gui::IncrementAnimations(SpriteObject *roundObject){
 /**
  * @brief Decrementation of animating objects counter.
  *
- * Reason for this counter is described in Gui::IncrementAnimations method description.
+ * Reason for this counter is described in Dialog::IncrementAnimations method description.
  */
-void Gui::AnimationFinished() {
+void Dialog::AnimationFinished() {
 	if (animations_.fetchAndAddAcquire(0))
 		animations_.fetchAndAddAcquire(-1);
 	if (!animations_.fetchAndAddAcquire(0))
@@ -247,15 +253,21 @@ void Gui::AnimationFinished() {
  * @param x - x coordinate.
  * @param y - y coordinate.
  */
-void Gui::CreateSurfaceObject(const FieldCell::Ground surface_type, const int x, const int y) {
+void Dialog::CreateSurfaceObject(const Dialog::Surface surface_type, const int x, const int y) {
 	QString file;
 	std::string xml_cmd;
 
 	switch (surface_type) {
-	case FieldCell::Ground::GRASS :
+	case Dialog::Surface::GRASS :
 		xml_cmd = "grass";
 		break;
-	case FieldCell::Ground::GROUND :
+	case Dialog::Surface::SAND :
+		xml_cmd = "sand";
+		break;
+	case Dialog::Surface::WATER :
+		xml_cmd = "water";
+		break;
+	case Dialog::Surface::SOIL :
 		xml_cmd = "soil";
 		break;
 	default:
@@ -280,7 +292,7 @@ void Gui::CreateSurfaceObject(const FieldCell::Ground surface_type, const int x,
  * @param x - x coordinate.
  * @param y - y coordinate.
  */
-void Gui::RemoveSurfaceObject(const int x, const int y)
+void Dialog::RemoveSurfaceObject(const int x, const int y)
 {
 	QTransform test;
 	QGraphicsItem *item = scene->itemAt(CalculateX(x), CalculateY(y), test);
@@ -295,7 +307,7 @@ void Gui::RemoveSurfaceObject(const int x, const int y)
  * @brief Method to append text to log window.
  * @param text - text to append.
  */
-void Gui::AppendTextToLog(const std::string text) {
+void Dialog::AppendTextToLog(const std::string text) {
 	ui->log_textWindow->append(QString::fromStdString(text));
 }
 
@@ -304,9 +316,9 @@ void Gui::AppendTextToLog(const std::string text) {
  * Used to append text to log window.
  * @param s - std::string to append.
  */
-Gui& operator <<(Gui& gui, const std::string s) {	
-	gui.ui->log_textWindow->insertPlainText(QString::fromStdString(s));
-	return gui;
+Dialog& operator <<(Dialog& dialog, const std::string s) {	
+	dialog.ui->log_textWindow->insertPlainText(QString::fromStdString(s));
+	return dialog;
 }
 
 /**
@@ -314,9 +326,9 @@ Gui& operator <<(Gui& gui, const std::string s) {
  * Used to append text to log window.
  * @param s - char pointer to append.
  */
-Gui& operator <<(Gui& gui, const char* s) {	
-	gui.ui->log_textWindow->insertPlainText(s);
-	return gui;
+Dialog& operator <<(Dialog& dialog, const char* s) {	
+	dialog.ui->log_textWindow->insertPlainText(s);
+	return dialog;
 }
 
 
@@ -325,7 +337,7 @@ Gui& operator <<(Gui& gui, const char* s) {
  * This method creates content of stats window.
  * param cell - Field's cell in which object, represented by clicked sprite, resides.
  */
-boost::format Gui::CreateStatistics(std::shared_ptr<FieldCell> cell) {
+boost::format Dialog::CreateStatistics(std::shared_ptr<FieldCell> cell) {
 	std::shared_ptr<CellObject> object;
 	std::shared_ptr<Unit> unit;
 	std::shared_ptr<Plant> plant;
@@ -333,7 +345,7 @@ boost::format Gui::CreateStatistics(std::shared_ptr<FieldCell> cell) {
 	object = cell->GetObject();
 		
 	if (object.use_count() == 0)
-		throw EvolvaException("Gui::CreateStatistics, cell->IsEmpty() failed.");
+		throw EvolvaException("Dialog::CreateStatistics, cell->IsEmpty() failed.");
 
 	form = boost::format("Id: %1%\nx: %2%\ny: %3%\nEnergy: %4%\nFatigue: %5%\nType: %6%");
 	form % object->GetId();
@@ -347,7 +359,7 @@ boost::format Gui::CreateStatistics(std::shared_ptr<FieldCell> cell) {
 		 * Without it, I must cast.
 		 */
 		if (unit.use_count() == 0)
-			throw EvolvaException("Gui::CreateStatistics, object->GetType(MOVABLE) failed");
+			throw EvolvaException("Dialog::CreateStatistics, object->GetType(MOVABLE) failed");
 		form % unit->GetEnergy();	
 		form % unit->GetFatigue();
 	} else {
@@ -355,7 +367,7 @@ boost::format Gui::CreateStatistics(std::shared_ptr<FieldCell> cell) {
 		if(object->GetType(CellObject::Type::PLANT)) {
 			plant = std::dynamic_pointer_cast<Plant>(object);
 			if (plant.use_count() == 0)
-				throw EvolvaException("Gui::CreateStatistics, object->GetType(PLANT) failed.");		
+				throw EvolvaException("Dialog::CreateStatistics, object->GetType(PLANT) failed.");		
 			form % plant->GetEnergy();
 			form % 0;
 		} else {
@@ -376,7 +388,7 @@ boost::format Gui::CreateStatistics(std::shared_ptr<FieldCell> cell) {
  * @param x - x coordinate of sprite object.
  * @param y - y coordinate of sprite object.
  */
-void Gui::SpriteObjectClicked(int x, int y) {
+void Dialog::SpriteObjectClicked(int x, int y) {
 	std::shared_ptr<Field> field = Field::GetInstance();
 	std::shared_ptr<FieldCell> cell = field->GetCell(x, y);
 	boost::format form;
@@ -389,7 +401,7 @@ void Gui::SpriteObjectClicked(int x, int y) {
 	ui->stats_textWindow->setPlainText(QString::fromStdString(form.str()));		
 }
 
-std::string Gui::GetTypeName(std::shared_ptr<const CellObject> object) {
+std::string Dialog::GetTypeName(std::shared_ptr<const CellObject> object) {
 	std::string obj_type;
 	if (object->GetType(CellObject::Type::CARNIVORE)) { 
 		if (object->GetType(CellObject::Type::FLESH))
