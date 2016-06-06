@@ -46,19 +46,15 @@ public:
 	
 	virtual ~Dialog();
 	static Dialog * GetInstance(QWidget *parent = 0, const int width = 1, const int height = 1);
-	void AppendTextToLog(std::string text);
-
-	friend Dialog& operator <<(Dialog& dialog, const std::string s);
-	friend Dialog& operator <<(Dialog& dialog, const char* s);
-
+	void AppendTextToLog(const QString text);
 	void CreateObject(const uint id, QString path, uint sprite_cnt, const int x, const int y);
 	void CreateSurfaceObject(const QString path, const int x, const int y);
 	void RemoveSurfaceObject(const int x, const int y);
 	void MoveObject(const uint id, const int x, const int y);
 	void MoveObjectTo(const uint id, const int x, const int y);
 	void RemoveObject(const uint id);
-	void UpdateStatistics(const QString text);
-
+	void UpdateStats(const QString text);
+	void UpdateLog(const QString text);
 private slots:
 	void on_pushButton_clicked();
 

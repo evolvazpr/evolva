@@ -148,15 +148,16 @@ bool Field::MoveObjectTo(std::shared_ptr<Unit> object, size_t x, size_t y, const
 }
 
 bool Field::Kill(std::shared_ptr<Unit> unit, const size_t reason) {
+	std::string text;
 	Logic* gui = Logic::GetInstance();
 	auto cell = GetCell(unit->GetX(), unit->GetY());
 	if (cell->GetUnit() == unit) {
-		//logger << "Unit "<< unit->GetId() << " is dead: " << pimpl_->GetReason(reason) << "\n";
 		const size_t x = unit->GetX();
 		const size_t y = unit->GetY();
 		const double energy = unit->GetDna("normal_weight");
 		cell->RemoveObject();
 		gui->RemoveObject(unit);
+		*gui << "Unit " << unit->GetId() << " is dead: " << pimpl_->GetReason(reason) << "\n";
 		unit->alive_ = false;
 		std::cout << "nmobjs: " << pimpl_->non_movable_objects_.size() << "\n";
 		std::cout << "\n\nINSERT FLESH!!!! :  " << energy << "  " << InsertNmo(std::make_shared<Flesh>(energy), x, y) << "\n\n";
@@ -165,7 +166,7 @@ bool Field::Kill(std::shared_ptr<Unit> unit, const size_t reason) {
 		return true;
 	}
 	else {
-		//logger << "\nERROR: Possible lose of some object. Program will continue.\n";
+		*gui << "\nERROR: Possible lose of some object. Program will continue.\n";
 		return false;
 	}
 }
@@ -176,7 +177,7 @@ bool Field::KillNmo(std::shared_ptr<NonMovableObject> object) {
 		if (object ==  pimpl_->non_movable_objects_[i]) {
 			auto cell = GetCell(object->GetX(), object->GetY());
 			if (cell == nullptr) {
-				//logger << "\nERROR: Possible lose of NonMovableObject. Program will continue.\n";
+				*gui << "\nERROR: Possible lose of NonMovableObject. Program will continue.\n";
 				return false;
 			}
 			cell->RemoveObject();

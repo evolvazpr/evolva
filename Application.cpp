@@ -253,8 +253,14 @@ void Application::ConnectSignals() {
 		const int, const int, GuiHandler)));
 	connect(dialog_, SIGNAL(ClearMutex()), this, SLOT(ClearMutex()));
 	connect(dialog_, SIGNAL(SpriteObjectClicked(int , int)), this, SLOT(SpriteObjectClicked(int , int)));
+	connect(this, SIGNAL(OnExit()), logic_, SLOT(OnExit()));
 }
 
+void Logic::OnExit() {
+	moveToThread(QApplication::instance()->thread());
+}
+
+/** @brief Only one slot is used, because with few signals I had performance hit. */
 void Application::GuiSlot(const uint id, const QString type, const int x, const int y, 
 			  GuiHandler command) {
 	switch (command) {
@@ -276,9 +282,16 @@ void Application::GuiSlot(const uint id, const QString type, const int x, const 
 	case GuiHandler::REMOVEOBJECT:
 		RemoveObject(id);
 		break;
+	case GuiHandler::WRITETEXT:
+		UpdateLog(type);
+		break;
 	default:
 		break;
 	}
+}
+
+void Application::UpdateLog(const QString text) {
+	dialog_->UpdateLog(text);
 }
 
 void Application::ClearMutex() {
@@ -334,5 +347,12 @@ boost::format Logic::CreateStatistics(const int x, const int y) {
 
 void Application::SpriteObjectClicked(int x, int y) {
 	boost::format format = logic_->CreateStatistics(x, y);
-	dialog_->UpdateStatistics(QString::fromStdString(format.str()));
+	dialog_->UpdateStats(QString::fromStdString(format.str()));
 }
+
+Application::~Application() {
+	logic_thread_.quit();
+	while(!logic_thread_.isFinished());
+	delete(logic_);
+	delete(dialog_);
+};

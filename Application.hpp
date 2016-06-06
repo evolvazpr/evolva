@@ -26,7 +26,8 @@ enum class GuiHandler : uint {
 	REMOVESURFACEOBJECT,
 	MOVEOBJECT,
 	MOVEOBJECTTO,
-	REMOVEOBJECT
+	REMOVEOBJECT,
+	WRITETEXT
 };
 
 Q_DECLARE_METATYPE(GuiHandler)
@@ -44,21 +45,24 @@ private:
 	QThread logic_thread_;
 	XmlIo gui_settings_;
 	void ConnectSignals();
-public:
-	Application(int& argc, char **argv);
-	void Init();
-
 	void CreateObject(const uint id, const QString type, const int x, const int y);
 	void CreateSurfaceObject(const QString type, const int x, const int y);
 	void RemoveSurfaceObject(const int x, const int y);
 	void MoveObject(const uint id, const int x, const int y);
 	void MoveObjectTo(const uint id, const int x, const int y);
 	void RemoveObject(const uint id);
+	void UpdateLog(const QString text);
+public:
+	~Application();
+	Application(int& argc, char **argv);
+	void Init();
 
 public slots:
 	void ClearMutex();
 	void GuiSlot(const uint id, const QString type, const int x, const int y, GuiHandler command);
 	void SpriteObjectClicked(int x, int y);
+signals:
+	void OnExit();
 };
 
 
@@ -67,7 +71,7 @@ class Logic : public QObject {
 
 private:
 	std::shared_ptr<Field> field_;
-	QMutex *mutex_;
+	QMutex *mutex_;	
 	static Logic* instance_;
 	Logic(QMutex *mutex);
 	QString GetObjectType(std::shared_ptr<const CellObject> object);
@@ -81,14 +85,49 @@ public:
 	void MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void RemoveObject(std::shared_ptr<const CellObject> object);
+	void WriteToLog(const QString data);
 	boost::format CreateStatistics(const int x, const int y);
+	template <class T> Logic& operator <<(const T object);
 
 public slots:
 	void LogicIteration();
+	void OnExit();
 
 signals:
 	void SignalGui(const uint id, const QString type, const int x, const int y, GuiHandler command);
 };
 
+/**
+ * @brief stream operator overload.
+ * Used to append text to log window.
+ * @param s - std::string to append.
+ */
+template <class T> Logic& Logic::operator <<(const T object) {
+	std::stringstream ss;
+	ss << object;
+	std::string text = ss.str();
+	emit SignalGui(0, QString::fromStdString(text), 0, 0, GuiHandler::WRITETEXT);
+	return *this;
+}
+/**
+ * @brief stream operator overload.
+ * Used to append text to log window.
+ * @param s - std::string to append.
+ */
+/*template <> Logic& Logic::operator <<(const std::string s) {	
+	emit SignalGui(0, QString::fromStdString(s), 0, 0, GuiHandler::WRITETEXT);
+	return *this;
+}
+*/
+/**
+ * @brief stream operator overload.
+ * Used to append text to log window.
+ * @param s - char pointer to append.
+ */
+/*template <> Logic& Logic::operator <<(const char* s) {	
+	emit SignalGui(0, QString(s), 0, 0, GuiHandler::WRITETEXT);
+	return *this;
+}
+*/
 #endif 
 

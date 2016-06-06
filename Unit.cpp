@@ -3,7 +3,7 @@
 #include "FieldCell.hpp"
 #include <forward_list>
 #include <boost/multi_array.hpp>
-
+#include "Application.hpp"
 
 #include <iostream>
 
@@ -701,7 +701,7 @@ void Unit::GiveBirth(const int x, const int y) {
 	std::cout << "c. speed: " << child->speed_ << "\n";
 	std::cout << "x: " << child->GetX() << "\n";
 	std::cout << "y: " << child->GetY() << "\n";
-	std::cout << "\n";	/**/
+	std::cout << "\n";	*/
 	energy_ -= (dna_["requirements.childbirth"] + child_energy);
 	child->energy_ = child_energy;
 	pregnant_ = false;
@@ -712,7 +712,8 @@ void Unit::GiveBirth(const int x, const int y) {
 }
 
 void Unit::Miscarry() {
-	//logger << GetId() << " miscarried\n";
+	Logic *logger = Logic::GetInstance();
+	*logger << GetId() << " miscarried\n";
 	pregnant_ = false;
 	pregnant_turns_ = 0;
 	child_dna_code_.reset();

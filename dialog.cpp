@@ -234,28 +234,8 @@ void Dialog::RemoveSurfaceObject(const int x, const int y)
  * @brief Method to append text to log window.
  * @param text - text to append.
  */
-void Dialog::AppendTextToLog(const std::string text) {
-	ui->log_textWindow->append(QString::fromStdString(text));
-}
-
-/**
- * @brief stream operator overload.
- * Used to append text to log window.
- * @param s - std::string to append.
- */
-Dialog& operator <<(Dialog& dialog, const std::string s) {	
-	dialog.ui->log_textWindow->insertPlainText(QString::fromStdString(s));
-	return dialog;
-}
-
-/**
- * @brief stream operator overload.
- * Used to append text to log window.
- * @param s - char pointer to append.
- */
-Dialog& operator <<(Dialog& dialog, const char* s) {	
-	dialog.ui->log_textWindow->insertPlainText(s);
-	return dialog;
+void Dialog::UpdateStats(const QString text) {
+	ui->stats_textWindow->setPlainText(text);
 }
 
 /**
@@ -267,8 +247,8 @@ Dialog& operator <<(Dialog& dialog, const char* s) {
  * @param x - x coordinate of sprite object.
  * @param y - y coordinate of sprite object.
  */
-void Dialog::UpdateStatistics(const QString text) {
-	ui->stats_textWindow->setPlainText(text);		
+void Dialog::UpdateLog(const QString text) {
+	ui->log_textWindow->insertPlainText(text);		
 }
 
 
