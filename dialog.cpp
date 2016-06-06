@@ -112,7 +112,7 @@ void Dialog::CreateObject(const uint id, QString path, uint sprite_cnt, const in
 	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(AnimationFinished()), 
 			this, SIGNAL(ClearMutex()));
 	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(wasClicked(int, int)), this, 
-			SLOT(SpriteObjectClicked(int, int)));
+			SIGNAL(SpriteObjectClicked(int, int)));
 	QObject::connect(&timer_, SIGNAL(timeout()), dynamic_cast<QObject *>(sprite_object), 
 			SLOT(animate()));
 	emit ClearMutex();
@@ -258,54 +258,6 @@ Dialog& operator <<(Dialog& dialog, const char* s) {
 	return dialog;
 }
 
-
-/**
- * @brief method used when sprite object was clicked (so stats window will be updated).
- * This method creates content of stats window.
- * param cell - Field's cell in which object, represented by clicked sprite, resides.
- */
-boost::format Dialog::CreateStatistics(std::shared_ptr<FieldCell> cell) {
-	std::shared_ptr<CellObject> object;
-	std::shared_ptr<Unit> unit;
-	std::shared_ptr<Plant> plant;
-	boost::format form;
-	object = cell->GetObject();
-		
-	if (object.use_count() == 0)
-		throw EvolvaException("Dialog::CreateStatistics, cell->IsEmpty() failed.");
-
-	form = boost::format("Id: %1%\nx: %2%\ny: %3%\nEnergy: %4%\nFatigue: %5%\nType: %6%");
-	form % object->GetId();
-	form % object->GetX();
-	form % object->GetY();
-	
-	if (object->GetType(CellObject::Type::MOVABLE)) {
-		unit = std::dynamic_pointer_cast<Unit>(object); 
-		/* Above line proofs wrong interface of CellObject.
-		 * I should write there GetEnergy() and GetFatigue() virtual methods also.
-		 * Without it, I must cast.
-		 */
-		if (unit.use_count() == 0)
-			throw EvolvaException("Dialog::CreateStatistics, object->GetType(MOVABLE) failed");
-		form % unit->GetEnergy();	
-		form % unit->GetFatigue();
-	} else {
-
-		if(object->GetType(CellObject::Type::PLANT)) {
-			plant = std::dynamic_pointer_cast<Plant>(object);
-			if (plant.use_count() == 0)
-				throw EvolvaException("Dialog::CreateStatistics, object->GetType(PLANT) failed.");		
-			form % plant->GetEnergy();
-			form % 0;
-		} else {
-			form % 0;
-			form % 0;
-		}	
-	}
-	form % "does not work";	
-	return form;
-}
-
 /**
  * @brief Method called when sprite object was clicked. 
  *
@@ -315,17 +267,8 @@ boost::format Dialog::CreateStatistics(std::shared_ptr<FieldCell> cell) {
  * @param x - x coordinate of sprite object.
  * @param y - y coordinate of sprite object.
  */
-void Dialog::SpriteObjectClicked(int x, int y) {
-	std::shared_ptr<Field> field = Field::GetInstance();
-	std::shared_ptr<FieldCell> cell = field->GetCell(x, y);
-	boost::format form;
-	if(cell->IsEmpty()) {
-		form = boost::format("Cell is empty.");
-	} else {
-		form = CreateStatistics(cell);
-	}
-
-	ui->stats_textWindow->setPlainText(QString::fromStdString(form.str()));		
+void Dialog::UpdateStatistics(const QString text) {
+	ui->stats_textWindow->setPlainText(text);		
 }
 
 

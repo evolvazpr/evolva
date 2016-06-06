@@ -14,6 +14,53 @@
 #undef private
 #include "CyclicQueue.hpp"
 #include "dialog.hpp"
+#include <boost/format.hpp>
+#include <QThread>
+#include "XmlIo.hpp"
+
+class Logic;
+
+enum class GuiHandler : uint {
+	CREATEOBJECT,
+	CREATESURFACEOBJECT,
+	REMOVESURFACEOBJECT,
+	MOVEOBJECT,
+	MOVEOBJECTTO,
+	REMOVEOBJECT
+};
+
+Q_DECLARE_METATYPE(GuiHandler)
+
+/** @brief
+ * proxy between logic core (which is in second thread) and GUI (first/main thread, because
+ * this is how qt works if I have understood documentation properly).
+ */
+class Application : public QApplication {
+	Q_OBJECT
+private:
+	QMutex mutex_;
+	Logic* logic_;
+	Dialog* dialog_;
+	QThread logic_thread_;
+	XmlIo gui_settings_;
+	void ConnectSignals();
+public:
+	Application(int& argc, char **argv);
+	void Init();
+
+	void CreateObject(const uint id, const QString type, const int x, const int y);
+	void CreateSurfaceObject(const QString type, const int x, const int y);
+	void RemoveSurfaceObject(const int x, const int y);
+	void MoveObject(const uint id, const int x, const int y);
+	void MoveObjectTo(const uint id, const int x, const int y);
+	void RemoveObject(const uint id);
+
+public slots:
+	void ClearMutex();
+	void GuiSlot(const uint id, const QString type, const int x, const int y, GuiHandler command);
+	void SpriteObjectClicked(int x, int y);
+};
+
 
 class Logic : public QObject {
 	Q_OBJECT
@@ -34,40 +81,13 @@ public:
 	void MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void RemoveObject(std::shared_ptr<const CellObject> object);
-	
+	boost::format CreateStatistics(const int x, const int y);
+
 public slots:
 	void LogicIteration();
 
 signals:
-	void CreateObject_s(const uint id, const QString type, const int x, const int y);
-	void CreateSurfaceObject_s(const QString type, const int x, const int y);
-	void RemoveSurfaceObject_s(const int x, const int y);
-	void MoveObject_s(const uint id, const int x, const int y);
-	void MoveObjectTo_s(const uint id, const int x, const int y);
-	void RemoveObject_s(const uint id);
-};
-
-class Application : public QApplication {
-	Q_OBJECT
-private:
-	QMutex mutex_;
-	Logic* logic_;
-	Dialog* dialog_;
-	QThread logic_thread_;
-	XmlIo gui_settings_;
-	void ConnectSignals();
-public:
-	Application(int& argc, char **argv);
-	void Init();
-
-public slots:
-	void CreateObject(const uint id, const QString type, const int x, const int y);
-	void CreateSurfaceObject(const QString type, const int x, const int y);
-	void RemoveSurfaceObject(const int x, const int y);
-	void MoveObject(const uint id, const int x, const int y);
-	void MoveObjectTo(const uint id, const int x, const int y);
-	void RemoveObject(const uint id);
-	void ClearMutex();
+	void SignalGui(const uint id, const QString type, const int x, const int y, GuiHandler command);
 };
 
 #endif 

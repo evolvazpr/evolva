@@ -12,17 +12,8 @@
 #include <memory>
 #include <QMutex>
 #include <QWaitCondition>
-#include <boost/format.hpp>
 #include <unordered_map>
-#include "XmlIo.hpp"
-#include "CellObject.hpp"
-#include <QThread>
 #include "SpriteObject.hpp"
-
-
-class RoundObject;
-class Field;
-class FieldCell;
 
 namespace Ui {
 	class Dialog;
@@ -46,7 +37,6 @@ private:
 	SpriteObject* SearchObject(const uint id);
 	qreal CalculateX(const int x);
 	qreal CalculateY(const int y);
-	boost::format CreateStatistics(std::shared_ptr<FieldCell> cell);
 	explicit Dialog(QWidget *parent = 0, const int width = 1, const int height = 1);
 
 public:
@@ -67,16 +57,15 @@ public:
 	void MoveObject(const uint id, const int x, const int y);
 	void MoveObjectTo(const uint id, const int x, const int y);
 	void RemoveObject(const uint id);
+	void UpdateStatistics(const QString text);
 
 private slots:
 	void on_pushButton_clicked();
 
-public slots:
-	void SpriteObjectClicked(int x, int y);
-
 signals:
 	void ClearMutex();
-	void NextLogicIteration();	
+	void NextLogicIteration();
+	void SpriteObjectClicked(int x, int y);
 };
 
 #endif // DIALOG_HPP

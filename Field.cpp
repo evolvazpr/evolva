@@ -349,7 +349,7 @@ void Field::GrowPlants() {
 	}
 	for (size_t i = 0; i < width; ++i) {
 		for (size_t j = 0; j < height; ++j) {
-			if (rand() % 1000 == 0) {
+			if (rand() % 5 == 0) {
 				GetCell(i, j)->SetGroundType(FieldCell::Ground::GRASS);
 				gui->RemoveSurfaceObject(i, j);
 				gui->CreateSurfaceObject(FieldCell::Ground::GRASS, i, j);

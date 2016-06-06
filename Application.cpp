@@ -1,5 +1,6 @@
 #include "Application.hpp"
 #include <iostream>
+#include <QMetaType>
 
 Application::Application(int& argc, char **argv) : QApplication(argc, argv), gui_settings_("gui.xml") {
 
@@ -25,28 +26,26 @@ void Logic::LogicIteration() {
 
 void Logic::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
 	mutex_->lock();
-	emit CreateObject_s(object->GetId(), GetObjectType(object), x, y);
+	emit SignalGui(object->GetId(), GetObjectType(object), x, y, GuiHandler::CREATEOBJECT);
 }
 void Logic::CreateSurfaceObject(const FieldCell::Ground ground_type, const int x, const int y) {
-	mutex_->lock();
-	emit CreateSurfaceObject_s(GetGroundType(ground_type), x, y);
+	emit SignalGui(0, GetGroundType(ground_type), x, y, GuiHandler::CREATESURFACEOBJECT);
 }
 void Logic::RemoveSurfaceObject(const int x, const int y) {
-	mutex_->lock();
-	emit RemoveSurfaceObject_s(x, y);
+	emit SignalGui(0, QString(""), x, y, GuiHandler::REMOVESURFACEOBJECT);
 }
 void Logic::MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
 	mutex_->lock();
-	emit MoveObject_s(object->GetId(), x, y);
+	emit SignalGui(object->GetId(),QString(""), x, y, GuiHandler::MOVEOBJECT);
 }
 void Logic::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y) {
 	mutex_->lock();
-	emit MoveObjectTo_s(object->GetId(), x, y);
+	emit SignalGui(object->GetId(), QString(""), x, y, GuiHandler::MOVEOBJECTTO);
 }
 
 void Logic::RemoveObject(std::shared_ptr<const CellObject> object) {
 	mutex_->lock();
-	emit RemoveObject_s(object->GetId());
+	emit SignalGui(object->GetId(), QString(""), 0, 0, GuiHandler::REMOVEOBJECT);
 }
 
 void Logic::Init() {
@@ -175,12 +174,13 @@ void Logic::Init() {
 }
 
 void Application::Init() {
+	qRegisterMetaType<GuiHandler>("GuiHandler");
 	dialog_ = Dialog::GetInstance(nullptr, 30, 30);
 	dialog_->show();
 	logic_ = Logic::GetInstance(&mutex_);
 	ConnectSignals();
 	logic_->moveToThread(&logic_thread_);
-	logic_thread_.start();
+	logic_thread_.start(QThread::TimeCriticalPriority);
 	logic_->Init();	
 }
 
@@ -248,20 +248,91 @@ void Application::RemoveObject(const uint id) {
 
 void Application::ConnectSignals() {
 	connect(dialog_, SIGNAL(NextLogicIteration()), logic_, SLOT(LogicIteration()));
-	connect(logic_, SIGNAL(CreateObject_s(const uint, const QString, const int, const int)),
-		this, SLOT(CreateObject(const uint, const QString, const int, const int)));
-	connect(logic_, SIGNAL(CreateSurfaceObject_s(const QString, const int, const int)),
-		this, SLOT(CreateSurfaceObject(const QString, const int, const int)));
-	connect(logic_, SIGNAL(RemoveSurfaceObject_s(const int, const int)),
-		this, SLOT(RemoveSurfaceObject(const int, const int)));
-	connect(logic_, SIGNAL(MoveObject_s(const uint, const int, const int)), 
-		this, SLOT(MoveObject(const uint, const int, const int)));
-	connect(logic_, SIGNAL(MoveObjectTo_s(const uint, const int, const int)),
-		this, SLOT(MoveObjectTo(const uint, const int, const int)));
-	connect(logic_, SIGNAL(RemoveObject_s(const uint)), this, SLOT(RemoveObject(const uint)));
+	connect(logic_, SIGNAL(SignalGui(const uint, const QString, const int, const int, 
+		GuiHandler)), this, SLOT(GuiSlot(const uint, const QString,
+		const int, const int, GuiHandler)));
 	connect(dialog_, SIGNAL(ClearMutex()), this, SLOT(ClearMutex()));
+	connect(dialog_, SIGNAL(SpriteObjectClicked(int , int)), this, SLOT(SpriteObjectClicked(int , int)));
+}
+
+void Application::GuiSlot(const uint id, const QString type, const int x, const int y, 
+			  GuiHandler command) {
+	switch (command) {
+	case GuiHandler::CREATEOBJECT:
+		CreateObject(id, type, x, y);
+		break;
+	case GuiHandler::CREATESURFACEOBJECT:
+		CreateSurfaceObject(type, x, y);
+		break;
+	case GuiHandler::REMOVESURFACEOBJECT:
+		RemoveSurfaceObject(x, y);
+		break;
+	case GuiHandler::MOVEOBJECT:
+		MoveObject(id, x, y);
+		break;
+	case GuiHandler::MOVEOBJECTTO:
+		MoveObjectTo(id, x, y);
+		break;
+	case GuiHandler::REMOVEOBJECT:
+		RemoveObject(id);
+		break;
+	default:
+		break;
+	}
 }
 
 void Application::ClearMutex() {
 	mutex_.unlock();
+}
+
+/**
+ * @brief method used when sprite object was clicked (so stats window will be updated).
+ * This method creates content of stats window.
+ * param cell - Field's cell in which object, represented by clicked sprite, resides.
+ */
+boost::format Logic::CreateStatistics(const int x, const int y) {
+	std::shared_ptr<FieldCell> cell = field_->GetCell(x , y);
+	std::shared_ptr<CellObject> object = cell->GetObject();
+	std::shared_ptr<Unit> unit;
+	std::shared_ptr<Plant> plant;
+	boost::format form;
+		
+	if (object.use_count() == 0)
+		throw EvolvaException("Dialog::CreateStatistics, cell->IsEmpty() failed.");
+
+	form = boost::format("Id: %1%\nx: %2%\ny: %3%\nEnergy: %4%\nFatigue: %5%\nType: %6%");
+	form % object->GetId();
+	form % object->GetX();
+	form % object->GetY();
+	
+	if (object->GetType(CellObject::Type::CARNIVORE) || object->GetType(CellObject::Type::HERBIVORE))  {
+		unit = std::dynamic_pointer_cast<Unit>(object); 
+		/* Above line proofs wrong interface of CellObject.
+		 * I should write there GetEnergy() and GetFatigue() virtual methods also.
+		 * Without it, I must cast.
+		 */
+		if (unit.use_count() == 0)
+			throw EvolvaException("Dialog::CreateStatistics, object->GetType(MOVABLE) failed");
+		form % unit->GetEnergy();	
+		form % unit->GetFatigue();
+	} else {
+
+		if(object->GetType(CellObject::Type::PLANT)) {
+			plant = std::dynamic_pointer_cast<Plant>(object);
+			if (plant.use_count() == 0)
+				throw EvolvaException("Dialog::CreateStatistics, object->GetType(PLANT) failed.");		
+			form % plant->GetEnergy();
+			form % 0;
+		} else {
+			form % 0;
+			form % 0;
+		}	
+	}
+	form % GetObjectType(object).toStdString();	
+	return form;
+}
+
+void Application::SpriteObjectClicked(int x, int y) {
+	boost::format format = logic_->CreateStatistics(x, y);
+	dialog_->UpdateStatistics(QString::fromStdString(format.str()));
 }
