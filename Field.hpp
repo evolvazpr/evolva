@@ -12,6 +12,7 @@ class NonMovableObject;
 class FieldCell;
 class Unit;
 class FieldPimpl;
+class Statistics;
 
 class Field {
 friend class Tui;
@@ -36,7 +37,6 @@ private:
 	bool keep_grass_[9];
 	bool new_tree_[9];
 	bool keep_tree_[9];
-
 public:
 	inline const size_t GetFfid() const { return ++ffid_; };
 	static std::shared_ptr<Field> GetInstance(const size_t x = 0, const size_t y = 0);
@@ -63,10 +63,9 @@ public:
 	std::shared_ptr<Unit> NextUnit();
 	bool IsCycleEnd() const;
 	void GrowPlants();
-	void LogAllUnits() const;
-
-	void f1();
+	void MakeGrass();
 	void f2();
+	std::shared_ptr<Statistics> stats_;
 };
 
 extern std::shared_ptr<Field> field;

@@ -1,10 +1,9 @@
 #include "Field.hpp"
 #include "FieldCell.hpp"
 #include "CellObject.hpp"
-#define private public
 #include "CyclicQueue.hpp"
-#undef private
 #include "Unit.hpp"
+#include "Statistics.hpp"
 #include <vector>
 #include <boost/multi_array.hpp>
 
@@ -74,6 +73,7 @@ Field::Field(const size_t x, const size_t y) : pimpl_(new FieldPimpl(x, y)), kee
 			pimpl_->cells_[i][j] = std::make_shared<FieldCell>(i, j);
 		}
 	}
+	stats_ = std::make_shared<Statistics>();
 }
 
 std::shared_ptr<Field> Field::GetInstance(const size_t x, const size_t y) {
@@ -149,10 +149,12 @@ bool Field::Kill(std::shared_ptr<Unit> unit, const size_t reason) {
 		const size_t x = unit->GetX();
 		const size_t y = unit->GetY();
 		const double energy = unit->GetDna("normal_weight");
+		const bool carnivore = unit->IsCarnivore();
 		cell->RemoveObject();
 		unit->alive_ = false;
+		unit->RemoveStatistics();
 		std::cout << "nmobjs: " << pimpl_->non_movable_objects_.size() << "\n";
-		std::cout << "\n\nINSERT FLESH!!!! :  " << energy << "  " << InsertNmo(std::make_shared<Flesh>(energy), x, y) << "\n\n";
+		std::cout << "\n\nINSERT FLESH!!!! :  " << energy << "  " << InsertNmo(std::make_shared<Flesh>(energy, carnivore), x, y) << "\n\n";
 		std::cout << "flesh: " << std::static_pointer_cast<Flesh>(GetCell(x, y)->GetObject())->GetDefaultEnergy() << "\n";
 		std::cout << "nmobjs: " << pimpl_->non_movable_objects_.size() << "\n";
 		return true;
@@ -276,10 +278,6 @@ bool Field::IsCycleEnd() const {
 	return pimpl_->movable_objects_.IsEnd();
 }
 
-void Field::f1() {
-	std::cout << "cqs: " << pimpl_->movable_objects_.size() << "\n";
-}
-
 void Field::f2() {
 	auto z = std::dynamic_pointer_cast<Unit>(pimpl_->movable_objects_.Get());
 	auto h = z;
@@ -382,7 +380,6 @@ void Field::GrowPlants() {
 			}
 			else {
 				if (cell->IsEmpty() && cells[i][j]) {
-				//	std::cout << "NEW TREEE!\n";
 					InsertNmo(std::make_shared<Tree>(100.0), i, j);
 				}
 				else if (!cell->IsEmpty()) {
@@ -395,6 +392,16 @@ void Field::GrowPlants() {
 	}
 }
 
-void Field::LogAllUnits() const {
-	return;
+void Field::MakeGrass() {
+	std::uniform_int_distribution<int> type(0, 1);
+	for (size_t i = 0; i < GetWidth(); i++) {
+		for (size_t j = 0; j < GetHeight(); j++) {
+			if (type(field->Random()) == 0) {
+				pimpl_->cells_[i][j]->SetGroundType(FieldCell::Ground::GROUND);
+			}
+			else {
+				pimpl_->cells_[i][j]->SetGroundType(FieldCell::Ground::GRASS);
+			}
+		}
+	}
 }

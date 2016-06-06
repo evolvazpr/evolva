@@ -1,40 +1,13 @@
 #include "Field.hpp"
 #include "Unit.hpp"
 #include "FieldCell.hpp"
-#include <forward_list>
+//#include <forward_list>
 #include <boost/multi_array.hpp>
 
 
 #include <iostream>
-
-
-
-
-
-// TODO: Unnatural breeding. Children may have more energy than parent! It brakes
-// the first law of thermodynamics. :( <- FIX THAT!
-
-double Heaviside(const double x) { return (x <= 0.0 ? 0.0 : x); }
-size_t Abs(const int x) { return (x < 0 ? -x : x); };
-
-double min3 (double a, double b, double c) {
-	if (a <= b) {
-		if (a <= c) return a;
-		else return c;
-	}
-	else {
-		if (b <= c) return b;
-		else return c;
-	}
-}
-
-
-
-
-
-
-
-
+#include "Utility.h"
+#include "Statistics.hpp"
 
 class Sense {
 public:
@@ -52,7 +25,7 @@ public:
 	private:
 		Cell() = delete;
 		std::shared_ptr<FieldCell> cell_;
-		int x_; //gdzie jest w sensie
+		int x_;
 		int y_;
 		inline void SetCell(std::shared_ptr<FieldCell> cell) { cell_ = cell; };
 		int empty_cell_x_; // empty cell near this
@@ -86,15 +59,23 @@ public:
 };
 
 std::shared_ptr<Sense::Cell> Sense::GetRelativeCellConst(const int x, const int y) const {
-	if (!foreach_started_) return nullptr;
+	if (!foreach_started_) {
+		return nullptr;
+	}
 	int requested_x = i_ + x;
-	if (requested_x < 0 || requested_x > size_ - 1) return nullptr;
+	if (requested_x < 0 || requested_x > size_ - 1) {
+		return nullptr;
+	}
 	int requested_y = j_ + y;
-	if (requested_y < 0 || requested_y > size_ - 1) return nullptr;
+	if (requested_y < 0 || requested_y > size_ - 1) {
+		return nullptr;
+	}
 	if (cells_[requested_x ][requested_y]->IsAvailable()) {
 		return cells_[requested_x][requested_y];
 	}
-	else return nullptr;
+	else {
+		return nullptr;
+	}
 }
 
 Sense::Cell::Cell(const size_t x, const size_t y) : x_(x), y_(y) {
@@ -168,13 +149,18 @@ bool Sense::Fetch() {
 
 
 Unit::Unit() : DnaUnit(), CellObject() {
+	omnivore_ = false;
+	disabled_ = true;
 	alive_ = true;
 	SetType(Type::UNIT, true);
 	SetType(Type::MOVABLE, true);
 	death_reason_ = 8;
+	field->stats_->disabled_++;
 }
 
 Unit::Unit(std::shared_ptr<DnaCode> dna_code) : DnaUnit(dna_code), CellObject() {
+	omnivore_ = false;
+	disabled_ = false;
 	alive_ = true;
 	SetType(Type::UNIT, true);
 	turns_ = 0;
@@ -198,8 +184,25 @@ Unit::Unit(std::shared_ptr<DnaCode> dna_code) : DnaUnit(dna_code), CellObject() 
 		std::cout << "niepelne dna\n";
 	}
 	UpdateSpeed();
-	if (dna_["herbivore"] > 50.0) SetType(Type::HERBIVORE, true);
-	if (dna_["carnivore"] > 50.0) SetType(Type::CARNIVORE, true);
+	if (dna_["herbivore"] > 50.0) {
+		SetType(Type::HERBIVORE, true);
+		if (dna_["carnivore"] > 50.0) {
+			SetType(Type::CARNIVORE, true);
+			field->stats_->omnivore_++;
+			omnivore_ = true;
+		}
+		else {
+			field->stats_->herbivore_++;
+		}
+	}
+	else if (dna_["carnivore"] > 50.0) {
+		SetType(Type::CARNIVORE, true);
+		field->stats_->carnivore_++;
+	}
+	else {
+		field->stats_->disabled_++;
+		disabled_ = true;
+	}
 	death_reason_ = 8;
 }
 
@@ -311,19 +314,6 @@ void Unit::UpdateSpeed() {
 	speed_ = ((0.5 * dna_["speed"] + 0.25 * dna_["agility"] + 0.125 * dna_["intelligence"] + 0.125 * dna_["strength"]) - 100.0) / dna_["normal_weight"] * energy_ + 100.0;
 }
 
-
-
-
-
-
-double Distance(double x1, double y1, double x2, double y2) {
-	x1 -= x2;
-	y1 -= y2;
-	return sqrt(x1 * x1 + y1 * y1);
-}
-
-
-
 size_t Unit::Think(const double intelligence, std::shared_ptr<Unit> attacker) {
 	// Calculate steps the unit can move. C. speed is <0, 100> (can be lower),
 	// so when c. speed is 100, the unit is able to move 25 steps.
@@ -426,7 +416,6 @@ size_t Unit::Think(const double intelligence, std::shared_ptr<Unit> attacker) {
 								if (!cell_object->GetType(CellObject::Type::PLANT)) return nullptr;
 								// blabla
 								auto tree = std::dynamic_pointer_cast<Tree>(cell_object);
-								Tree *b = tree.get();
 								return tree;
 							}
 							else {
@@ -447,7 +436,6 @@ size_t Unit::Think(const double intelligence, std::shared_ptr<Unit> attacker) {
 				int x = best_cell_think->GetEmptyX();
 				int y = best_cell_think->GetEmptyY();/**/
 				std::cout << "bcxy: " << x << " " << y << "\n";
-				size_t id = best_cell_think->Get()->GetObject()->GetId();
 				Move(best_cell_think->GetEmptyX(), best_cell_think->GetEmptyY(), true);
 				auto tree = std::dynamic_pointer_cast<Tree>(best_cell_think->Get()->GetObject());
 				energy_ += tree->Eat(3.0 * dna_["normal_weight"] - energy_);
@@ -501,7 +489,6 @@ size_t Unit::Think(const double intelligence, std::shared_ptr<Unit> attacker) {
 				int x = best_cell_think->GetEmptyX();
 				int y = best_cell_think->GetEmptyY();/**/
 				std::cout << "bcxy: " << x << " " << y << "\n";
-				size_t id = best_cell_think->Get()->GetObject()->GetId();
 				std::shared_ptr<Flesh> flesh = nullptr;
 				if (best_cell_think->Get()->GetObject()->GetType(CellObject::Type::UNIT)) {
 					auto unit = std::dynamic_pointer_cast<Unit>(best_cell_think->Get()->GetObject());
@@ -595,8 +582,6 @@ size_t Unit::Explore(double steps) {
 	double &magnitude = steps;
 	int x = static_cast<int>(floor(magnitude * cos(angle)));
 	int y = static_cast<int>(floor(magnitude * sin(angle)));
-	size_t old_x = GetX();
-	size_t old_y = GetY();
 	Move(x, y, true);
 	return 0;
 	// TODO: gui -> log -> succcesful movement
@@ -690,7 +675,9 @@ template <class SC, class F> std::shared_ptr<SC> Unit::Action(double steps_limit
 		//! BREAK CUZ OF DEBUGGING
 		else if(1) return;
 		// Else, perform the second conditions test. It may change best_cell.
-		else conditions(cell, field_cell, specific_object, true, best_cell);
+		else {
+			conditions(cell, field_cell, specific_object, true, best_cell);
+		}
 	});
 	// If there is no right object, return empty cell.
 	if (!best_cell) return nullptr;
@@ -705,19 +692,11 @@ void Unit::GiveBirth(const int x, const int y) {
 	const double child_energy = child_dna_code_->operator[]("normal_weight") * 0.75;
 	if (energy_ - child_energy < 0.0) return Miscarry();
 	auto child = std::make_shared<Unit>(child_dna_code_);
-    field->f1();
 	field->InsertObject(child, static_cast<int>(GetX() + x), static_cast<int>(GetY()) + y);
-	field->f1();
 	std::cout << GetId() << " gives a birth to " << child->GetId() << " at " << child->GetX() << ", " << child->GetY() << " (" << GetX() + x << ", " << GetY() + y << ")\n";
 	for (auto j = child->dna_.begin(); j != child->dna_.end(); ++j) {
 		std::cout << j->first << ": " << j->second << "\n";
 	}
-/*	std::cout << "death: " << child->death_ << "\n";
-	std::cout << "energy: " << child->energy_ << "\n";
-	std::cout << "c. speed: " << child->speed_ << "\n";
-	std::cout << "x: " << child->GetX() << "\n";
-	std::cout << "y: " << child->GetY() << "\n";
-	std::cout << "\n";	/**/
 	energy_ -= (dna_["requirements.childbirth"] + child_energy);
 	child->energy_ = child_energy;
 	pregnant_ = false;
@@ -734,3 +713,17 @@ void Unit::Miscarry() {
 	child_dna_code_.reset();
 }
 
+void Unit::RemoveStatistics() {
+	if (disabled_) {
+		field->stats_->disabled_--;
+	}
+	else if (omnivore_) {
+		field->stats_->omnivore_--;
+	}
+	else if (IsCarnivore()) {
+		field->stats_->carnivore_--;
+	}
+	else if (IsHerbivore()) {
+		field->stats_->herbivore_--;
+	}
+}

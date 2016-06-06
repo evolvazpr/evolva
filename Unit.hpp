@@ -59,6 +59,9 @@ private:
 	inline bool IsCarnivore() const { return dna_["carnivore"] >= 50.0; };
 	inline bool IsHerbivore() const { return dna_["herbivore"] >= 50.0; };
 	size_t death_reason_;
+	bool omnivore_;
+	bool disabled_;
+	void RemoveStatistics();
 };
 
 #endif // _UNIT_HPP_

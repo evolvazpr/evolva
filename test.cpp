@@ -8,8 +8,8 @@
 #undef protected
 #undef private
 #include <iostream>
-
-
+#include <iomanip>
+#include "Statistics.hpp"
 
 
     #include <unistd.h>   //_getch*/
@@ -84,7 +84,7 @@ int main(void) {
 		DnaGenerator gen(dna_ptr);
 		gen.variability_ = 30.0;
 
-		std::shared_ptr<Unit> u[10];
+		std::shared_ptr<Unit> u[9];
 		u[0] = std::make_shared<Unit>(gen.Generate());
 		u[1] = std::make_shared<Unit>(gen.Generate());
 		u[2] = std::make_shared<Unit>(gen.Generate());
@@ -94,7 +94,7 @@ int main(void) {
 		u[6] = std::make_shared<Unit>(gen.Generate());
 		u[7] = std::make_shared<Unit>(gen.Generate());
 		u[8] = std::make_shared<Unit>(gen.Generate());
-		u[9] = std::make_shared<Unit>(gen.Generate());
+	//	u[9] = std::make_shared<Unit>(gen.Generate());
 
 
 //		u[0]->energy_ = 200.0;
@@ -202,8 +202,9 @@ int main(void) {
 //	field->KillNmo(field->GetCell(2,8)->GetNmo());
 
 	Tui tui;
-
+	field->MakeGrass();
 	for (int i = 0; i < 10; ++i) field->GrowPlants();
+
 	field->BeginCycle();
 	field->Play();
 
@@ -212,6 +213,12 @@ int main(void) {
 
 	while(1) {
 		tui.PrintField();
+		std::cout << std::setw(16) << "carnies: " << field->stats_->carnivore_.Get() << "";
+		std::cout << std::setw(16) << "herbis: " << field->stats_->herbivore_.Get() << "";
+		std::cout << std::setw(16) << "omnis: " << field->stats_->omnivore_.Get() << "\n";
+		std::cout << std::setw(16) << "disabled: " << field->stats_->disabled_.Get() << "";
+	/*	std::cout << std::setw(16) << "trees: " << field->stats_->tree_.Get() << "";
+		std::cout << std::setw(16) << "flesh: " << field->stats_->flesh_.Get() << "\n";/**/
 	//	field->f2();
 //		field->LogAllUnits();
 		if (getch() == ' ') break;

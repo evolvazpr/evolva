@@ -1,6 +1,8 @@
 #include "FieldCell.hpp"
 #include "CellObject.hpp"
 #include "Unit.hpp"
+#include "Field.hpp"
+#include <random>
 
 FieldCell::FieldCell(const size_t x, const size_t y) {
 	object_ = nullptr;
