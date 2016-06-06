@@ -61,7 +61,6 @@ public slots:
 	void ClearMutex();
 	void GuiSlot(const uint id, const QString type, const int x, const int y, GuiHandler command);
 	void SpriteObjectClicked(int x, int y);
-signals:
 	void OnExit();
 };
 
@@ -91,7 +90,6 @@ public:
 
 public slots:
 	void LogicIteration();
-	void OnExit();
 
 signals:
 	void SignalGui(const uint id, const QString type, const int x, const int y, GuiHandler command);

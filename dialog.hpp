@@ -55,6 +55,7 @@ public:
 	void RemoveObject(const uint id);
 	void UpdateStats(const QString text);
 	void UpdateLog(const QString text);
+	void closeEvent(QCloseEvent *event) Q_DECL_OVERRIDE; 
 private slots:
 	void on_pushButton_clicked();
 
@@ -62,6 +63,7 @@ signals:
 	void ClearMutex();
 	void NextLogicIteration();
 	void SpriteObjectClicked(int x, int y);
+	void OnExit();
 };
 
 #endif // DIALOG_HPP

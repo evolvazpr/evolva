@@ -253,11 +253,13 @@ void Application::ConnectSignals() {
 		const int, const int, GuiHandler)));
 	connect(dialog_, SIGNAL(ClearMutex()), this, SLOT(ClearMutex()));
 	connect(dialog_, SIGNAL(SpriteObjectClicked(int , int)), this, SLOT(SpriteObjectClicked(int , int)));
-	connect(this, SIGNAL(OnExit()), logic_, SLOT(OnExit()));
+	connect(dialog_, SIGNAL(OnExit()), this, SLOT(OnExit()));
 }
 
-void Logic::OnExit() {
-	moveToThread(QApplication::instance()->thread());
+void Application::OnExit() {
+	ClearMutex();
+	logic_thread_.quit();
+	while(!logic_thread_.isFinished());
 }
 
 /** @brief Only one slot is used, because with few signals I had performance hit. */
@@ -351,8 +353,6 @@ void Application::SpriteObjectClicked(int x, int y) {
 }
 
 Application::~Application() {
-	logic_thread_.quit();
-	while(!logic_thread_.isFinished());
 	delete(logic_);
 	delete(dialog_);
 };

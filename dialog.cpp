@@ -251,4 +251,7 @@ void Dialog::UpdateLog(const QString text) {
 	ui->log_textWindow->insertPlainText(text);		
 }
 
-
+void Dialog::closeEvent(QCloseEvent *event) {
+	emit OnExit();
+	QDialog::closeEvent(event);
+}
