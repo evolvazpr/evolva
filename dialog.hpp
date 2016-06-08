@@ -11,7 +11,6 @@
 #include <iostream>
 #include <memory>
 #include <QMutex>
-#include <QWaitCondition>
 #include <unordered_map>
 #include "SpriteObject.hpp"
 
@@ -33,12 +32,14 @@ private:
 	const unsigned int height_;
 	QTimer timer_;
 	static Dialog* dialog_;
-
+	QAtomicInt animations_;
+	QList<SpriteObject *> to_add_;
+	QList<SpriteObject *> to_remove_;	
 	SpriteObject* SearchObject(const uint id);
 	qreal CalculateX(const int x);
 	qreal CalculateY(const int y);
 	explicit Dialog(QWidget *parent = 0, const int width = 1, const int height = 1);
-
+	void UpdateScene();
 public:
 	/**
 	 * @brief enum class to describe possible surface types.
@@ -58,7 +59,7 @@ public:
 	void closeEvent(QCloseEvent *event) Q_DECL_OVERRIDE; 
 private slots:
 	void on_pushButton_clicked();
-
+	void AnimationFinished();
 signals:
 	void ClearMutex();
 	void NextLogicIteration();

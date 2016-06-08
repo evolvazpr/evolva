@@ -36,7 +36,7 @@ Dialog::Dialog(QWidget *parent, const int width, const int height) :
 	ui->graphicsView->setRenderHint(QPainter::Antialiasing);
 	ui->graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 	ui->graphicsView->show();
-
+	animations_ = 0;
 	QDialog::setWindowFlags(flags);
 	timer_.start(ANIMATION_CLOCK);		
 }
@@ -107,14 +107,34 @@ void Dialog::CreateObject(const uint id, QString path, uint sprite_cnt, const in
 	QString sprite_path;
 	sprite_object = new SpriteObject(scene->parent(), id, x_pos, y_pos, 
 					path, sprite_cnt, PIXELS_PER_OBJECT);
-	scene->addItem(sprite_object);
+	if (animations_)
+		to_add_.push_back(sprite_object);
+	else 
+		scene->addItem(sprite_object);
 	
 	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(AnimationFinished()), 
-			this, SIGNAL(ClearMutex()));
+			this, SLOT(AnimationFinished()));
 	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(wasClicked(int, int)), this, 
 			SIGNAL(SpriteObjectClicked(int, int)));
 	QObject::connect(&timer_, SIGNAL(timeout()), dynamic_cast<QObject *>(sprite_object), 
 			SLOT(animate()));
+	emit ClearMutex();
+}
+
+void Dialog::AnimationFinished() {
+	animations_--;
+	if (!animations_) {
+		for (auto &it : to_add_) {
+			scene->addItem(it);
+		}
+		to_add_.clear();
+
+		for (auto &it : to_remove_) {
+			scene->removeItem(it);
+			delete(it);
+		}
+		to_remove_.clear();
+	}
 	emit ClearMutex();
 }
 
@@ -151,6 +171,7 @@ void Dialog::MoveObject(const uint id, const int x, const int y) {
 	if (!roundObject) {
 		throw EvolvaException("Dialog::moveObject - object not found!\n");
 	}
+	animations_++;
 	roundObject->move(CalculateX(x), CalculateY(y));	
 }
 
@@ -172,7 +193,7 @@ void Dialog::MoveObjectTo(const uint id, const int x, const int y) {
 
 	dx = CalculateX(x) - x_old;
 	dy = CalculateY(y) - y_old;
-
+	animations_++;
 	roundObject->move(dx, dy);
 }
 
@@ -183,11 +204,23 @@ void Dialog::MoveObjectTo(const uint id, const int x, const int y) {
 void Dialog::RemoveObject(const uint id) {
 	SpriteObject *roundObject = SearchObject(id);
 
-	if (!roundObject) 
-		throw EvolvaException("Dialog::removeObject - object not found!\n");	
+	if (!roundObject) {
+		for (auto &it : to_add_) {
+			if (it->id() == id) {
+				roundObject = it;
+				break;
+			}
+		}
+		if (!roundObject)
+			throw EvolvaException("Dialog::removeObject - internal error!\n");		
+	}
 
-	scene->removeItem(roundObject);
-	delete(roundObject);
+	if (animations_) {
+		to_remove_.push_back(roundObject);
+	} else {
+		scene->removeItem(roundObject);
+		delete(roundObject);
+	}
 	emit ClearMutex();
 }
 

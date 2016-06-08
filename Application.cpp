@@ -25,7 +25,7 @@ void Logic::LogicIteration() {
 }
 
 void Logic::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
-	mutex_->lock();
+//	mutex_->lock();
 	emit SignalGui(object->GetId(), GetObjectType(object), x, y, Application::GuiHandler::CREATEOBJECT);
 }
 void Logic::CreateSurfaceObject(const FieldCell::Ground ground_type, const int x, const int y) {
@@ -35,16 +35,16 @@ void Logic::RemoveSurfaceObject(const int x, const int y) {
 	emit SignalGui(0, QString(""), x, y, Application::GuiHandler::REMOVESURFACEOBJECT);
 }
 void Logic::MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
-	mutex_->lock();
+//	mutex_->lock();
 	emit SignalGui(object->GetId(),QString(""), x, y, Application::GuiHandler::MOVEOBJECT);
 }
 void Logic::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y) {
-	mutex_->lock();
+//	mutex_->lock();
 	emit SignalGui(object->GetId(), QString(""), x, y, Application::GuiHandler::MOVEOBJECTTO);
 }
 
 void Logic::RemoveObject(std::shared_ptr<const CellObject> object) {
-	mutex_->lock();
+//	mutex_->lock();
 	emit SignalGui(object->GetId(), QString(""), 0, 0, Application::GuiHandler::REMOVEOBJECT);
 }
 
@@ -179,8 +179,8 @@ void Application::Init() {
 	dialog_->show();
 	logic_ = Logic::GetInstance(&mutex_);
 	ConnectSignals();
-	logic_->moveToThread(&logic_thread_);
-	logic_thread_.start(QThread::TimeCriticalPriority);
+//	logic_->moveToThread(&logic_thread_);
+//	logic_thread_.start(QThread::TimeCriticalPriority);
 	logic_->Init();	
 }
 
@@ -257,12 +257,12 @@ void Application::ConnectSignals() {
 }
 
 void Application::OnExit() {
-	logic_thread_.quit();
+//	logic_thread_.quit();
 	dialog_->close();
 	//deadlock at exit workaround - ugly solution
-	while(logic_thread_.isRunning()) {
-		mutex_.unlock();
-	}
+//	while(logic_thread_.isRunning()) {
+//		mutex_.unlock();
+//	}
 }
 
 /** @brief Only one slot is used, because with few signals I had performance hit. */
@@ -300,7 +300,7 @@ void Application::UpdateLog(const QString text) {
 }
 
 void Application::ClearMutex() {
-	mutex_.unlock();
+	//mutex_.unlock();
 }
 
 /**
