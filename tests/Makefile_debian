@@ -3,7 +3,7 @@ MAKEFILE      = Makefile
 #Change if your paths/compilators varries.
 QT_PATH_BIN = /usr/lib/x86_64-linux-gnu/qt5
 QT_PATH_INC = /usr/include/x86_64-linux-gnu/qt5
-BOOST_PATH_INC = /usr/include/boost
+#BOOST_PATH_INC = /usr/include/boost
 
 CPP_LIB = /usr/lib/gcc/x86_64-linux-gnu/4.9
 CPP_USR_INC = /usr/include/c++/4.9
@@ -20,7 +20,7 @@ DEFINES       = -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_CONCURRENT_LIB -DQT_GUI_LIB 
 CFLAGS        = -m64 -pipe $(OPT_FLAGS) $(DBG_FLAGS) -Wall -Wextra -D_REENTRANT -fPIE $(DEFINES) -ggdb
 CXXFLAGS      = -m64 -pipe -std=c++11 $(OPT_FLAGS) $(DBG_FLAGS) -Wall -Wextra -D_REENTRANT -fPIE $(DEFINES) -ggdb
 INCPATH       = -I $(QT_PATH_BIN)/mkspecs/linux-g++-64 -isystem $(QT_PATH_INC) -isystem $(QT_PATH_INC)/QtWidgets 
-INCPATH      += -isystem $(QT_PATH_INC)/QtConcurrent -isystem $(QT_PATH_INC)/QtGui -isystem $(QT_PATH_INC)/QtCore -isystem $(BOOST_PATH_INC) -I.. -I.
+INCPATH      += -isystem $(QT_PATH_INC)/QtConcurrent -isystem $(QT_PATH_INC)/QtGui -isystem $(QT_PATH_INC)/QtCore  -I.. -I.
 INCPATH      += -isystem $(QT_PATH_INC)/QtWidgets
 LINK          = g++
 LFLAGS        = -m64 -std=c++11 -Wl,-O1

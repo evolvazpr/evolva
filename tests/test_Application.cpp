@@ -2,7 +2,9 @@
 
 int main(int argc, char *argv[])
 {
-	Application app(argc, argv);
-	app.Init();
-	app.exec();
+	Application* app = Application::GetInstance(argc, argv);
+	app->Init();
+	app->exec();
+	delete(app);
+	return 0;
 }

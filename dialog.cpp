@@ -4,9 +4,6 @@
 #include "EvolvaException.hpp"
 #include "Unit.hpp"
 
-
-Dialog* Dialog::dialog_ = nullptr;
-
 /**
  * @brief ANIMATION_CLOCK static global variable. Parameter to setup freqency of animation (FPS).
  */
@@ -47,24 +44,6 @@ Dialog::Dialog(QWidget *parent, const int width, const int height) :
 Dialog::~Dialog() {
 	delete ui;
 }
-
-
-/**
- * @brief Singleton method to get pointer to object. 
- * @param parent - optional parameter used in object's first initalization. Used to set parent
- *		   of dialog.
- * @param width - width of field.
- * @param height - height of field.
- */
-Dialog * Dialog::GetInstance(QWidget *parent, const int width, const int height) {
-	if (dialog_ == nullptr) {
-		if (width == 0 || height == 0)
-			throw EvolvaException("Error: width or height of GUI field set to 0!");
-		dialog_ = new Dialog(parent, width, height);
-	}
-	return dialog_;
-}
-
 
 /**
  * @brief pushButton action method.
@@ -118,7 +97,6 @@ void Dialog::CreateObject(const uint id, QString path, uint sprite_cnt, const in
 			SIGNAL(SpriteObjectClicked(int, int)));
 	QObject::connect(&timer_, SIGNAL(timeout()), dynamic_cast<QObject *>(sprite_object), 
 			SLOT(animate()));
-	emit ClearMutex();
 }
 
 void Dialog::AnimationFinished() {
@@ -135,7 +113,6 @@ void Dialog::AnimationFinished() {
 		}
 		to_remove_.clear();
 	}
-	emit ClearMutex();
 }
 
 /**
@@ -155,6 +132,13 @@ SpriteObject* Dialog::SearchObject(const uint id) {
 				return ptr;
 		}
 	}
+	
+	for (auto &ptr : to_add_) {
+		if (ptr->id() == id) {
+			return ptr;
+		}
+	}
+
 	return nullptr;
 }
 
@@ -204,16 +188,8 @@ void Dialog::MoveObjectTo(const uint id, const int x, const int y) {
 void Dialog::RemoveObject(const uint id) {
 	SpriteObject *roundObject = SearchObject(id);
 
-	if (!roundObject) {
-		for (auto &it : to_add_) {
-			if (it->id() == id) {
-				roundObject = it;
-				break;
-			}
-		}
-		if (!roundObject)
-			throw EvolvaException("Dialog::removeObject - internal error!\n");		
-	}
+	if (!roundObject)
+		throw EvolvaException("Dialog::removeObject - internal error!\n");		
 
 	if (animations_) {
 		to_remove_.push_back(roundObject);
@@ -221,7 +197,6 @@ void Dialog::RemoveObject(const uint id) {
 		scene->removeItem(roundObject);
 		delete(roundObject);
 	}
-	emit ClearMutex();
 }
 
 /**
@@ -243,7 +218,6 @@ void Dialog::CreateSurfaceObject(const QString path, const int x, const int y) {
 	QGraphicsPixmapItem *rect = new QGraphicsPixmapItem(pix_map);
 	rect->setOffset(CalculateX(x), CalculateY(y));
 	scene->addItem(rect);
-	emit ClearMutex();
 }
 
 /**
@@ -251,15 +225,13 @@ void Dialog::CreateSurfaceObject(const QString path, const int x, const int y) {
  * @param x - x coordinate.
  * @param y - y coordinate.
  */
-void Dialog::RemoveSurfaceObject(const int x, const int y)
-{
+void Dialog::RemoveSurfaceObject(const int x, const int y) {
 	QTransform test;
 	QGraphicsItem *item = scene->itemAt(CalculateX(x), CalculateY(y), test);
 	if (!item)
 		return;
 	scene->removeItem(item);
-	delete(item);
-	emit ClearMutex();	
+	delete(item);	
 }
 
 
@@ -284,7 +256,3 @@ void Dialog::UpdateLog(const QString text) {
 	ui->log_textWindow->insertPlainText(text);		
 }
 
-void Dialog::closeEvent(QCloseEvent *event) {
-	(void)event;
-	emit OnExit();
-}

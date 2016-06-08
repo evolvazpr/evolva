@@ -2,53 +2,53 @@
 #include <iostream>
 #include <QMetaType>
 
-Application::Application(int& argc, char **argv) : QApplication(argc, argv), gui_settings_("gui.xml") {
+Application::Application(int& argc, char **argv) : QApplication(argc, argv), dialog_(nullptr, 30, 30), gui_settings_("gui.xml") {
 
 }
 
-Logic *Logic::instance_ = nullptr;
+Application* Application::instance_ = nullptr;
 
-Logic *Logic::GetInstance(QMutex *mutex) {
+Application* Application::GetInstance(int argc, char **argv) {
+	
+	struct make_shared_enabler : public Application {
+		public:
+			make_shared_enabler(int& argc, char**argv) : Application(argc, argv){}
+	};
+
 	if (instance_ == nullptr) {
-		instance_ = new Logic(mutex);
+		instance_ = new Application(argc, argv);
 	}
 	return instance_;
 }
 
-Logic::Logic(QMutex *mutex) : QObject(), mutex_(mutex) {}
-
-
-void Logic::LogicIteration() {
-	Tui tui;
+void Application::LogicIteration() {
 	field_->Next();
-	tui.PrintField();
 }
 
-void Logic::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
-//	mutex_->lock();
-	emit SignalGui(object->GetId(), GetObjectType(object), x, y, Application::GuiHandler::CREATEOBJECT);
+void Application::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
+	std::string type_s = GetObjectType(object).toStdString();
+	QString path = QString::fromStdString(gui_settings_[type_s]["path"]);
+	int sprite_cnt = gui_settings_[type_s]["sprite_cnt"];
+	dialog_.CreateObject(object->GetId(), path, sprite_cnt, x, y);
 }
-void Logic::CreateSurfaceObject(const FieldCell::Ground ground_type, const int x, const int y) {
-	emit SignalGui(0, GetGroundType(ground_type), x, y, Application::GuiHandler::CREATESURFACEOBJECT);
-}
-void Logic::RemoveSurfaceObject(const int x, const int y) {
-	emit SignalGui(0, QString(""), x, y, Application::GuiHandler::REMOVESURFACEOBJECT);
-}
-void Logic::MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
-//	mutex_->lock();
-	emit SignalGui(object->GetId(),QString(""), x, y, Application::GuiHandler::MOVEOBJECT);
-}
-void Logic::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y) {
-//	mutex_->lock();
-	emit SignalGui(object->GetId(), QString(""), x, y, Application::GuiHandler::MOVEOBJECTTO);
+void Application::CreateSurfaceObject(const FieldCell::Ground ground_type, const int x, const int y) {
+	std::string type_s = GetGroundType(ground_type).toStdString();
+	QString path = QString::fromStdString(gui_settings_[type_s]["path"]);
+	dialog_.CreateSurfaceObject(path, x, y);
 }
 
-void Logic::RemoveObject(std::shared_ptr<const CellObject> object) {
-//	mutex_->lock();
-	emit SignalGui(object->GetId(), QString(""), 0, 0, Application::GuiHandler::REMOVEOBJECT);
+void Application::MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
+	dialog_.MoveObject(object->GetId(), x, y);
+}
+void Application::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y) {
+	dialog_.MoveObjectTo(object->GetId(), x, y);
 }
 
-void Logic::Init() {
+void Application::RemoveObject(std::shared_ptr<const CellObject> object) {
+	dialog_.RemoveObject(object->GetId());
+}
+
+void Application::LogicInit() {
 	field_ = Field::GetInstance(30, 30);
 	{
 		std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();
@@ -174,17 +174,12 @@ void Logic::Init() {
 }
 
 void Application::Init() {
-	qRegisterMetaType<Application::GuiHandler>("Application::GuiHandler");
-	dialog_ = Dialog::GetInstance(nullptr, 30, 30);
-	dialog_->show();
-	logic_ = Logic::GetInstance(&mutex_);
 	ConnectSignals();
-//	logic_->moveToThread(&logic_thread_);
-//	logic_thread_.start(QThread::TimeCriticalPriority);
-	logic_->Init();	
+	dialog_.show();
+	LogicInit();	
 }
 
-QString Logic::GetObjectType(std::shared_ptr<const CellObject> object) {
+QString Application::GetObjectType(std::shared_ptr<const CellObject> object) {
 	QString obj_type;
 	if (object->GetType(CellObject::Type::CARNIVORE)) { 
 		if (object->GetType(CellObject::Type::FLESH))
@@ -204,7 +199,7 @@ QString Logic::GetObjectType(std::shared_ptr<const CellObject> object) {
 	return obj_type;
 }
 
-QString Logic::GetGroundType(FieldCell::Ground type) {
+QString Application::GetGroundType(FieldCell::Ground type) {
 	QString surface;
 	if (type == FieldCell::Ground::GRASS)
 		surface = "grass";
@@ -213,94 +208,18 @@ QString Logic::GetGroundType(FieldCell::Ground type) {
 	return surface;
 }
 
-void Application::CreateObject(const uint id, const QString type, const int x, const int y) {
-	std::string type_s = type.toStdString();
-	QString path = QString::fromStdString(gui_settings_[type_s]["path"]);
-	int sprite_cnt = gui_settings_[type_s]["sprite_cnt"];
-	dialog_->CreateObject(id, path, sprite_cnt, x, y);	
-	ClearMutex();
-}
-
-void Application::CreateSurfaceObject(const QString type, const int x, const int y) {
-	std::string type_s = type.toStdString();
-	QString path = QString::fromStdString(gui_settings_[type_s]["path"]);
-	dialog_->CreateSurfaceObject(path, x, y);
-	ClearMutex();
-}
 
 void Application::RemoveSurfaceObject(const int x, const int y) {
-	dialog_->RemoveSurfaceObject(x, y);
-	ClearMutex();
-}
-
-void Application::MoveObject(const uint id, const int x, const int y) {
-	dialog_->MoveObject(id, x, y);
-}
-
-void Application::MoveObjectTo(const uint id, const int x, const int y) {
-	dialog_->MoveObjectTo(id, x, y);
-}
-
-void Application::RemoveObject(const uint id) {
-	dialog_->RemoveObject(id);
-	ClearMutex();		
+	dialog_.RemoveSurfaceObject(x, y);
 }
 
 void Application::ConnectSignals() {
-	connect(dialog_, SIGNAL(NextLogicIteration()), logic_, SLOT(LogicIteration()));
-	connect(logic_, SIGNAL(SignalGui(const uint, const QString, const int, const int, 
-		Application::GuiHandler)), this, SLOT(GuiSlot(const uint, const QString,
-		const int, const int, Application::GuiHandler)));
-	connect(dialog_, SIGNAL(ClearMutex()), this, SLOT(ClearMutex()));
-	connect(dialog_, SIGNAL(SpriteObjectClicked(int , int)), this, SLOT(SpriteObjectClicked(int , int)));
-	connect(dialog_, SIGNAL(OnExit()), this, SLOT(OnExit()));
-}
-
-void Application::OnExit() {
-//	logic_thread_.quit();
-	dialog_->close();
-	//deadlock at exit workaround - ugly solution
-//	while(logic_thread_.isRunning()) {
-//		mutex_.unlock();
-//	}
-}
-
-/** @brief Only one slot is used, because with few signals I had performance hit. */
-void Application::GuiSlot(const uint id, const QString type, const int x, const int y, 
-			  Application::GuiHandler command) {
-	switch (command) {
-	case Application::GuiHandler::CREATEOBJECT:
-		CreateObject(id, type, x, y);
-		break;
-	case Application::GuiHandler::CREATESURFACEOBJECT:
-		CreateSurfaceObject(type, x, y);
-		break;
-	case Application::GuiHandler::REMOVESURFACEOBJECT:
-		RemoveSurfaceObject(x, y);
-		break;
-	case Application::GuiHandler::MOVEOBJECT:
-		MoveObject(id, x, y);
-		break;
-	case Application::GuiHandler::MOVEOBJECTTO:
-		MoveObjectTo(id, x, y);
-		break;
-	case Application::GuiHandler::REMOVEOBJECT:
-		RemoveObject(id);
-		break;
-	case Application::GuiHandler::WRITETEXT:
-		UpdateLog(type);
-		break;
-	default:
-		break;
-	}
+	connect(&dialog_, SIGNAL(NextLogicIteration()), this, SLOT(LogicIteration()));
+	connect(&dialog_, SIGNAL(SpriteObjectClicked(int , int)), this, SLOT(SpriteObjectClicked(int , int)));
 }
 
 void Application::UpdateLog(const QString text) {
-	dialog_->UpdateLog(text);
-}
-
-void Application::ClearMutex() {
-	//mutex_.unlock();
+	dialog_.UpdateLog(text);
 }
 
 /**
@@ -308,7 +227,7 @@ void Application::ClearMutex() {
  * This method creates content of stats window.
  * param cell - Field's cell in which object, represented by clicked sprite, resides.
  */
-boost::format Logic::CreateStatistics(const int x, const int y) {
+boost::format Application::CreateStatistics(const int x, const int y) {
 	std::shared_ptr<FieldCell> cell = field_->GetCell(x , y);
 	std::shared_ptr<CellObject> object = cell->GetObject();
 	std::shared_ptr<Unit> unit;
@@ -351,11 +270,9 @@ boost::format Logic::CreateStatistics(const int x, const int y) {
 }
 
 void Application::SpriteObjectClicked(int x, int y) {
-	boost::format format = logic_->CreateStatistics(x, y);
-	dialog_->UpdateStats(QString::fromStdString(format.str()));
+	boost::format format = CreateStatistics(x, y);
+	dialog_.UpdateStats(QString::fromStdString(format.str()));
 }
 
 Application::~Application() {
-	delete(logic_);
-	delete(dialog_);
 };

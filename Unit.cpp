@@ -712,7 +712,7 @@ void Unit::GiveBirth(const int x, const int y) {
 }
 
 void Unit::Miscarry() {
-	Logic *logger = Logic::GetInstance();
+	Application* logger = Application::GetInstance();
 	*logger << GetId() << " miscarried\n";
 	pregnant_ = false;
 	pregnant_turns_ = 0;

@@ -31,23 +31,17 @@ private:
 	const unsigned int width_;
 	const unsigned int height_;
 	QTimer timer_;
-	static Dialog* dialog_;
 	QAtomicInt animations_;
 	QList<SpriteObject *> to_add_;
 	QList<SpriteObject *> to_remove_;	
 	SpriteObject* SearchObject(const uint id);
 	qreal CalculateX(const int x);
 	qreal CalculateY(const int y);
-	explicit Dialog(QWidget *parent = 0, const int width = 1, const int height = 1);
-	void UpdateScene();
 public:
-	/**
-	 * @brief enum class to describe possible surface types.
-	 */
-	
+
+	explicit Dialog(QWidget *parent = 0, const int width = 1, const int height = 1);
+
 	virtual ~Dialog();
-	static Dialog * GetInstance(QWidget *parent = 0, const int width = 1, const int height = 1);
-	void AppendTextToLog(const QString text);
 	void CreateObject(const uint id, QString path, uint sprite_cnt, const int x, const int y);
 	void CreateSurfaceObject(const QString path, const int x, const int y);
 	void RemoveSurfaceObject(const int x, const int y);
@@ -55,16 +49,13 @@ public:
 	void MoveObjectTo(const uint id, const int x, const int y);
 	void RemoveObject(const uint id);
 	void UpdateStats(const QString text);
-	void UpdateLog(const QString text);
-	void closeEvent(QCloseEvent *event) Q_DECL_OVERRIDE; 
+	void UpdateLog(const QString text); 
 private slots:
 	void on_pushButton_clicked();
 	void AnimationFinished();
 signals:
-	void ClearMutex();
 	void NextLogicIteration();
 	void SpriteObjectClicked(int x, int y);
-	void OnExit();
 };
 
 #endif // DIALOG_HPP

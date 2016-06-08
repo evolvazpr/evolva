@@ -29,71 +29,37 @@ class Logic;
 class Application : public QApplication {
 	Q_OBJECT
 private:
-	QMutex mutex_;
-	Logic* logic_;
-	Dialog* dialog_;
-	QThread logic_thread_;
+	static Application* instance_;
+
+	std::shared_ptr<Field> field_;
+	Dialog dialog_;
 	XmlIo gui_settings_;
 	void ConnectSignals();
-	void CreateObject(const uint id, const QString type, const int x, const int y);
-	void CreateSurfaceObject(const QString type, const int x, const int y);
-	void RemoveSurfaceObject(const int x, const int y);
-	void MoveObject(const uint id, const int x, const int y);
-	void MoveObjectTo(const uint id, const int x, const int y);
-	void RemoveObject(const uint id);
-	void UpdateLog(const QString text);
-public:
-	enum class GuiHandler : uint {
-	CREATEOBJECT,
-	CREATESURFACEOBJECT,
-	REMOVESURFACEOBJECT,
-	MOVEOBJECT,
-	MOVEOBJECTTO,
-	REMOVEOBJECT,
-	WRITETEXT
-	};
-	
-	~Application();
-	Application(int& argc, char **argv);
-	void Init();
 
-public slots:
-	void ClearMutex();
-	void GuiSlot(const uint id, const QString type, const int x, const int y, Application::GuiHandler command);
-	void SpriteObjectClicked(int x, int y);
-	void OnExit();
-};
-
-Q_DECLARE_METATYPE(Application::GuiHandler)
-
-class Logic : public QObject {
-	Q_OBJECT
-
-private:
-	std::shared_ptr<Field> field_;
-	QMutex *mutex_;	
-	static Logic* instance_;
-	Logic(QMutex *mutex);
 	QString GetObjectType(std::shared_ptr<const CellObject> object);
 	QString GetGroundType(FieldCell::Ground type);
-public:
+	boost::format CreateStatistics(const int x, const int y);
+	
+	Application(int& argc, char **argv);
+	void LogicInit();
+
+public:	
+	~Application();
 	void Init();
-	static Logic *GetInstance(QMutex *mutex = nullptr);
+
 	void CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void CreateSurfaceObject(const FieldCell::Ground ground_type, const int x, const int y);
 	void RemoveSurfaceObject(const int x, const int y);
 	void MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void RemoveObject(std::shared_ptr<const CellObject> object);
-	void WriteToLog(const QString data);
-	boost::format CreateStatistics(const int x, const int y);
-	template <class T> Logic& operator <<(const T object);
+	void UpdateLog(const QString text);
+	static Application* GetInstance(int argc = 0, char **argv = nullptr);
+	template <class T> Application& operator <<(const T object);
 
 public slots:
+	void SpriteObjectClicked(int x, int y);
 	void LogicIteration();
-
-signals:
-	void SignalGui(const uint id, const QString type, const int x, const int y, Application::GuiHandler command);
 };
 
 /**
@@ -101,11 +67,11 @@ signals:
  * Used to append text to log window.
  * @param s - std::string to append.
  */
-template <class T> Logic& Logic::operator <<(const T object) {
+template <class T> Application& Application::operator <<(const T object) {
 	std::stringstream ss;
 	ss << object;
 	std::string text = ss.str();
-	emit SignalGui(0, QString::fromStdString(text), 0, 0, Application::GuiHandler::WRITETEXT);
+	UpdateLog(QString::fromStdString(text));
 	return *this;
 }
 #endif 
