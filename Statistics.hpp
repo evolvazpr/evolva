@@ -61,7 +61,7 @@ template <class T> StatisticsEntity<T>& StatisticsEntity<T>::operator ++ (int) {
 	if (value_ > max_) max_ = value_;
 	double samples = field->GetGlobalTurnCounter() + 1;
 	avrage_ = (avrage_ * (samples - 1) + value_) / samples;
-	sum_ = sum_ + value_;
+	sum_ = sum_ + 1.0;
 	return *this;
 }
 
@@ -71,7 +71,6 @@ template <class T> StatisticsEntity<T>& StatisticsEntity<T>::operator -- (int) {
 	if (value_ > max_) max_ = value_;
 	double samples = field->GetGlobalTurnCounter() + 1;
 	avrage_ = (avrage_ * (samples - 1) + value_) / samples;
-	sum_ = sum_ + value_;
 	return *this;
 }
 
@@ -102,7 +101,6 @@ public:
 private:
 	Statistics(const Statistics &object) = delete;
 	Statistics& operator = (const Statistics&) = delete;
-//	size_t counter_;
 };
 
 #endif // _STATISTICS_HPP_

@@ -28,10 +28,6 @@ void Tui::PrintField() {
 					if (p->GetType(CellObject::Type::HERBIVORE)) std::cout << "VV";
 					else if (p->GetType(CellObject::Type::CARNIVORE)) std::cout << "CC";
 					else std::cout << "UU";
-/*					size_t id = p->GetId();
-					while (id >= 100) id -= 100;
-					if (id < 10) std::cout << "0";
-					std::cout << id;	/**/
 				}
 				else if (p->GetType(CellObject::Type::TREE)) std::cout << "!!";
 				else if (p->GetType(CellObject::Type::FLESH)) std::cout << "##";

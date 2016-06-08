@@ -17,6 +17,7 @@ public:
 	inline double GetFatigue() const { return fatigue_; };
 	inline bool IsAlive() const { return alive_; };
 	bool operator <= (const std::shared_ptr<Unit> object) const;
+	double GetMovePriority() const;
 private:
 	/*< Configuration for thinking and updating functions. It provides several
 	parameters using to describe the behaviour of one given unit. It is inherited
@@ -32,7 +33,6 @@ private:
 		double attractiveness_;								/*< Calculated level of attractiveness (0 - 100). */
 		double strength_;									/*< Calculated level of strength. */
 		double energy_;										/*< Level stored in nutritions in organism. */
-		double poison_;										/*< Level of poison. */
 		size_t death_;
 		bool pregnant_;
 		std::shared_ptr<DnaCode> child_dna_code_;
@@ -47,7 +47,6 @@ private:
 	void CalculateDeathTime();
 	//! TODO: intelligence? swarm? :(
 	size_t Think(const double intelligence = NAN, std::shared_ptr<Unit> attacker = nullptr);
-	double GetMovePriority() const;
 	bool Pregnant(std::shared_ptr<DnaCode> dna);
 	size_t Explore(double steps);
 	inline std::shared_ptr<Unit> GetUnit(){ return std::static_pointer_cast<Unit>(shared_from_this()); };

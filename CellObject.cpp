@@ -5,23 +5,28 @@
 
 // CellObject
 
+//CellObject()
 CellObject::CellObject() : id_(field->GetFfid()) {
 	// Zero types
 	memset(&types_, 0, sizeof(bool) * 11);
 }
 
+//CellObject()
 CellObject::CellObject(const size_t id) : id_(id) {
 	// Zero types
 	memset(&types_, 0, sizeof(bool) * 11);
 }
 
+//~CellObject()
 CellObject::~CellObject() {
 }
 
+//GetType()
 bool CellObject::GetType(const CellObject::Type bit) const {
 	return types_[static_cast<unsigned char>(bit)];
 }
 
+//SetType()
 void CellObject::SetType(const CellObject::Type bit, const bool value) {
 	types_[static_cast<unsigned char>(bit)] = value;
 }
@@ -86,8 +91,8 @@ Flesh::Flesh(const double energy, const bool carnivore) : Eatable(energy, -5.24,
 	SetType(Type::FLESH, true);
 	carnivore_ = carnivore;
 	field->stats_->flesh_++;
-};
+}
 
 Flesh::~Flesh() {
-	field->stats_->tree_--;
+	field->stats_->flesh_--;
 }

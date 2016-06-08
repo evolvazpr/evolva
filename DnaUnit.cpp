@@ -1,10 +1,10 @@
 #include "Field.hpp"
 #include "DnaUnit.hpp"
 
-DnaUnit::DnaUnit() : dna_(*dna_code_.get()), dna_code_(std::make_shared<DnaCode>()) {
+DnaUnit::DnaUnit() : dna_code_(std::make_shared<DnaCode>()), dna_(*dna_code_.get()) {
 }
 
-DnaUnit::DnaUnit(std::shared_ptr<DnaCode> dna_code) : dna_(*dna_code_.get()), dna_code_(dna_code) {
+DnaUnit::DnaUnit(std::shared_ptr<DnaCode> dna_code) : dna_code_(dna_code), dna_(*dna_code_.get()) {
 }
 
 DnaUnit::~DnaUnit() {
