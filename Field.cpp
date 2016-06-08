@@ -160,7 +160,7 @@ bool Field::Kill(std::shared_ptr<Unit> unit, const size_t reason) {
 		unit->alive_ = false;
 		unit->RemoveStatistics();
 		InsertNmo(std::make_shared<Flesh>(energy, carnivore), x, y);
-		logger << "Flesh of unit " << id << "inserted at: " << x << ", " << y << "\n";
+		logger << "Flesh of unit " << id << " inserted at: " << x << ", " << y << "\n";
 		return true;
 	}
 	else {

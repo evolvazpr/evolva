@@ -304,15 +304,11 @@ void Unit::UpdateSpeed() {
 	speed_ = ((0.5 * dna_["speed"] + 0.25 * dna_["agility"] + 0.125 * dna_["intelligence"] + 0.125 * dna_["strength"]) - 100.0) / dna_["normal_weight"] * energy_ + 100.0;
 }
 
-size_t Unit::Think(const double intelligence, std::shared_ptr<Unit> attacker) {
+size_t Unit::Think(std::shared_ptr<Unit> attacker) {
 	// Calculate steps the unit can move. C. speed is <0, 100> (can be lower),
 	// so when c. speed is 100, the unit is able to move 25 steps.
 	double steps_limit = Heaviside(speed_ / 4.0);
-	// If intelligence is specified, method uses "swarm intelligence".
-	const double pushed_intelligence = dna_["intelligence"];
-	if (!isnan(intelligence)) dna_["intelligence"] = intelligence;
 	// Think in danger. Fight or run.
-	// TODO: is UpdateSpeed() necessary here?
 	if (!!attacker) {
 		double target_speed = 0.45 * speed_ + 0.45 * dna_["agility"] + 0.1 * dna_["intelligence"];
 		double attacker_speed = 0.45 * attacker->speed_ + 0.45 * attacker->dna_["agility"] + 0.1 * attacker->dna_["intelligence"];
@@ -321,9 +317,6 @@ size_t Unit::Think(const double intelligence, std::shared_ptr<Unit> attacker) {
 		if (target_speed >= attacker_speed) { //can run
 			if (target_strength < attacker_strength) {
 				field->stats_->escape_++;
-				if (!isnan(intelligence)) {
-					dna_["intelligence"] = pushed_intelligence;
-				}
 				return 0;
 			}
 		}
@@ -354,10 +347,6 @@ size_t Unit::Think(const double intelligence, std::shared_ptr<Unit> attacker) {
 		}
 		else {
 			attacker->health_ = attacker_health;
-		}
-		// Back to original intelligence, and then return.
-		if (!isnan(intelligence)) {
-			dna_["intelligence"] = pushed_intelligence;
 		}
 		return 0;
 	}
@@ -494,7 +483,7 @@ size_t Unit::Think(const double intelligence, std::shared_ptr<Unit> attacker) {
 					Move(best_cell_think->GetEmptyX(), best_cell_think->GetEmptyY(), true);
 					const size_t xc = unit->GetX();
 					const size_t yc = unit->GetY();
-					unit->Think(NAN, std::static_pointer_cast<Unit>(shared_from_this()));
+					unit->Think(std::static_pointer_cast<Unit>(shared_from_this()));
 					if(!IsAlive()) return 1;
 					flesh = std::dynamic_pointer_cast<Flesh>(field->GetCell(xc, yc)->GetObject());
 					if (flesh == nullptr) return 1;
