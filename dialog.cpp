@@ -252,6 +252,6 @@ void Dialog::UpdateLog(const QString text) {
 }
 
 void Dialog::closeEvent(QCloseEvent *event) {
+	(void)event;
 	emit OnExit();
-	QDialog::closeEvent(event);
 }

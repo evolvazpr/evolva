@@ -20,17 +20,7 @@
 
 class Logic;
 
-enum class GuiHandler : uint {
-	CREATEOBJECT,
-	CREATESURFACEOBJECT,
-	REMOVESURFACEOBJECT,
-	MOVEOBJECT,
-	MOVEOBJECTTO,
-	REMOVEOBJECT,
-	WRITETEXT
-};
 
-Q_DECLARE_METATYPE(GuiHandler)
 
 /** @brief
  * proxy between logic core (which is in second thread) and GUI (first/main thread, because
@@ -53,17 +43,28 @@ private:
 	void RemoveObject(const uint id);
 	void UpdateLog(const QString text);
 public:
+	enum class GuiHandler : uint {
+	CREATEOBJECT,
+	CREATESURFACEOBJECT,
+	REMOVESURFACEOBJECT,
+	MOVEOBJECT,
+	MOVEOBJECTTO,
+	REMOVEOBJECT,
+	WRITETEXT
+	};
+	
 	~Application();
 	Application(int& argc, char **argv);
 	void Init();
 
 public slots:
 	void ClearMutex();
-	void GuiSlot(const uint id, const QString type, const int x, const int y, GuiHandler command);
+	void GuiSlot(const uint id, const QString type, const int x, const int y, Application::GuiHandler command);
 	void SpriteObjectClicked(int x, int y);
 	void OnExit();
 };
 
+Q_DECLARE_METATYPE(Application::GuiHandler)
 
 class Logic : public QObject {
 	Q_OBJECT
@@ -92,7 +93,7 @@ public slots:
 	void LogicIteration();
 
 signals:
-	void SignalGui(const uint id, const QString type, const int x, const int y, GuiHandler command);
+	void SignalGui(const uint id, const QString type, const int x, const int y, Application::GuiHandler command);
 };
 
 /**
@@ -104,28 +105,8 @@ template <class T> Logic& Logic::operator <<(const T object) {
 	std::stringstream ss;
 	ss << object;
 	std::string text = ss.str();
-	emit SignalGui(0, QString::fromStdString(text), 0, 0, GuiHandler::WRITETEXT);
+	emit SignalGui(0, QString::fromStdString(text), 0, 0, Application::GuiHandler::WRITETEXT);
 	return *this;
 }
-/**
- * @brief stream operator overload.
- * Used to append text to log window.
- * @param s - std::string to append.
- */
-/*template <> Logic& Logic::operator <<(const std::string s) {	
-	emit SignalGui(0, QString::fromStdString(s), 0, 0, GuiHandler::WRITETEXT);
-	return *this;
-}
-*/
-/**
- * @brief stream operator overload.
- * Used to append text to log window.
- * @param s - char pointer to append.
- */
-/*template <> Logic& Logic::operator <<(const char* s) {	
-	emit SignalGui(0, QString(s), 0, 0, GuiHandler::WRITETEXT);
-	return *this;
-}
-*/
 #endif 
 

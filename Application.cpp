@@ -26,26 +26,26 @@ void Logic::LogicIteration() {
 
 void Logic::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
 	mutex_->lock();
-	emit SignalGui(object->GetId(), GetObjectType(object), x, y, GuiHandler::CREATEOBJECT);
+	emit SignalGui(object->GetId(), GetObjectType(object), x, y, Application::GuiHandler::CREATEOBJECT);
 }
 void Logic::CreateSurfaceObject(const FieldCell::Ground ground_type, const int x, const int y) {
-	emit SignalGui(0, GetGroundType(ground_type), x, y, GuiHandler::CREATESURFACEOBJECT);
+	emit SignalGui(0, GetGroundType(ground_type), x, y, Application::GuiHandler::CREATESURFACEOBJECT);
 }
 void Logic::RemoveSurfaceObject(const int x, const int y) {
-	emit SignalGui(0, QString(""), x, y, GuiHandler::REMOVESURFACEOBJECT);
+	emit SignalGui(0, QString(""), x, y, Application::GuiHandler::REMOVESURFACEOBJECT);
 }
 void Logic::MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
 	mutex_->lock();
-	emit SignalGui(object->GetId(),QString(""), x, y, GuiHandler::MOVEOBJECT);
+	emit SignalGui(object->GetId(),QString(""), x, y, Application::GuiHandler::MOVEOBJECT);
 }
 void Logic::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y) {
 	mutex_->lock();
-	emit SignalGui(object->GetId(), QString(""), x, y, GuiHandler::MOVEOBJECTTO);
+	emit SignalGui(object->GetId(), QString(""), x, y, Application::GuiHandler::MOVEOBJECTTO);
 }
 
 void Logic::RemoveObject(std::shared_ptr<const CellObject> object) {
 	mutex_->lock();
-	emit SignalGui(object->GetId(), QString(""), 0, 0, GuiHandler::REMOVEOBJECT);
+	emit SignalGui(object->GetId(), QString(""), 0, 0, Application::GuiHandler::REMOVEOBJECT);
 }
 
 void Logic::Init() {
@@ -174,7 +174,7 @@ void Logic::Init() {
 }
 
 void Application::Init() {
-	qRegisterMetaType<GuiHandler>("GuiHandler");
+	qRegisterMetaType<Application::GuiHandler>("Application::GuiHandler");
 	dialog_ = Dialog::GetInstance(nullptr, 30, 30);
 	dialog_->show();
 	logic_ = Logic::GetInstance(&mutex_);
@@ -249,42 +249,45 @@ void Application::RemoveObject(const uint id) {
 void Application::ConnectSignals() {
 	connect(dialog_, SIGNAL(NextLogicIteration()), logic_, SLOT(LogicIteration()));
 	connect(logic_, SIGNAL(SignalGui(const uint, const QString, const int, const int, 
-		GuiHandler)), this, SLOT(GuiSlot(const uint, const QString,
-		const int, const int, GuiHandler)));
+		Application::GuiHandler)), this, SLOT(GuiSlot(const uint, const QString,
+		const int, const int, Application::GuiHandler)));
 	connect(dialog_, SIGNAL(ClearMutex()), this, SLOT(ClearMutex()));
 	connect(dialog_, SIGNAL(SpriteObjectClicked(int , int)), this, SLOT(SpriteObjectClicked(int , int)));
 	connect(dialog_, SIGNAL(OnExit()), this, SLOT(OnExit()));
 }
 
 void Application::OnExit() {
-	ClearMutex();
 	logic_thread_.quit();
-	while(!logic_thread_.isFinished());
+	dialog_->close();
+	//deadlock at exit workaround - ugly solution
+	while(logic_thread_.isRunning()) {
+		mutex_.unlock();
+	}
 }
 
 /** @brief Only one slot is used, because with few signals I had performance hit. */
 void Application::GuiSlot(const uint id, const QString type, const int x, const int y, 
-			  GuiHandler command) {
+			  Application::GuiHandler command) {
 	switch (command) {
-	case GuiHandler::CREATEOBJECT:
+	case Application::GuiHandler::CREATEOBJECT:
 		CreateObject(id, type, x, y);
 		break;
-	case GuiHandler::CREATESURFACEOBJECT:
+	case Application::GuiHandler::CREATESURFACEOBJECT:
 		CreateSurfaceObject(type, x, y);
 		break;
-	case GuiHandler::REMOVESURFACEOBJECT:
+	case Application::GuiHandler::REMOVESURFACEOBJECT:
 		RemoveSurfaceObject(x, y);
 		break;
-	case GuiHandler::MOVEOBJECT:
+	case Application::GuiHandler::MOVEOBJECT:
 		MoveObject(id, x, y);
 		break;
-	case GuiHandler::MOVEOBJECTTO:
+	case Application::GuiHandler::MOVEOBJECTTO:
 		MoveObjectTo(id, x, y);
 		break;
-	case GuiHandler::REMOVEOBJECT:
+	case Application::GuiHandler::REMOVEOBJECT:
 		RemoveObject(id);
 		break;
-	case GuiHandler::WRITETEXT:
+	case Application::GuiHandler::WRITETEXT:
 		UpdateLog(type);
 		break;
 	default:
