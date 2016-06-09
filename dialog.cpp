@@ -5,29 +5,18 @@
 #include "Unit.hpp"
 
 /**
- * @brief ANIMATION_CLOCK static global variable. Parameter to setup freqency of animation (FPS).
- */
-static const qreal ANIMATION_CLOCK = 1000/33;
-
-/**
- * @brief Pixels per object
- */
-static const uint PIXELS_PER_OBJECT = 25;
-
-
-/**
  * @brief Constructor.
  * @param parent - parent for Qt API (no need to call delete thanks to it).
  */
 Dialog::Dialog(QWidget *parent, const int width, const int height) :
-	QDialog(parent), ui(new Ui::Dialog), width_(width), height_(height) { 
+	QDialog(parent), ui(new Ui::Dialog), animation_clock_(1000.0/33.0), pixels_per_object_(25), steps_per_tick_(5.0),  width_(width), height_(height) { 
 	Qt::WindowFlags flags = Qt::WindowTitleHint | Qt::WindowSystemMenuHint;
 	flags |= Qt::WindowCloseButtonHint | Qt::WindowMinMaxButtonsHint;
 	
 	ui->setupUi(this);
 	scene = new QGraphicsScene();
 	ui->graphicsView->setScene(scene);
-	scene->setSceneRect(0, 0, width_ * PIXELS_PER_OBJECT, height_ * PIXELS_PER_OBJECT);
+	scene->setSceneRect(0, 0, width_ * pixels_per_object_, height_ * pixels_per_object_);
 	ui->graphicsView->centerOn(scene->sceneRect().center());
 	ui->graphicsView->setCacheMode(QGraphicsView::CacheNone);
 	ui->graphicsView->setRenderHint(QPainter::Antialiasing);
@@ -35,7 +24,7 @@ Dialog::Dialog(QWidget *parent, const int width, const int height) :
 	ui->graphicsView->show();
 	animations_ = 0;
 	QDialog::setWindowFlags(flags);
-	timer_.start(ANIMATION_CLOCK);		
+	timer_.start(animation_clock_);	
 }
 
 /**
@@ -49,8 +38,24 @@ Dialog::~Dialog() {
  * @brief pushButton action method.
  * Method called when "Kolejna tura" button was clicked.
  */
-void Dialog::on_pushButton_clicked() {	
-	emit NextLogicIteration();
+void Dialog::on_pushButton_clicked() {
+	uint rounds = rounds_per_click_;
+       for (uint i = 0; i < rounds; i++) 
+		emit NextLogicIteration();
+}
+
+void Dialog::on_pushButton_2_clicked() {
+	bool test;
+	const uint rounds = ui->lineEdit_rounds->text().toUInt(&test, 10);
+	if (!test) {
+		return;
+	}
+	const uint steps = ui->lineEdit_steps->text().toUInt(&test, 10);
+	if (!test) {
+		return;
+	}
+	rounds_per_click_ = rounds;
+	steps_per_tick_ = steps;
 }
 /**
  * @brief Graphical x coordinate calculation.
@@ -79,13 +84,14 @@ qreal Dialog::CalculateY(const int y) {
  * @param y - field's y coordinate of object.
  */
 void Dialog::CreateObject(const uint id, QString path, uint sprite_cnt, const int x, const int y) {
+	QMutexLocker lock(&mutex_);
 	int x_pos = CalculateX(x);
 	int y_pos = CalculateY(y);
 	SpriteObject *sprite_object;
 	std::string obj_type;
 	QString sprite_path;
 	sprite_object = new SpriteObject(scene->parent(), id, x_pos, y_pos, 
-					path, sprite_cnt, PIXELS_PER_OBJECT);
+					path, sprite_cnt, pixels_per_object_);
 	if (animations_)
 		to_add_.push_back(sprite_object);
 	else 
@@ -93,13 +99,14 @@ void Dialog::CreateObject(const uint id, QString path, uint sprite_cnt, const in
 	
 	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(AnimationFinished()), 
 			this, SLOT(AnimationFinished()));
-	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(wasClicked(int, int)), this, 
+	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(WasClicked(int, int)), this, 
 			SIGNAL(SpriteObjectClicked(int, int)));
 	QObject::connect(&timer_, SIGNAL(timeout()), dynamic_cast<QObject *>(sprite_object), 
-			SLOT(animate()));
+			SLOT(Animate()));
 }
 
 void Dialog::AnimationFinished() {
+	QMutexLocker lock(&mutex_);
 	animations_--;
 	if (!animations_) {
 		for (auto &it : to_add_) {
@@ -128,13 +135,13 @@ SpriteObject* Dialog::SearchObject(const uint id) {
 			ptr = dynamic_cast<SpriteObject *>(it); //How to not to cast?
 			if (ptr == nullptr)
 				throw EvolvaException("Dialog::SearchObject! IT SHOULD NOT OCCURE!");
-			if(ptr->id() == id)
+			if(ptr->GetId() == id)
 				return ptr;
 		}
 	}
 	
 	for (auto &ptr : to_add_) {
-		if (ptr->id() == id) {
+		if (ptr->GetId() == id) {
 			return ptr;
 		}
 	}
@@ -151,12 +158,13 @@ SpriteObject* Dialog::SearchObject(const uint id) {
  * @param y - <b>realative field (not graphical) steps</b> in y direction to make.
  */
 void Dialog::MoveObject(const uint id, const int x, const int y) {
+	QMutexLocker lock(&mutex_);
 	SpriteObject *roundObject = SearchObject(id);
 	if (!roundObject) {
 		throw EvolvaException("Dialog::moveObject - object not found!\n");
 	}
 	animations_++;
-	roundObject->move(CalculateX(x), CalculateY(y));	
+	roundObject->Move(CalculateX(x), CalculateY(y), steps_per_tick_);	
 }
 
 /**
@@ -166,6 +174,7 @@ void Dialog::MoveObject(const uint id, const int x, const int y) {
  * @param y - <b>real field's y coordinate</b> in which RoundObject will be placed.
  */
 void Dialog::MoveObjectTo(const uint id, const int x, const int y) {
+	QMutexLocker lock(&mutex_);
 	SpriteObject *roundObject = SearchObject(id);
 	int x_old, y_old, dx, dy;
 	if (!roundObject) {
@@ -178,7 +187,7 @@ void Dialog::MoveObjectTo(const uint id, const int x, const int y) {
 	dx = CalculateX(x) - x_old;
 	dy = CalculateY(y) - y_old;
 	animations_++;
-	roundObject->move(dx, dy);
+	roundObject->Move(dx, dy, steps_per_tick_);
 }
 
 /**
@@ -186,6 +195,7 @@ void Dialog::MoveObjectTo(const uint id, const int x, const int y) {
  * @param object - shared_ptr to object which will be deleted from GUI.
  */
 void Dialog::RemoveObject(const uint id) {
+	QMutexLocker lock(&mutex_);
 	SpriteObject *roundObject = SearchObject(id);
 
 	if (!roundObject)
@@ -212,7 +222,7 @@ void Dialog::CreateSurfaceObject(const QString path, const int x, const int y) {
 		throw EvolvaException("Sprite could not have been loaded." 
 			"Aborting program.\nCheck if gui.xml is correct.");
 	
-	pix_map = pix_map.scaled(PIXELS_PER_OBJECT, PIXELS_PER_OBJECT, 
+	pix_map = pix_map.scaled(pixels_per_object_, pixels_per_object_, 
 				 Qt::IgnoreAspectRatio, 
 				 Qt::SmoothTransformation);
 	QGraphicsPixmapItem *rect = new QGraphicsPixmapItem(pix_map);

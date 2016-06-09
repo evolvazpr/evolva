@@ -1,10 +1,6 @@
 #include "SpriteObject.hpp"
 #include <iostream>
 #include <QThread>
-/**
- * @brief INCREMENT_PER_TICK static global variable. Parameter to set speed of animation.
- */
-static const qreal INCREMENT_PER_TICK = 5.0;
 
 /**
  * @brief SpriteObject constructor.
@@ -69,8 +65,11 @@ SpriteObject::~SpriteObject() {
  *
  * @param dx - how many steps in pixels to take into x direction.
  * @param dy - how many steps in pixels to take into y direction.
+ * @param steps_per_tick - how many steps to perform in single move. If 0 - move to destiny in
+ * one timer timeout.
  */
-void SpriteObject::move(const int dx, const int dy) {
+void SpriteObject::Move(const int dx, const int dy, const qreal steps_per_tick) {
+	steps_per_tick_ = steps_per_tick;
 	dx_ = dx;
 	dy_ = dy;
 }
@@ -79,20 +78,20 @@ void SpriteObject::move(const int dx, const int dy) {
  * @brief Method to obtain id number.
  * @return object's id number.
  */
-uint SpriteObject::id() {
+uint SpriteObject::GetId() {
 	return id_;
 }
 
 
 /**
- * @brief meta-method used by animate() method to get new position of object.
+ * @brief meta-method used by Animate() method to get new position of object.
  * @param lasts - describes distance to final place of object.
  * @param increment - describes single size of step, which is made per animate() call.
  * @param actual_cord - describes actual coordinate of graphic object.
  */
 template <class T> T SpriteObject::CalculateCoord(T *lasts, T increment, T actual_coord) {
 	T new_coord;
-	if (qFabs(increment) <= qFabs(*lasts)) {
+	if (qFabs(increment) < qFabs(*lasts)) {
 		*lasts -= increment;
 		new_coord = actual_coord + increment;
 	} else {
@@ -110,43 +109,48 @@ template <class T> T SpriteObject::CalculateCoord(T *lasts, T increment, T actua
  * graphical coordinates of object. If there is no steps to perform,
  * method disconnects timer from this method.
  */
-void SpriteObject::animate() {
+void SpriteObject::Animate() {
 	qreal x_coord = 0;
 	qreal y_coord = 0;
 	qreal angle = 0;
 	qreal dx = 0, dy = 0;
 
-	if((!dx_) && (!dy_)) 
+	if((!dx_) && (!dy_)) {
 		return;
-	angle = qAtan(qFabs((qreal)dx_)/qFabs((qreal)dy_));
-	dx = INCREMENT_PER_TICK * qSin(angle);
-	dy = INCREMENT_PER_TICK * qCos(angle);
-
-	if (dx_ < 0)
-		dx *= -1.0;
-	if (dy_ < 0)
-		dy *= -1.0;
-
-	x_coord = CalculateCoord(&dx_, dx, x()); 
-	y_coord = CalculateCoord(&dy_, dy, y());
-
-	/* direction designation */
-
-	if (qFabs(dx_) > qFabs(dy_)) {
-		if (dx_ < 0)
-			direction_ = 1;
-		else if (dx_ > 0)
-			direction_ = 2;	
+	} else if (steps_per_tick_ == 0.0) {
+		x_coord = CalculateCoord(&dx_, dy_, x());
+		y_coord = CalculateCoord(&dy_, dy_, y());
 	} else {
+		angle = qAtan(qFabs((qreal)dx_)/qFabs((qreal)dy_));
+		dx = steps_per_tick_ * qSin(angle);
+		dy = steps_per_tick_ * qCos(angle);
+
+		if (dx_ < 0)
+			dx *= -1.0;
 		if (dy_ < 0)
-			direction_ = 3;
-		else if (dy_ > 0) 
-			direction_ = 0;
+			dy *= -1.0;
+
+		x_coord = CalculateCoord(&dx_, dx, x()); 
+		y_coord = CalculateCoord(&dy_, dy, y());
+
+		/* direction designation */
+
+		if (qFabs(dx_) > qFabs(dy_)) {
+			if (dx_ < 0)
+				direction_ = 1;
+			else if (dx_ > 0)
+				direction_ = 2;	
+		} else {
+			if (dy_ < 0)
+				direction_ = 3;
+			else if (dy_ > 0) 
+				direction_ = 0;
+		}
+	
+	
+		actual_sprite_ = (actual_sprite_ + 1) % (sprites_cnt_ - 1);
 	}
-	
-	
-	actual_sprite_ = (actual_sprite_ + 1) % (sprites_cnt_ - 1);
-	
+
 	if ((!dx_ && !dy_))
 		actual_sprite_ = 0;
 
@@ -176,7 +180,7 @@ bool SpriteObject::IsMoving()
 void SpriteObject::mousePressEvent(QGraphicsSceneMouseEvent *event) {
 	int x_pos = qFloor(x()/(qreal)pixsize_ + 0.5);
 	int y_pos = qFloor(y()/(qreal)pixsize_ + 0.5);
-	emit wasClicked(x_pos, y_pos);
+	emit WasClicked(x_pos, y_pos);
 	(void)event;
 }
 

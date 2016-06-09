@@ -19,6 +19,7 @@
 class SpriteObject : public QObject, public QGraphicsPixmapItem {
 	Q_OBJECT
 private:
+	qreal steps_per_tick_;
 	const int id_;
 	qreal dx_;
 	qreal dy_;
@@ -35,8 +36,8 @@ public:
 	SpriteObject(QObject* parent, const uint id, const int x, const int y, 
 		    QString path, const int sprites_cnt, const uint pixsize);
 	virtual ~SpriteObject();
-	void move(const int x, const int y);
-	uint id();
+	void Move(const int x, const int y, const qreal steps_per_tick);
+	uint GetId();
 	bool IsMoving();
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 		           QWidget *wdiget) Q_DECL_OVERRIDE;
@@ -46,9 +47,9 @@ public:
 	virtual int type() const Q_DECL_OVERRIDE;
 signals:
 	void AnimationFinished();
-	void wasClicked(int x, int y);
+	void WasClicked(int x, int y);
 public slots:
-	void animate();
+	void Animate();
 };
 
 #endif //_ROUNDOBJECT_HPP_

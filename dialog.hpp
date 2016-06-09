@@ -27,6 +27,13 @@ class Dialog : public QDialog
 
 private:
 	Ui::Dialog *ui;
+	
+	const qreal animation_clock_;
+	const uint pixels_per_object_;
+	uint steps_per_tick_;
+	qreal rounds_per_click_;
+	
+	QMutex mutex_;
 	QGraphicsScene *scene;
 	const unsigned int width_;
 	const unsigned int height_;
@@ -50,8 +57,10 @@ public:
 	void RemoveObject(const uint id);
 	void UpdateStats(const QString text);
 	void UpdateLog(const QString text); 
+	qreal GetStepsPerTick();
 private slots:
 	void on_pushButton_clicked();
+	void on_pushButton_2_clicked();
 	void AnimationFinished();
 signals:
 	void NextLogicIteration();
