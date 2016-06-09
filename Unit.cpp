@@ -314,7 +314,7 @@ size_t Unit::Think(const double intelligence, std::shared_ptr<Unit> attacker) {
 	double steps_limit = Heaviside(speed_ / 4.0);
 	// If intelligence is specified, method uses "swarm intelligence".
 	const double pushed_intelligence = dna_["intelligence"];
-	if (!isnan(intelligence)) dna_["intelligence"] = intelligence;
+	if (!std::isnan(intelligence)) dna_["intelligence"] = intelligence;
 	// Think in danger. Fight or run.
 	// TODO: is UpdateSpeed() necessary here?
 	if (!!attacker) {
@@ -326,7 +326,7 @@ size_t Unit::Think(const double intelligence, std::shared_ptr<Unit> attacker) {
 			if (target_strength < attacker_strength) {
 				// TODO: run
 				// Run and return
-				if (!isnan(intelligence)) dna_["intelligence"] = pushed_intelligence;
+				if (!std::isnan(intelligence)) dna_["intelligence"] = pushed_intelligence;
 				return 0;
 			}
 		}
@@ -350,7 +350,7 @@ size_t Unit::Think(const double intelligence, std::shared_ptr<Unit> attacker) {
 		if (attacker_health < 0.0) field->Kill(attacker, 1);
 		else attacker->health_ = attacker_health;
 		// Back to original intelligence, and then return.
-		if (!isnan(intelligence)) dna_["intelligence"] = pushed_intelligence;
+		if (!std::isnan(intelligence)) dna_["intelligence"] = pushed_intelligence;
 		return 0;
 	}
 

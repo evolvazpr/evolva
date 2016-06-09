@@ -57,6 +57,8 @@ void Dialog::on_pushButton_2_clicked() {
 	}
 	rounds_per_click_ = rounds;
 	steps_per_tick_ = steps;
+
+	std::cout << "steps" << steps_per_tick_ << std::endl;
 }
 /**
  * @brief Graphical x coordinate calculation.
@@ -107,6 +109,7 @@ void Dialog::CreateObject(const uint id, QString path, uint sprite_cnt, const in
 }
 
 void Dialog::AnimationFinished() {
+	std::cout << "Move end.\n";
 	QMutexLocker lock(&mutex_);
 	animations_.fetchAndAddAcquire(-1);
 	if (!animations_.fetchAndAddAcquire(0)) {
@@ -166,7 +169,7 @@ void Dialog::MoveObject(const uint id, const int x, const int y) {
 	}
 	if (!roundObject->IsMoving())
 		animations_.fetchAndAddAcquire(1);
-	
+	std::cout << "Object: " << roundObject->GetId() << ", moved\n";	
 	roundObject->Move(CalculateX(x), CalculateY(y), steps_per_tick_);	
 }
 
@@ -189,7 +192,7 @@ void Dialog::MoveObjectTo(const uint id, const int x, const int y) {
 
 	dx = CalculateX(x) - x_old;
 	dy = CalculateY(y) - y_old;
-	
+	std::cout << "Object: " << roundObject->GetId() << "moved\n";	
 	if (!roundObject->IsMoving())
 		animations_.fetchAndAddAcquire(1);
 

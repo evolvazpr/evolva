@@ -71,8 +71,8 @@ SpriteObject::~SpriteObject() {
  */
 void SpriteObject::Move(const qreal dx, const qreal dy, const qreal steps_per_tick) {
 	steps_per_tick_ = steps_per_tick;
-	dx_ += dx;
-	dy_ += dy;
+	dx_ = dx;
+	dy_ = dy;
 
 	if ((!dx_) && (!dy_))
 		emit AnimationFinished();
@@ -100,7 +100,7 @@ qreal SpriteObject::CalculateCoord(qreal *lasts, qreal increment, qreal actual_c
 		new_coord = actual_coord + increment;
 	} else {
 		new_coord = actual_coord + *lasts;
-		*lasts = 0.0;
+		*lasts = qreal(0);
 	}	
 	return new_coord;
 }
@@ -118,21 +118,23 @@ void SpriteObject::Animate() {
 	qreal y_coord = 0;
 	qreal angle = 0;
 	qreal dx = 0, dy = 0;
-
+	
 	if((!dx_) && (!dy_)) {
 		return;
-	} else if (steps_per_tick_ < 1.0) {
+	} else if (steps_per_tick_ < qreal(1)) {
 		x_coord = CalculateCoord(&dx_, dy_, x());
 		y_coord = CalculateCoord(&dy_, dy_, y());
+		dx_ = 0;
+		dy_ = 0;
 	} else {
 		angle = qAtan(qFabs((qreal)dx_)/qFabs((qreal)dy_));
 		dx = steps_per_tick_ * qSin(angle);
 		dy = steps_per_tick_ * qCos(angle);
 
-		if (dx_ < 0)
-			dx *= -1.0;
-		if (dy_ < 0)
-			dy *= -1.0;
+		if (dx_ < qreal(0))
+			dx *= qreal(-1);
+		if (dy_ < qreal(0))
+			dy *= qreal(-1);
 
 		x_coord = CalculateCoord(&dx_, dx, x()); 
 		y_coord = CalculateCoord(&dy_, dy, y());
