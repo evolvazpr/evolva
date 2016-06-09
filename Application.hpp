@@ -17,6 +17,7 @@
 #include <boost/format.hpp>
 #include <QThread>
 #include "XmlIo.hpp"
+#include <QMessageBox>
 
 class Logic;
 
@@ -34,6 +35,7 @@ private:
 	std::shared_ptr<Field> field_;
 	Dialog dialog_;
 	XmlIo gui_settings_;
+	XmlIo logic_settings_;
 	void ConnectSignals();
 
 	QString GetObjectType(std::shared_ptr<const CellObject> object) const;

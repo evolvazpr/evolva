@@ -2,8 +2,8 @@
 #include <iostream>
 #include <QMetaType>
 
-Application::Application(int& argc, char **argv) : QApplication(argc, argv), dialog_(nullptr, 30, 30), gui_settings_("gui.xml") {
-
+Application::Application(int& argc, char **argv) : QApplication(argc, argv), dialog_(), gui_settings_("gui.xml"), logic_settings_("logic.xml") {
+	dialog_.setField(logic_settings_["Field"]["width"], logic_settings_["Field"]["height"]);
 }
 
 Application* Application::instance_ = nullptr;
@@ -24,6 +24,7 @@ Application* Application::GetInstance(int argc, char **argv) {
 void Application::LogicIteration() {
 	Tui tui;
 	if(!field_->Next()) {
+		QMessageBox::information(nullptr, tr("Evolva"), tr("Simulation has finished."));
 		exit();
 	}
 	tui.PrintField();
