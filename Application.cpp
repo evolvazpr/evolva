@@ -22,7 +22,9 @@ Application* Application::GetInstance(int argc, char **argv) {
 }
 
 void Application::LogicIteration() {
+	Tui tui;
 	field_->Next();
+	tui.PrintField();
 }
 
 void Application::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {

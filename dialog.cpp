@@ -25,6 +25,8 @@ Dialog::Dialog(QWidget *parent, const int width, const int height) :
 	animations_ = 0;
 	QDialog::setWindowFlags(flags);
 	timer_.start(animation_clock_);	
+	rounds_per_click_ = ui->lineEdit_rounds->text().toUInt();
+	steps_per_tick_ = ui->lineEdit_steps->text().toUInt();
 }
 
 /**
@@ -39,8 +41,7 @@ Dialog::~Dialog() {
  * Method called when "Kolejna tura" button was clicked.
  */
 void Dialog::on_pushButton_clicked() {
-	uint rounds = rounds_per_click_;
-       for (uint i = 0; i < rounds; i++) 
+       for (uint i = 0; i < rounds_per_click_; ++i) 
 		emit NextLogicIteration();
 }
 
@@ -85,14 +86,14 @@ qreal Dialog::CalculateY(const int y) {
  */
 void Dialog::CreateObject(const uint id, QString path, uint sprite_cnt, const int x, const int y) {
 	QMutexLocker lock(&mutex_);
-	int x_pos = CalculateX(x);
-	int y_pos = CalculateY(y);
+	qreal x_pos = CalculateX(x);
+	qreal y_pos = CalculateY(y);
 	SpriteObject *sprite_object;
 	std::string obj_type;
 	QString sprite_path;
 	sprite_object = new SpriteObject(scene->parent(), id, x_pos, y_pos, 
 					path, sprite_cnt, pixels_per_object_);
-	if (animations_)
+	if (animations_.fetchAndAddAcquire(0))
 		to_add_.push_back(sprite_object);
 	else 
 		scene->addItem(sprite_object);
@@ -107,8 +108,8 @@ void Dialog::CreateObject(const uint id, QString path, uint sprite_cnt, const in
 
 void Dialog::AnimationFinished() {
 	QMutexLocker lock(&mutex_);
-	animations_--;
-	if (!animations_) {
+	animations_.fetchAndAddAcquire(-1);
+	if (!animations_.fetchAndAddAcquire(0)) {
 		for (auto &it : to_add_) {
 			scene->addItem(it);
 		}
@@ -163,7 +164,9 @@ void Dialog::MoveObject(const uint id, const int x, const int y) {
 	if (!roundObject) {
 		throw EvolvaException("Dialog::moveObject - object not found!\n");
 	}
-	animations_++;
+	if (!roundObject->IsMoving())
+		animations_.fetchAndAddAcquire(1);
+	
 	roundObject->Move(CalculateX(x), CalculateY(y), steps_per_tick_);	
 }
 
@@ -186,7 +189,10 @@ void Dialog::MoveObjectTo(const uint id, const int x, const int y) {
 
 	dx = CalculateX(x) - x_old;
 	dy = CalculateY(y) - y_old;
-	animations_++;
+	
+	if (!roundObject->IsMoving())
+		animations_.fetchAndAddAcquire(1);
+
 	roundObject->Move(dx, dy, steps_per_tick_);
 }
 
@@ -201,7 +207,7 @@ void Dialog::RemoveObject(const uint id) {
 	if (!roundObject)
 		throw EvolvaException("Dialog::removeObject - internal error!\n");		
 
-	if (animations_) {
+	if (animations_.fetchAndAddAcquire(0)) {
 		to_remove_.push_back(roundObject);
 	} else {
 		scene->removeItem(roundObject);

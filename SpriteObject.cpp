@@ -18,7 +18,7 @@
  * @param pixsize - describes graphics cell size
  */
 
-SpriteObject::SpriteObject(QObject * parent, const uint id, const int x, const int y, 
+SpriteObject::SpriteObject(QObject * parent, const uint id, const qreal x, const qreal y, 
 		          const QString sprite_path, const int sprites_cnt, const uint pixsize) : 
 			  QObject(parent), QGraphicsPixmapItem(),
 		       	  id_(id), sprites_cnt_(sprites_cnt),
@@ -35,6 +35,7 @@ SpriteObject::SpriteObject(QObject * parent, const uint id, const int x, const i
 	actual_sprite_ = 0;
 	setPos(x, y);
 	setZValue(1);
+	steps_per_tick_ = 0;
 }
 
 /**
@@ -68,10 +69,13 @@ SpriteObject::~SpriteObject() {
  * @param steps_per_tick - how many steps to perform in single move. If 0 - move to destiny in
  * one timer timeout.
  */
-void SpriteObject::Move(const int dx, const int dy, const qreal steps_per_tick) {
+void SpriteObject::Move(const qreal dx, const qreal dy, const qreal steps_per_tick) {
 	steps_per_tick_ = steps_per_tick;
-	dx_ = dx;
-	dy_ = dy;
+	dx_ += dx;
+	dy_ += dy;
+
+	if ((!dx_) && (!dy_))
+		emit AnimationFinished();
 }
 
 /**
@@ -89,14 +93,14 @@ uint SpriteObject::GetId() {
  * @param increment - describes single size of step, which is made per animate() call.
  * @param actual_cord - describes actual coordinate of graphic object.
  */
-template <class T> T SpriteObject::CalculateCoord(T *lasts, T increment, T actual_coord) {
-	T new_coord;
+qreal SpriteObject::CalculateCoord(qreal *lasts, qreal increment, qreal actual_coord) {
+	qreal new_coord;
 	if (qFabs(increment) < qFabs(*lasts)) {
 		*lasts -= increment;
 		new_coord = actual_coord + increment;
 	} else {
 		new_coord = actual_coord + *lasts;
-		*lasts = 0;
+		*lasts = 0.0;
 	}	
 	return new_coord;
 }
@@ -117,7 +121,7 @@ void SpriteObject::Animate() {
 
 	if((!dx_) && (!dy_)) {
 		return;
-	} else if (steps_per_tick_ == 0.0) {
+	} else if (steps_per_tick_ < 1.0) {
 		x_coord = CalculateCoord(&dx_, dy_, x());
 		y_coord = CalculateCoord(&dy_, dy_, y());
 	} else {

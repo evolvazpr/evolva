@@ -27,16 +27,16 @@ private:
 	int actual_sprite_;
 	int direction_;
 	const uint pixsize_;
-	template <class T> T CalculateCoord(T *lasts, T increment, T actual_coord);
+	qreal CalculateCoord(qreal *lasts, qreal increment, qreal actual_coord);
 
 protected:
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
 
 public:
-	SpriteObject(QObject* parent, const uint id, const int x, const int y, 
+	SpriteObject(QObject* parent, const uint id, const qreal x, const qreal y, 
 		    QString path, const int sprites_cnt, const uint pixsize);
 	virtual ~SpriteObject();
-	void Move(const int x, const int y, const qreal steps_per_tick);
+	void Move(const qreal x, const qreal y, const qreal steps_per_tick);
 	uint GetId();
 	bool IsMoving();
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
