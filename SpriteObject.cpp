@@ -122,10 +122,8 @@ void SpriteObject::Animate() {
 	if((!dx_) && (!dy_)) {
 		return;
 	} else if (steps_per_tick_ < qreal(1)) {
-		x_coord = CalculateCoord(&dx_, dy_, x());
+		x_coord = CalculateCoord(&dx_, dx_, x());
 		y_coord = CalculateCoord(&dy_, dy_, y());
-		dx_ = 0;
-		dy_ = 0;
 	} else {
 		angle = qAtan(qFabs((qreal)dx_)/qFabs((qreal)dy_));
 		dx = steps_per_tick_ * qSin(angle);
