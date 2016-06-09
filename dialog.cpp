@@ -49,10 +49,12 @@ void Dialog::on_pushButton_2_clicked() {
 	bool test;
 	const uint rounds = ui->lineEdit_rounds->text().toUInt(&test, 10);
 	if (!test) {
+		QMessageBox::warning(this, tr("Evolva"), tr("Wrong input data. Only numerics are allowed."));
 		return;
 	}
 	const uint steps = ui->lineEdit_steps->text().toUInt(&test, 10);
 	if (!test) {
+		QMessageBox::warning(this, tr("Evolva"), tr("Wrong input data. Only numerics are allowed."));	
 		return;
 	}
 	rounds_per_click_ = rounds;
@@ -269,6 +271,8 @@ void Dialog::UpdateStats(const QString text) {
  * @param y - y coordinate of sprite object.
  */
 void Dialog::UpdateLog(const QString text) {
-	ui->log_textWindow->insertPlainText(text);		
+	QScrollBar *sb = ui->log_textWindow->verticalScrollBar();
+	ui->log_textWindow->insertPlainText(text);
+	sb->setValue(sb->maximum());	
 }
 

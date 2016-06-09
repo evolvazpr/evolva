@@ -12,6 +12,8 @@
 #include <memory>
 #include <QMutex>
 #include <unordered_map>
+#include <QScrollBar>
+#include <QMessageBox>
 #include "SpriteObject.hpp"
 
 namespace Ui {

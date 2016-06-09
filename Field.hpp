@@ -11,6 +11,7 @@ class NonMovableObject;
 class FieldCell;
 class Unit;
 class FieldPimpl;
+class Statistics;
 
 class Field {
 friend class Tui;
@@ -31,11 +32,10 @@ private:
 	mutable std::default_random_engine random_generator_; //!TODO: apply generator to all randoms
 	double mutability_;
 	bool InsertCellObject(std::shared_ptr<CellObject> object, const size_t x, const size_t y);
-	bool new_grass_[9];
-	bool keep_grass_[9];
-	bool new_tree_[9];
-	bool keep_tree_[9];
-
+	const bool keep_grass_[9];
+	const bool new_grass_[9];
+	const bool keep_tree_[9];
+	const bool new_tree_[9];
 public:
 	inline const size_t GetFfid() const { return ++ffid_; };
 	static std::shared_ptr<Field> GetInstance(const size_t x = 0, const size_t y = 0);
@@ -62,10 +62,11 @@ public:
 	std::shared_ptr<Unit> NextUnit();
 	bool IsCycleEnd() const;
 	void GrowPlants();
-	void LogAllUnits() const;
-
-	void f1();
+	void MakeGrass();
 	void f2();
+	std::shared_ptr<Statistics> stats_;
+	inline bool IsNewTurn() const { return new_turn_; };
+	bool new_turn_;
 };
 
 extern std::shared_ptr<Field> field;

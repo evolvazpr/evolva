@@ -36,9 +36,9 @@ private:
 	XmlIo gui_settings_;
 	void ConnectSignals();
 
-	QString GetObjectType(std::shared_ptr<const CellObject> object);
-	QString GetGroundType(FieldCell::Ground type);
-	boost::format CreateStatistics(const int x, const int y);
+	QString GetObjectType(std::shared_ptr<const CellObject> object) const;
+	QString GetGroundType(FieldCell::Ground type) const;
+	boost::format CreateStatistics(const int x, const int y) const;
 	
 	Application(int& argc, char **argv);
 	void LogicInit();

@@ -1,6 +1,8 @@
 #include "FieldCell.hpp"
 #include "CellObject.hpp"
 #include "Unit.hpp"
+#include "Field.hpp"
+#include <random>
 
 FieldCell::FieldCell(const size_t x, const size_t y) {
 	object_ = nullptr;
@@ -24,14 +26,10 @@ bool FieldCell::SetObject(std::shared_ptr<CellObject> object) {
             return true;
 		}
 		else {
-			// Remove current object (move to output)
-		//	std::shared_ptr<CellObject> output(std::move(object_));
 			// Set new object parent cell to this cell
 			object_->cell_ = object->cell_;
 			// Set new object
 			object_ = object;
-			// Reset output object parent cell
-		//	output->cell_.reset();
 			// Return output
 			return true;
 		}

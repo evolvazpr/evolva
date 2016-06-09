@@ -23,7 +23,9 @@ Application* Application::GetInstance(int argc, char **argv) {
 
 void Application::LogicIteration() {
 	Tui tui;
-	field_->Next();
+	if(!field_->Next()) {
+		exit();
+	}
 	tui.PrintField();
 }
 
@@ -169,8 +171,8 @@ void Application::LogicInit() {
 	field->InsertNmo(std::make_shared<Tree>(24.0), 4, 4);
 	field->InsertNmo(std::make_shared<Tree>(500.0), 2, 8);
 	field->InsertNmo(std::make_shared<Tree>(100.0), 0, 9);
-
-	for (int i = 0; i < 10; ++i) field->GrowPlants();
+	field->MakeGrass();
+	for (int i = 0; i < 15; ++i) field->GrowPlants();
 	field->BeginCycle();
 	field->Play();
 }
@@ -181,27 +183,30 @@ void Application::Init() {
 	LogicInit();	
 }
 
-QString Application::GetObjectType(std::shared_ptr<const CellObject> object) {
+QString Application::GetObjectType(std::shared_ptr<const CellObject> object) const {
+	std::shared_ptr<const Flesh> flesh;
 	QString obj_type;
+	
 	if (object->GetType(CellObject::Type::CARNIVORE)) { 
-		if (object->GetType(CellObject::Type::FLESH))
-			obj_type = "carnivore_dead";
-		else
-			obj_type = "carnivore";
+		obj_type = "carnivore";
 	} else if (object->GetType(CellObject::Type::HERBIVORE)) {
-		if (object->GetType(CellObject::Type::FLESH))
-			obj_type = "herbivore_dead";
-		else
-			obj_type = "herbivore";
+		obj_type = "herbivore";
 	} else if (object->GetType(CellObject::Type::PLANT)) {
 		obj_type = "tree";
+	} else if (object->GetType(CellObject::Type::FLESH)) {
+		flesh = std::dynamic_pointer_cast<const Flesh>(object);
+		if (flesh->IsCarnivore())
+			obj_type = "carnivore_dead";
+		else
+			obj_type = "herbivore_dead";
 	} else {
 		obj_type = "stone";
-	}	
+	}
+		
 	return obj_type;
 }
 
-QString Application::GetGroundType(FieldCell::Ground type) {
+QString Application::GetGroundType(FieldCell::Ground type) const {
 	QString surface;
 	if (type == FieldCell::Ground::GRASS)
 		surface = "grass";
@@ -229,7 +234,7 @@ void Application::UpdateLog(const QString text) {
  * This method creates content of stats window.
  * param cell - Field's cell in which object, represented by clicked sprite, resides.
  */
-boost::format Application::CreateStatistics(const int x, const int y) {
+boost::format Application::CreateStatistics(const int x, const int y) const {
 	std::shared_ptr<FieldCell> cell = field_->GetCell(x , y);
 	std::shared_ptr<CellObject> object = cell->GetObject();
 	std::shared_ptr<Unit> unit;

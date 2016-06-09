@@ -1,125 +1,74 @@
 #include "CyclicQueue.hpp"
 #include "CellObject.hpp"
 #include "Unit.hpp"
-#include <iostream>
 #include "EvolvaException.hpp"
-#include <limits>
+
+CyclicQueue::CyclicQueue() : queue_([](std::shared_ptr<Unit> u1, std::shared_ptr<Unit> u2) -> bool { return u1->GetMovePriority() < u2->GetMovePriority(); }) {
+	new_cycle_ = true;
+}
+
+CyclicQueue::~CyclicQueue() {
+}
+
+#include <iostream>
 
 bool CyclicQueue::Next() {
-	if (empty()) {
-		return (end_ = true); // ?
+	if (queue_.empty()) {
+		return false;
 	}
-	++position_;
-	end_ = false;
-	while (!empty()) {
-		if (position_ == end()) {
-			position_ = begin();
-			end_ = true;
-		}
-		if (!(*position_)->IsAlive()) {
-			Remove();
-		}
-		else return end_;
+	std::shared_ptr<Unit> unit = queue_.top();
+	queue_.pop();
+	if (unit->IsAlive()) {
+		to_queue_.push_back(unit);
 	}
-	return end_;
-}
-
-void CyclicQueue::Begin() {
-	position_ = begin();
-	end_ = false;
-}
-
-void CyclicQueue::Insortion(std::shared_ptr<Unit> new_object, const bool keep_position) {
-	if (empty()) {
-		push_back(new_object);
-		position_ = begin();
-		return;
-	}
-	size_t position_id = std::numeric_limits<size_t>::max();
-	if (keep_position) {
-		end_ = false;
-		bool empty_queue = false;
-		while (!((*position_)->IsAlive())) {
-			if (!Next()) {
-				empty_queue = true;
-				break;
-			}
+	if (queue_.empty()) {
+		new_cycle_ = true;
+		Repush();
+		if (queue_.empty()) {
+			return false;
 		}
-		if (empty_queue) {
-			push_back(new_object);
-			position_ = begin();
-			return;
+		else {
+			return true;
 		}
-		position_id = (*position_)->GetId();
-	}
-	bool inserted = false;
-	for (iterator i = begin(); i != end(); ++i) {
-		bool condition = false;
-		try {
-			condition = !new_object->operator <= (*i);
-		}
-		catch (const EvolvaException &e) {
-			//tolog
-			std::cout << "\nERROR: Possible lost of cyclic queue data.\n Cyclic queue is corrupted but program will continue.\nDetails: " << e.what() << "\n";
-		}
-		if (condition) {
-			insert(i, new_object);
-			inserted = true;
-			break;
-		}
-	}
-	if (!inserted) push_back(new_object);
-	if (keep_position) {
-		Begin();
-		if (position_id != std::numeric_limits<size_t>::max()) {
-			while ((*position_)->GetId() != position_id) {
-				if (!Next()) {
-					Begin();
-					break;
-				}
-			}
-		}
-	}
-
-	/*
-	auto address = &(*position_);
-	position_ = begin();
-	int i = 0;
-	for (; ; ++i) {
-		if (position_ == end()) break;
-		else ++position_;
-	}
-	position_ = begin();
-	while (1) {
-		auto b = &(*position_);
-		if (b != address) ++position_;
-		else break;
-	}/**/
-}
-
-void CyclicQueue::Remove() {
-	if (end_) {
-		erase(begin());
-		position_ = begin();
 	}
 	else {
-		auto previous_position = position_;
-		--previous_position;
-		erase(position_);
-		position_ = previous_position;
-		++position_;
+		new_cycle_ = false;
+		return true;
 	}
 }
 
-void CyclicQueue::Sort() {
-	if(empty()) return;
-	CyclicQueue queue;
-	Begin();
-	do {
-		std::shared_ptr<Unit> object = *position_;
-		queue.Insortion(object, false);
-	} while(!Next());
-	clear();
-	operator = (queue);
-	Begin();
+bool CyclicQueue::IsEmpty() const {
+	return to_queue_.empty() && queue_.empty();
+}
+
+bool CyclicQueue::IsNewCycle() const {
+	return new_cycle_;
+}
+
+void CyclicQueue::Repush() {
+	for (auto i = to_queue_.begin(); i != to_queue_.end(); ++i) {
+		queue_.push(*i);
+	}
+	to_queue_.clear();
+}
+
+void CyclicQueue::Insert(std::shared_ptr<Unit> unit) {
+	to_queue_.push_back(unit);
+}
+
+std::shared_ptr<Unit> CyclicQueue::Get() {
+	if(queue_.empty()) {
+		return nullptr;
+	}
+	else {
+		return queue_.top();
+	}
+}
+
+size_t CyclicQueue::GetQueueSize() const {
+	return queue_.size();
+}
+
+size_t CyclicQueue::GetQueueBufferSize() const {
+	return to_queue_.size();
 }
