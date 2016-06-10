@@ -8,8 +8,9 @@
  * @brief Constructor.
  * @param parent - parent for Qt API (no need to call delete thanks to it).
  */
-Dialog::Dialog(QWidget *parent, const int width, const int height) :
-	QDialog(parent), ui(new Ui::Dialog), animation_clock_(1000.0/33.0), pixels_per_object_(25), steps_per_tick_(5.0),  width_(width), height_(height) { 
+Dialog::Dialog(QWidget *parent, const int width, const int height, const int pixels_per_object) :
+	QDialog(parent), ui(new Ui::Dialog), animation_clock_(1000.0/33.0), 
+	pixels_per_object_(pixels_per_object), steps_per_tick_(5.0),  width_(width), height_(height) { 
 	Qt::WindowFlags flags = Qt::WindowTitleHint | Qt::WindowSystemMenuHint;
 	flags |= Qt::WindowCloseButtonHint | Qt::WindowMinMaxButtonsHint;
 	
@@ -25,7 +26,6 @@ Dialog::Dialog(QWidget *parent, const int width, const int height) :
 	animations_ = 0;
 	QDialog::setWindowFlags(flags);
 	timer_.start(animation_clock_);	
-	rounds_per_click_ = ui->lineEdit_rounds->text().toUInt();
 	steps_per_tick_ = ui->lineEdit_steps->text().toUInt();
 }
 
@@ -41,23 +41,24 @@ Dialog::~Dialog() {
  * Method called when "Kolejna tura" button was clicked.
  */
 void Dialog::on_pushButton_clicked() {
-       for (uint i = 0; i < rounds_per_click_; ++i) 
-		emit NextLogicIteration();
+	if (animations_)
+		return;
+	emit NextLogicIteration();
+}
+
+void Dialog::on_pushButton_3_clicked() {
+	if (animations_)
+		return;
+	emit MoveToTheEndOfRound();	
 }
 
 void Dialog::on_pushButton_2_clicked() {
 	bool test;
-	const uint rounds = ui->lineEdit_rounds->text().toUInt(&test, 10);
-	if (!test) {
-		QMessageBox::warning(this, tr("Evolva"), tr("Wrong input data. Only numerics are allowed."));
-		return;
-	}
 	const uint steps = ui->lineEdit_steps->text().toUInt(&test, 10);
 	if (!test) {
 		QMessageBox::warning(this, tr("Evolva"), tr("Wrong input data. Only numerics are allowed."));	
 		return;
 	}
-	rounds_per_click_ = rounds;
 	steps_per_tick_ = steps;
 }
 /**
@@ -66,7 +67,7 @@ void Dialog::on_pushButton_2_clicked() {
  * @return  - graphical x coordinate.
  */
 qreal Dialog::CalculateX(const int x) {
-	return ((qreal)x) / ((qreal)width_ )* scene->width();
+	return qFloor(((qreal)x) / ((qreal)width_ )* scene->width() + 0.5);
 }
 
 /**
@@ -75,7 +76,7 @@ qreal Dialog::CalculateX(const int x) {
  * @return  - graphical y coordinate.
  */
 qreal Dialog::CalculateY(const int y) {
-	return ((qreal)y) / ((qreal)height_) * scene->height();
+	return qFloor(((qreal)y) / ((qreal)height_) * scene->height() + 0.5);
 }
 
 
@@ -234,8 +235,10 @@ void Dialog::CreateSurfaceObject(const QString path, const int x, const int y) {
 				 Qt::IgnoreAspectRatio, 
 				 Qt::SmoothTransformation);
 	QGraphicsPixmapItem *rect = new QGraphicsPixmapItem(pix_map);
-	rect->setOffset(CalculateX(x), CalculateY(y));
+	if (rect == nullptr)//remove it?
+		throw EvolvaException("?");
 	scene->addItem(rect);
+	rect->setOffset(CalculateX(x), CalculateY(y));
 }
 
 /**
@@ -250,6 +253,22 @@ void Dialog::RemoveSurfaceObject(const int x, const int y) {
 		return;
 	scene->removeItem(item);
 	delete(item);	
+}
+
+void Dialog::ReplaceSurfaceObject(const QString path, const int x, const int y) {
+	QTransform test;
+	QPixmap pix_map(path);
+	if(pix_map.isNull())
+		throw EvolvaException("Sprite could not have been loaded." 
+			"Aborting program.\nCheck if gui.xml is correct.");
+	pix_map = pix_map.scaled(pixels_per_object_, pixels_per_object_,
+				 Qt::IgnoreAspectRatio,
+				 Qt::SmoothTransformation);
+	QGraphicsItem *item = scene->itemAt(CalculateX(x), CalculateY(y), test);
+	QGraphicsPixmapItem *pixmap_item = dynamic_cast<QGraphicsPixmapItem*>(item);
+	if (!pixmap_item)
+		throw EvolvaException("Dialog::ReplaceSurfaceObject internal error");
+	pixmap_item->setPixmap(pix_map);
 }
 
 

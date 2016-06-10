@@ -18,6 +18,7 @@
 #include <QThread>
 #include "XmlIo.hpp"
 #include <QMessageBox>
+#include <boost/tokenizer.hpp>
 
 class Logic;
 
@@ -52,6 +53,7 @@ public:
 
 	void CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void CreateSurfaceObject(const FieldCell::Ground ground_type, const int x, const int y);
+	void ReplaceSurfaceObject(const FieldCell::Ground ground_type, const int x, const int y);
 	void RemoveSurfaceObject(const int x, const int y);
 	void MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y);
@@ -63,6 +65,7 @@ public:
 public slots:
 	void SpriteObjectClicked(int x, int y);
 	void LogicIteration();
+	void MoveLogicToEndOfRound();
 };
 
 /**

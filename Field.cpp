@@ -336,13 +336,11 @@ void Field::GrowPlants() {
 		for (size_t j = 0; j < height; ++j) {
 			if (ground_prob(Random()) == 0) {
 				GetCell(i, j)->SetGroundType(FieldCell::Ground::GRASS);
-				gui->RemoveSurfaceObject(i, j);
-				gui->CreateSurfaceObject(FieldCell::Ground::GRASS, i, j);
+				gui->ReplaceSurfaceObject(FieldCell::Ground::GRASS, i, j);
 			}
 			else {
 				GetCell(i, j)->SetGroundType(cells[i][j] == 1 ? FieldCell::Ground::GRASS : FieldCell::Ground::GROUND);
-				gui->RemoveSurfaceObject(i, j);
-				gui->CreateSurfaceObject(cells[i][j] == 1 ? FieldCell::Ground::GRASS : FieldCell::Ground::GROUND, i, j);
+				gui->ReplaceSurfaceObject(cells[i][j] == 1 ? FieldCell::Ground::GRASS : FieldCell::Ground::GROUND, i, j);
 			}
 			cells[i][j] = 0;
 		}
@@ -404,7 +402,7 @@ void Field::MakeGrass() {
 			}
 			else {
 				pimpl_->cells_[i][j]->SetGroundType(FieldCell::Ground::GRASS);
-				gui->CreateSurfaceObject(FieldCell::Ground::GROUND, i, j);
+				gui->CreateSurfaceObject(FieldCell::Ground::GRASS, i, j);
 			}
 		}
 	}

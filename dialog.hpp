@@ -33,7 +33,6 @@ private:
 	const qreal animation_clock_;
 	const uint pixels_per_object_;
 	uint steps_per_tick_;
-	qreal rounds_per_click_;
 	
 	QMutex mutex_;
 	QGraphicsScene *scene;
@@ -48,12 +47,14 @@ private:
 	qreal CalculateY(const int y);
 public:
 
-	explicit Dialog(QWidget *parent = 0, const int width = 1, const int height = 1);
+	explicit Dialog(QWidget *parent = 0, const int width = 1, const int height = 1, 
+			const int pixels_per_object = 25);
 
 	virtual ~Dialog();
 	void CreateObject(const uint id, QString path, uint sprite_cnt, const int x, const int y);
 	void CreateSurfaceObject(const QString path, const int x, const int y);
 	void RemoveSurfaceObject(const int x, const int y);
+	void ReplaceSurfaceObject(const QString path, const int x, const int y);
 	void MoveObject(const uint id, const int x, const int y);
 	void MoveObjectTo(const uint id, const int x, const int y);
 	void RemoveObject(const uint id);
@@ -63,9 +64,11 @@ public:
 private slots:
 	void on_pushButton_clicked();
 	void on_pushButton_2_clicked();
+	void on_pushButton_3_clicked();
 	void AnimationFinished();
 signals:
 	void NextLogicIteration();
+	void MoveToTheEndOfRound();
 	void SpriteObjectClicked(int x, int y);
 };
 

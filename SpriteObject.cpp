@@ -95,6 +95,7 @@ uint SpriteObject::GetId() {
  */
 qreal SpriteObject::CalculateCoord(qreal *lasts, qreal increment, qreal actual_coord) {
 	qreal new_coord;
+	increment = qFloor(increment + 0.5);
 	if (qFabs(increment) < qFabs(*lasts)) {
 		*lasts -= increment;
 		new_coord = actual_coord + increment;

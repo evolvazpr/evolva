@@ -12,6 +12,16 @@ function create_node($name, $format, $sprite_cnt) {
 	return $string
 }
 
+function create_gui_setting() {
+	$string = "<Gui>`r`n"
+	$string += "<pixels_per_object>`r`n"
+	$string += "25`r`n"
+	$string += "</pixels_per_object>`r`n"
+	$string += "</Gui>`r`n"
+
+	return $string
+}
+
 mkdir ../sprites
 cd ../sprites
 
@@ -40,6 +50,7 @@ $text += create_node "unit" "png" "1"
 $text += create_node "stone" "png" "1"
 $text += create_node "carnivore_dead" "png" "1"
 $text += create_node "herbivore_dead" "png" "1"
+$text += create_gui_setting
 
 $text+="</evolva>"
 

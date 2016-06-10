@@ -1,17 +1,17 @@
 <evolva>
 	<Field>
-		<width>30</width>
-		<height>30</height>
+		<width>45</width>
+		<height>44</height>
 	</Field>
 
 	<Herbivore>
-		<intelligence>80.0</intelligence>
+		<intelligence>65.0</intelligence>
 		<agility>30.0</agility>
 		<speed>80.0</speed>
-		<strength>20.4</strength>
+		<strength>25.4</strength>
 		<death_time_u>50.0</death_time_u>
 		<death_time_s>2.68</death_time_s>
-		<mutability>10</mutability>
+		<mutability>10.0</mutability>
 		<mutation_stability>1.1</mutation_stability>
 		<fatigue_death_threshold>80.0</fatigue_death_threshold>
 		<health_death_threshold>20.0</health_death_threshold>
@@ -27,25 +27,26 @@
 		<requirements.childbirth>40.0</requirements.childbirth>
 		<wakeup_threshold>20.0</wakeup_threshold>
 		<fatigue_turn_increase>2.0</fatigue_turn_increase>
-		<normal_weight>80.0</normal_weight>
-		<pregnancy_time>2.0</pregnancy_time>
+		<normal_weight>120.0</normal_weight>
+		<pregnancy_time>1.49</pregnancy_time>
 		<herbivore>100.0</herbivore>
-		<carnivore>0.0</carnivore>
+		<carnivore>2.0</carnivore>
 		<vision>15.0</vision>
 		<gen.variability>30.0</gen.variability>
 		<initial_cnt>9</initial_cnt>
+		<initial_coords>0,0;9,9;7,0;11,1;10,2;9,3;2,0;22,2;24,0;1,1;24,2</initial_coords>
 	</Herbivore>
 	<Carnivore>
-		<intelligence>50.0</intelligence>
+		<intelligence>65.0</intelligence>
 		<agility>60.0</agility>
 		<speed>80.0</speed>
-		<strength>70.4</strength>
+		<strength>80.4</strength>
 		<death_time_u>60.0</death_time_u>
 		<death_time_s>1.5</death_time_s>
-		<mutability>20</mutability>
+		<mutability>20.0</mutability>
 		<mutation_stability>1.1</mutation_stability>
 		<fatigue_death_threshold>95.0</fatigue_death_threshold>
-		<health_death_threshold>5.0</health_death_threshold>
+		<health_death_threshold>0.0</health_death_threshold>
 		<fatigue_regeneration>15.0</fatigue_regeneration>
 		<health_regeneration_sleep>10.0</health_regeneration_sleep>
 		<health_regeneration>0.0</health_regeneration>
@@ -54,21 +55,22 @@
 		<requirements.eating>5.0</requirements.eating>
 		<requirements.mating>20.0</requirements.mating>
 		<requirements.step>1.0</requirements.step>
-		<requirements.attack>35.0</requirements.attack>
+		<requirements.attack>30.0</requirements.attack>
 		<requirements.childbirth>60.0</requirements.childbirth>
 		<wakeup_threshold>20.0</wakeup_threshold>
 		<fatigue_turn_increase>4.0</fatigue_turn_increase>
 		<normal_weight>800.0</normal_weight>
-		<pregnancy_time>3.0</pregnancy_time>
-		<herbivore>0.0</herbivore>
+		<pregnancy_time>2.3</pregnancy_time>
+		<herbivore>2.0</herbivore>
 		<carnivore>100.0</carnivore>
 		<vision>50.0</vision>
 		<gen.variability>30.0</gen.variability>
 		<initial_cnt>6</initial_cnt>
+		<initial_coords>19,19;39,15;38,15;40,18;39,18</initial_coords>
 	</Carnivore>
 	<Plants>
-		<initial_cnt>15</initial_cnt>
-		<maxenergy>600.0</maxenergy>
-		<grow>15</grow>
+		<initial_cnt>6</initial_cnt>
+		<initial_grow>15</initial_grow>
+		<initial_params>50.0,1,2;80.0,7,2;20.0,3,4;24.0,4,4;500.0,2,8;100.0,0,9</initial_params>
 	</Plants>
 </evolva>

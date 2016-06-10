@@ -41,6 +41,13 @@ create_node "unit" "png" "1"
 create_node "stone" "png" "1"
 create_node "carnivore_dead" "png" "1"
 create_node "herbivore_dead" "png" "1"
+
+FILE=`printf "%s\n%s" "$FILE" "<Gui>"`
+FILE=`printf "%s\n%s" "$FILE" "<pixels_per_object>"`
+FILE=`printf "%s\n%s" "$FILE" "<25"`
+FILE=`printf "%s\n%s" "$FILE" "</Gui>"`
+FILE=`printf "%s\n%s" "$FILE" "</pixels_per_object>"`
+
 FILE+="</evolva>"
 
 cd ../tests

@@ -3,7 +3,8 @@
 #include <QMetaType>
 
 Application::Application(int& argc, char **argv) : QApplication(argc, argv), gui_settings_("gui.xml"), logic_settings_("logic.xml"), 
-						   dialog_(nullptr, logic_settings_["Field"]["width"], logic_settings_["Field"]["height"] )  
+						   dialog_(nullptr, logic_settings_["Field"]["width"], logic_settings_["Field"]["height"],
+							   gui_settings_["Gui"]["pixels_per_object"] )  
 {}
 
 Application* Application::instance_ = nullptr;
@@ -22,12 +23,10 @@ Application* Application::GetInstance(int argc, char **argv) {
 }
 
 void Application::LogicIteration() {
-	Tui tui;
 	if(!field_->Next()) {
 		QMessageBox::information(nullptr, tr("Evolva"), tr("Simulation has finished."));
 		exit();
 	}
-	tui.PrintField();
 }
 
 void Application::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
@@ -42,6 +41,12 @@ void Application::CreateSurfaceObject(const FieldCell::Ground ground_type, const
 	dialog_.CreateSurfaceObject(path, x, y);
 }
 
+void Application::ReplaceSurfaceObject(const FieldCell::Ground ground_type, const int x, const int y) {
+	std::string type_s = GetGroundType(ground_type).toStdString();
+	QString path = QString::fromStdString(gui_settings_[type_s]["path"]);
+	dialog_.ReplaceSurfaceObject(path, x, y);
+}
+
 void Application::MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
 	dialog_.MoveObject(object->GetId(), x, y);
 }
@@ -54,12 +59,15 @@ void Application::RemoveObject(std::shared_ptr<const CellObject> object) {
 }
 
 void Application::PrepareInitialObjects(CellObject::Type type) {
-	int loop_count;
+	typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+	
 	std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();
 	std::string type_name;
 	std::shared_ptr<Unit> unit;
-	const int width = logic_settings_["Field"]["width"];
-	const int height = logic_settings_["Field"]["height"];
+	
+	boost::char_separator<char> sep_registry(";");
+	boost::char_separator<char> sep_data(",");
+	
 	int x, y;
 	bool test;
 	DnaCode &dna = *dna_ptr;
@@ -99,34 +107,54 @@ void Application::PrepareInitialObjects(CellObject::Type type) {
 	DnaGenerator gen(dna_ptr);
 	gen.variability_ = logic_settings_[type_name]["gen.variability"];
 	
-	loop_count = logic_settings_[type_name]["initial_cnt"];
-	for (int i = 0; i < loop_count; ++i) {
+	std::string temp = logic_settings_[type_name]["initial_coords"];
+	
+	tokenizer registry_tokens(temp, sep_registry);
+	
+	for (tokenizer::iterator it = registry_tokens.begin(); it != registry_tokens.end(); ++it) {
+		tokenizer::iterator data_it;
+		tokenizer data_tokens(*it, sep_data);
+		data_it = data_tokens.begin();
+		x = std::stoi(*data_it);
+		++data_it;
+		y = std::stoi(*data_it);
 		unit = std::make_shared<Unit>(gen.Generate());
-		do {
-			x = rand() % width;
-			y = rand() % height;	
-			test = field_->InsertObject(unit, x, y);	
-		} while (!test);
+		test = field_->InsertObject(unit, x, y);
+		if (!test)
+			throw EvolvaException("Data in logic.xml is corrupted.");
 	}
 }
 
 void Application::PrepareInitialPlants() {
+	typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 	bool test;
-	const int initial_cnt = logic_settings_["Plants"]["initial_cnt"];
-	const int initial_grow = logic_settings_["Plants"]["grow"];
-	const int max_energy = logic_settings_["Plants"]["maxenergy"];
-	const int width = logic_settings_["Field"]["width"];
-	const int height = logic_settings_["Field"]["height"];
+
+	boost::char_separator<char> sep_registry(";");
+	boost::char_separator<char> sep_data(",");
+
+	const int initial_grow = logic_settings_["Plants"]["initial_grow"];	
 	int x, y;
+	double energy;
+
 	std::shared_ptr<Tree> tree;
-	for (int i = 0; i < initial_cnt; ++i) {
-		tree = std::make_shared<Tree>(rand() % max_energy);
-		do {
-			x = rand() % width;
-			y = rand() % height;
-			test = field_->InsertNmo(tree, x, y);
-		} while (!test);
-	}
+	std::string temp = logic_settings_["Plants"]["initial_params"];
+	tokenizer registry_tokens(temp, sep_registry);
+
+	for (tokenizer::iterator it = registry_tokens.begin(); it != registry_tokens.end(); ++it) {
+		tokenizer::iterator data_it;
+		tokenizer data_tokens(*it, sep_data);
+		data_it = data_tokens.begin();
+		energy = std::stod(*data_it);
+		data_it++;
+		x = std::stoi(*data_it);
+		data_it++;
+		y = std::stoi(*data_it);
+		tree = std::make_shared<Tree>(energy);
+		test = field_->InsertNmo(tree, x, y);
+		if (!test)
+			throw EvolvaException("Data in logic.xml is corrupted.");
+	}	
+
 	field_->MakeGrass();
 	for (int i = 0; i < initial_grow; i++) {
 		field_->GrowPlants();
@@ -180,6 +208,14 @@ QString Application::GetGroundType(FieldCell::Ground type) const {
 	return surface;
 }
 
+void Application::MoveLogicToEndOfRound() {
+	do {
+		if(!field_->Next()) {
+			QMessageBox::information(nullptr, tr("Evolva"), tr("Simulation has finished."));
+			exit();
+		}
+	} while (!field_->IsNewTurn());	
+}
 
 void Application::RemoveSurfaceObject(const int x, const int y) {
 	dialog_.RemoveSurfaceObject(x, y);
@@ -188,6 +224,7 @@ void Application::RemoveSurfaceObject(const int x, const int y) {
 void Application::ConnectSignals() {
 	connect(&dialog_, SIGNAL(NextLogicIteration()), this, SLOT(LogicIteration()));
 	connect(&dialog_, SIGNAL(SpriteObjectClicked(int , int)), this, SLOT(SpriteObjectClicked(int , int)));
+	connect(&dialog_, SIGNAL(MoveToTheEndOfRound()), this, SLOT(MoveLogicToEndOfRound()));
 }
 
 void Application::UpdateLog(const QString text) {

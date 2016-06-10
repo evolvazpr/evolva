@@ -2,7 +2,7 @@
 #include "Unit.hpp"
 #include "FieldCell.hpp"
 #include <boost/multi_array.hpp>
-#include "Utility.h"
+#include "Utility.hpp"
 #include "Statistics.hpp"
 #include "Application.hpp"
 
