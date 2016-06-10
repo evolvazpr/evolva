@@ -33,15 +33,16 @@ private:
 	static Application* instance_;
 
 	std::shared_ptr<Field> field_;
-	Dialog dialog_;
 	XmlIo gui_settings_;
 	XmlIo logic_settings_;
+	Dialog dialog_;
 	void ConnectSignals();
 
 	QString GetObjectType(std::shared_ptr<const CellObject> object) const;
 	QString GetGroundType(FieldCell::Ground type) const;
 	boost::format CreateStatistics(const int x, const int y) const;
-	
+	void PrepareInitialObjects(CellObject::Type type);	
+	void PrepareInitialPlants();
 	Application(int& argc, char **argv);
 	void LogicInit();
 

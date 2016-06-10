@@ -5,7 +5,7 @@
 	</Field>
 
 	<Herbivore>
-		<inteligence>80.0</inteligence>
+		<intelligence>80.0</intelligence>
 		<agility>30.0</agility>
 		<speed>80.0</speed>
 		<strength>20.4</strength>
@@ -13,8 +13,8 @@
 		<death_time_s>2.68</death_time_s>
 		<mutability>10</mutability>
 		<mutation_stability>1.1</mutation_stability>
-		<fatigue_death_treshold>80.0</fatigue_death_treshold>
-		<health_death_treshold>20.0</health_death_treshold>
+		<fatigue_death_threshold>80.0</fatigue_death_threshold>
+		<health_death_threshold>20.0</health_death_threshold>
 		<fatigue_regeneration>10.0</fatigue_regeneration>
 		<health_regeneration_sleep>5.0</health_regeneration_sleep>
 		<health_regeneration>0.0</health_regeneration>
@@ -31,12 +31,12 @@
 		<pregnancy_time>2.0</pregnancy_time>
 		<herbivore>100.0</herbivore>
 		<carnivore>0.0</carnivore>
-		<vision>15.0<vision>
-		<gen.variability_>30.0</gen.variability_>
+		<vision>15.0</vision>
+		<gen.variability>30.0</gen.variability>
 		<initial_cnt>9</initial_cnt>
 	</Herbivore>
 	<Carnivore>
-		<inteligence>50.0</inteligence>
+		<intelligence>50.0</intelligence>
 		<agility>60.0</agility>
 		<speed>80.0</speed>
 		<strength>70.4</strength>
@@ -44,8 +44,8 @@
 		<death_time_s>1.5</death_time_s>
 		<mutability>20</mutability>
 		<mutation_stability>1.1</mutation_stability>
-		<fatigue_death_treshold>95.0</fatigue_death_treshold>
-		<health_death_treshold>5.0</health_death_treshold>
+		<fatigue_death_threshold>95.0</fatigue_death_threshold>
+		<health_death_threshold>5.0</health_death_threshold>
 		<fatigue_regeneration>15.0</fatigue_regeneration>
 		<health_regeneration_sleep>10.0</health_regeneration_sleep>
 		<health_regeneration>0.0</health_regeneration>
@@ -62,8 +62,13 @@
 		<pregnancy_time>3.0</pregnancy_time>
 		<herbivore>0.0</herbivore>
 		<carnivore>100.0</carnivore>
-		<vision>50.0<vision>
-		<gen.variability_>30.0</gen.variability_>
+		<vision>50.0</vision>
+		<gen.variability>30.0</gen.variability>
 		<initial_cnt>6</initial_cnt>
 	</Carnivore>
+	<Plants>
+		<initial_cnt>15</initial_cnt>
+		<maxenergy>600.0</maxenergy>
+		<grow>15</grow>
+	</Plants>
 </evolva>

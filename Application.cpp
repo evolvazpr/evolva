@@ -2,9 +2,9 @@
 #include <iostream>
 #include <QMetaType>
 
-Application::Application(int& argc, char **argv) : QApplication(argc, argv), dialog_(), gui_settings_("gui.xml"), logic_settings_("logic.xml") {
-	dialog_.setField(logic_settings_["Field"]["width"], logic_settings_["Field"]["height"]);
-}
+Application::Application(int& argc, char **argv) : QApplication(argc, argv), gui_settings_("gui.xml"), logic_settings_("logic.xml"), 
+						   dialog_(nullptr, logic_settings_["Field"]["width"], logic_settings_["Field"]["height"] )  
+{}
 
 Application* Application::instance_ = nullptr;
 
@@ -53,127 +53,91 @@ void Application::RemoveObject(std::shared_ptr<const CellObject> object) {
 	dialog_.RemoveObject(object->GetId());
 }
 
+void Application::PrepareInitialObjects(CellObject::Type type) {
+	int loop_count;
+	std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();
+	std::string type_name;
+	std::shared_ptr<Unit> unit;
+	const int width = logic_settings_["Field"]["width"];
+	const int height = logic_settings_["Field"]["height"];
+	int x, y;
+	bool test;
+	DnaCode &dna = *dna_ptr;
+	if (type == CellObject::Type::HERBIVORE)
+		type_name = "Herbivore";
+	else
+		type_name = "Carnivore";
+
+	dna["intelligence"] = logic_settings_[type_name]["intelligence"];
+	dna["agility"] = logic_settings_[type_name]["agility"];
+	dna["speed"] = logic_settings_[type_name]["speed"];
+	dna["strength"] = logic_settings_[type_name]["strength"];
+	dna["death_time_u"] = logic_settings_[type_name]["death_time_u"];
+	dna["death_time_s"] = logic_settings_[type_name]["death_time_s"];
+	dna["mutability"] = logic_settings_[type_name]["mutability"];
+	dna["mutation_stability"] = logic_settings_[type_name]["mutation_stability"];
+	dna["fatigue_death_threshold"] = logic_settings_[type_name]["fatigue_death_threshold"];
+	dna["health_death_threshold"] = logic_settings_[type_name]["health_death_threshold"];
+	dna["fatigue_regeneration"] = logic_settings_[type_name]["fatigue_regeneration"];
+	dna["health_regeneration_sleep"] = logic_settings_[type_name]["health_regeneration_sleep"];
+	dna["health_regeneration"] = logic_settings_[type_name]["health_regeneration"];
+	dna["requirements.normal_turn"] = logic_settings_[type_name]["requirements.normal_turn"];
+	dna["requirements.sleep_turn"] = logic_settings_[type_name]["requirements.sleep_turn"];
+	dna["requirements.eating"] = logic_settings_[type_name]["requirements.eating"];
+	dna["requirements.mating"] = logic_settings_[type_name]["requirements.mating"];
+	dna["requirements.step"] = logic_settings_[type_name]["requirements.step"];
+	dna["requirements.attack"] = logic_settings_[type_name]["requirements.attack"];
+	dna["requirements.childbirth"] = logic_settings_[type_name]["requirements.childbirth"];
+	dna["wakeup_threshold"] = logic_settings_[type_name]["wakeup_threshold"];
+	dna["fatigue_turn_increase"] = logic_settings_[type_name]["fatigue_turn_increase"];
+	dna["normal_weight"] = logic_settings_[type_name]["normal_weight"];
+	dna["pregnancy_time"] = logic_settings_[type_name]["pregnancy_time"];
+	dna["herbivore"] = logic_settings_[type_name]["herbivore"];
+	dna["carnivore"] = logic_settings_[type_name]["carnivore"];
+	dna["vision"] = logic_settings_[type_name]["vision"];
+
+	DnaGenerator gen(dna_ptr);
+	gen.variability_ = logic_settings_[type_name]["gen.variability"];
+	
+	loop_count = logic_settings_[type_name]["initial_cnt"];
+	for (int i = 0; i < loop_count; ++i) {
+		unit = std::make_shared<Unit>(gen.Generate());
+		do {
+			x = rand() % width;
+			y = rand() % height;	
+			test = field_->InsertObject(unit, x, y);	
+		} while (!test);
+	}
+}
+
+void Application::PrepareInitialPlants() {
+	bool test;
+	const int initial_cnt = logic_settings_["Plants"]["initial_cnt"];
+	const int initial_grow = logic_settings_["Plants"]["grow"];
+	const int max_energy = logic_settings_["Plants"]["maxenergy"];
+	const int width = logic_settings_["Field"]["width"];
+	const int height = logic_settings_["Field"]["height"];
+	int x, y;
+	std::shared_ptr<Tree> tree;
+	for (int i = 0; i < initial_cnt; ++i) {
+		tree = std::make_shared<Tree>(rand() % max_energy);
+		do {
+			x = rand() % width;
+			y = rand() % height;
+			test = field_->InsertNmo(tree, x, y);
+		} while (!test);
+	}
+	field_->MakeGrass();
+	for (int i = 0; i < initial_grow; i++) {
+		field_->GrowPlants();
+	}
+}
+
 void Application::LogicInit() {
-	field_ = Field::GetInstance(30, 30);
-	{
-		std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();
-		DnaCode &dna = *dna_ptr;
-		dna["intelligence"] = 80.0;
-		dna["agility"] = 30.0;
-		dna["speed"] = 80.0;
-		dna["strength"] = 20.4;
-		dna["death_time_u"] = 50.0;
-		dna["death_time_s"] = 2.68;
-		dna["mutability"] = 10.0;
-		dna["mutation_stability"] = 1.1;
-		dna["fatigue_death_threshold"] = 80.0;
-		dna["health_death_threshold"] = 20.0;
-		dna["fatigue_regeneration"] = 10.0;
-		dna["health_regeneration_sleep"] = 5.0;
-		dna["health_regeneration"] = 0.0;
-		dna["requirements.normal_turn"] = 10.0;
-		dna["requirements.sleep_turn"] = 10.0;
-		dna["requirements.eating"] = 2.0;
-		dna["requirements.mating"] = 25.0;
-		dna["requirements.step"] = 2.0;
-		dna["requirements.attack"] = 50.0;
-		dna["requirements.childbirth"] = 40.0;
-		dna["wakeup_threshold"] = 20.0;
-		dna["fatigue_turn_increase"] = 2.0;
-		dna["normal_weight"] = 80.0;
-		dna["pregnancy_time"] = 2.0;
-		dna["herbivore"] = 100.0;
-		dna["carnivore"] = 0.0;
-		dna["vision"] = 15.0;
-
-		DnaGenerator gen(dna_ptr);
-		gen.variability_ = 30.0;
-
-		std::shared_ptr<Unit> u[10];
-		u[0] = std::make_shared<Unit>(gen.Generate());
-		u[1] = std::make_shared<Unit>(gen.Generate());
-		u[2] = std::make_shared<Unit>(gen.Generate());
-		u[3] = std::make_shared<Unit>(gen.Generate());
-		u[4] = std::make_shared<Unit>(gen.Generate());
-		u[5] = std::make_shared<Unit>(gen.Generate());
-		u[6] = std::make_shared<Unit>(gen.Generate());
-		u[7] = std::make_shared<Unit>(gen.Generate());
-		u[8] = std::make_shared<Unit>(gen.Generate());
-		u[9] = std::make_shared<Unit>(gen.Generate());
-
-		field->InsertObject(u[0], 0, 0);
-
-		field->InsertObject(u[1], 9, 9);
-		field->InsertObject(u[2], 7, 0);
-		field->InsertObject(u[3], 11, 1);
-		field->InsertObject(u[4], 10, 2);
-		field->InsertObject(u[5], 9, 3);
-		field->InsertObject(u[6], 2, 0);
-		field->InsertObject(u[7], 22, 2);
-		field->InsertObject(u[8], 24, 0);
-
-	}
-	{
-
-		std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();
-		DnaCode &dna = *dna_ptr;
-		dna["intelligence"] = 50.0;
-		dna["agility"] = 60.0;
-		dna["speed"] = 80.0;
-		dna["strength"] = 70.4;
-		dna["death_time_u"] = 60.0;
-		dna["death_time_s"] = 1.5;
-		dna["mutability"] = 20.0;
-		dna["mutation_stability"] = 1.1;
-		dna["fatigue_death_threshold"] = 95.0;
-		dna["health_death_threshold"] = 5.0;
-		dna["fatigue_regeneration"] = 15.0;
-		dna["health_regeneration_sleep"] = 10.0;
-		dna["health_regeneration"] = 0.0;
-		dna["requirements.normal_turn"] = 12.0;
-		dna["requirements.sleep_turn"] = 1.0;
-		dna["requirements.eating"] = 5.0;
-		dna["requirements.mating"] = 20.0;
-		dna["requirements.step"] = 1.0;
-		dna["requirements.attack"] = 35.0;
-		dna["requirements.childbirth"] = 60.0;
-		dna["wakeup_threshold"] = 20.0;
-		dna["fatigue_turn_increase"] = 4.0;
-		dna["normal_weight"] = 800.0;
-		dna["pregnancy_time"] = 3.0;
-		dna["herbivore"] = 0.0;
-		dna["carnivore"] = 100.0;
-		dna["vision"] = 50.0;
-
-		DnaGenerator gen(dna_ptr);
-		gen.variability_ = 30.0;
-
-		std::shared_ptr<Unit> u[6];
-		u[0] = std::make_shared<Unit>(gen.Generate());
-		u[1] = std::make_shared<Unit>(gen.Generate());
-		u[2] = std::make_shared<Unit>(gen.Generate());
-		u[3] = std::make_shared<Unit>(gen.Generate());
-		u[4] = std::make_shared<Unit>(gen.Generate());
-		u[5] = std::make_shared<Unit>(gen.Generate());
-
-		field->InsertObject(u[0], 19, 19);
-
-		field->InsertObject(u[1], 0, 15);
-		field->InsertObject(u[2], 1, 15);
-		field->InsertObject(u[3], 2, 15);
-		field->InsertObject(u[4], 1, 18);
-		field->InsertObject(u[5], 2, 18);
-
-	}
-
-	field->InsertNmo(std::make_shared<Tree>(50.0), 1, 1);
-	field->InsertNmo(std::make_shared<Tree>(80.0), 7, 2);
-	field->InsertNmo(std::make_shared<Tree>(20.0), 3, 4);
-	field->InsertNmo(std::make_shared<Tree>(24.0), 4, 4);
-	field->InsertNmo(std::make_shared<Tree>(500.0), 2, 8);
-	field->InsertNmo(std::make_shared<Tree>(100.0), 0, 9);
-	field->MakeGrass();
-	for (int i = 0; i < 15; ++i) field->GrowPlants();
+	field_ = Field::GetInstance(logic_settings_["Field"]["width"],logic_settings_["Field"]["height"]);
+	PrepareInitialObjects(CellObject::Type::HERBIVORE);
+	PrepareInitialObjects(CellObject::Type::CARNIVORE);	
+	PrepareInitialPlants();
 	field->BeginCycle();
 	field->Play();
 }
