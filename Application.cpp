@@ -2,8 +2,34 @@
 #include <iostream>
 #include <QMetaType>
 
-Application::Application(int& argc, char **argv) : QApplication(argc, argv), gui_settings_("gui.xml"), logic_settings_("logic.xml"), 
-						   dialog_(nullptr, logic_settings_["Field"]["width"], logic_settings_["Field"]["height"],
+Pixmap::Pixmap(const uint pixels_per_object) {
+		pixels_per_object_ = pixels_per_object;
+}
+	
+Pixmap::Pixmap(const Pixmap & p) {
+		pixels_per_object_ = p.pixels_per_object_;
+		pixmap_ = p.pixmap_;
+		sprite_cnt_ = p.sprite_cnt_;
+}
+
+Pixmap::Pixmap(Pixmap&& p) {
+		pixels_per_object_ = p.pixels_per_object_;
+		pixmap_ = p.pixmap_;
+		sprite_cnt_ = p.sprite_cnt_;
+}
+
+void Pixmap::SetObject(QString path, uint sprite_cnt) {
+		pixmap_ = QPixmap(path);
+		sprite_cnt_ = sprite_cnt;
+		pixmap_ = pixmap_.scaled(pixels_per_object_ * sprite_cnt_, pixels_per_object_ * sprite_cnt_, 
+					 Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+}
+
+const QPixmap& Pixmap::GetPixmap() const { return pixmap_; }
+uint Pixmap::GetSpriteCnt() const { return sprite_cnt_; }
+
+
+Application::Application(int& argc, char **argv) : QApplication(argc, argv), gui_settings_("gui.xml"), logic_settings_("logic.xml"), dialog_(nullptr, logic_settings_["Field"]["width"], logic_settings_["Field"]["height"],
 							   gui_settings_["Gui"]["pixels_per_object"] )  
 {}
 
@@ -29,17 +55,15 @@ void Application::LogicIteration() {
 	}
 }
 
-const QPixmap& Application::GetObjectPixmap(std::shared_ptr<const CellObject> object, uint* sprite_cnt) {
-	std::string type = GetObjectType(object).toStdString();
-	Pixmap pixmap = pixmaps_[type];
-	*sprite_cnt = pixmap.GetSpriteCnt();
-	return pixmap.GetPixmap();	
+const QPixmap& Application::GetObjectPixmap(std::shared_ptr<const CellObject> object, uint* sprite_cnt) const {
+	const std::string type = GetObjectType(object).toStdString();
+	*sprite_cnt = pixmaps_.at(type).GetSpriteCnt();
+	return pixmaps_.at(type).GetPixmap();	
 }
 
-const QPixmap& Application::GetObjectPixmap(const FieldCell::Ground ground_type) {
-	std::string type = GetGroundType(ground_type).toStdString();
-	Pixmap pixmap = pixmaps_[type];
-	return pixmap.GetPixmap();
+const QPixmap& Application::GetObjectPixmap(const FieldCell::Ground ground_type) const {
+	const std::string type = GetGroundType(ground_type).toStdString();
+	return pixmaps_.at(type).GetPixmap();
 }
 
 void Application::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
@@ -61,6 +85,7 @@ void Application::ReplaceSurfaceObject(const FieldCell::Ground ground_type, cons
 void Application::MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
 	dialog_.MoveObject(object->GetId(), x, y);
 }
+
 void Application::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y) {
 	dialog_.MoveObjectTo(object->GetId(), x, y);
 }
@@ -189,13 +214,13 @@ void Application::Init() {
 }
 
 void Application::AddToPixmaps(std::string name) {
-	std::string path;
-	uint spirte_cnt;
-	Pixmap pixmap(gui_settings_["Gui"]["pixels_per_object"]);
-	path = gui_settings_[name]["path"];
+	uint sprite_cnt;
+	std::string path = gui_settings_[name]["path"];
+	uint pixels_per_object = gui_settings_["Gui"]["pixels_per_object"];
+	Pixmap pixmap(pixels_per_object);
 	sprite_cnt = gui_settings_[name]["sprite_cnt"];
-	pixmap.SetObject(path, sprite_cnt);
-	pixmap_container_.insert({name, pixmap});
+	pixmap.SetObject(QString::fromStdString(path), sprite_cnt);
+	pixmaps_.insert({name, pixmap});
 }
 
 void Application::PixmapContainerInit() {

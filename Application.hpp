@@ -28,19 +28,13 @@ private:
 	QPixmap pixmap_;
 	uint sprite_cnt_;
 public:
-	Pixmap(const uint pixels_per_object) {
-		pixels_per_object_ = pixels_per_object;
-	}
+	Pixmap(const uint pixels_per_object);
+	Pixmap(const Pixmap & p);
+	Pixmap(Pixmap&& p);
 
-	void SetObject(QString path, uint sprite_cnt) {
-		pixmap_ = QPixmap(path);
-		pixmap_ = pixmap_.scaled(pixels_per_object_, pixels_per_object_, Qt::IgnoreAspectRatio,
-					 Qt::SmoothTransformation);
-		sprite_cnt_ = sprite_cnt;
-	}
-
-	const QPixmap& GetPixmap() { return pixmap_; }
-	uint GetSpriteCnt() { return sprite_cnt_; }
+	void SetObject(QString path, uint sprite_cnt);
+	const QPixmap& GetPixmap() const;
+	uint GetSpriteCnt() const;
 };
 
 /** @brief
