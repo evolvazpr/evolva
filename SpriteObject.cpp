@@ -19,15 +19,15 @@
  */
 
 SpriteObject::SpriteObject(QObject * parent, const uint id, const qreal x, const qreal y, 
-		          const QString sprite_path, const int sprites_cnt, const uint pixsize) : 
+		          const QPixmap& pixmap, const int sprites_cnt, const uint pixsize) : 
 			  QObject(parent), QGraphicsPixmapItem(),
 		       	  id_(id), sprites_cnt_(sprites_cnt),
 			  pixsize_(pixsize)	
 {
 	actual_sprite_ = 0;
-	QPixmap pixmap(sprite_path);
+/*	QPixmap pixmap(sprite_path);
 	pixmap = pixmap.scaled(pixsize_ * sprites_cnt_, pixsize_ * sprites_cnt_, Qt::IgnoreAspectRatio, 
-			       Qt::SmoothTransformation);
+			       Qt::SmoothTransformation);*/
 	setPixmap(pixmap);	
 	dx_ = 0;
 	dy_ = 0;

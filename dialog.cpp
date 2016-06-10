@@ -87,7 +87,7 @@ qreal Dialog::CalculateY(const int y) {
  * @param x - field's x coordinate of object.
  * @param y - field's y coordinate of object.
  */
-void Dialog::CreateObject(const uint id, QString path, uint sprite_cnt, const int x, const int y) {
+void Dialog::CreateObject(const uint id, const QPixmap& pixmap, uint sprite_cnt, const int x, const int y) {
 	QMutexLocker lock(&mutex_);
 	qreal x_pos = CalculateX(x);
 	qreal y_pos = CalculateY(y);
@@ -95,7 +95,7 @@ void Dialog::CreateObject(const uint id, QString path, uint sprite_cnt, const in
 	std::string obj_type;
 	QString sprite_path;
 	sprite_object = new SpriteObject(scene->parent(), id, x_pos, y_pos, 
-					path, sprite_cnt, pixels_per_object_);
+					pixmap, sprite_cnt, pixels_per_object_);
 	if (animations_.fetchAndAddAcquire(0))
 		to_add_.push_back(sprite_object);
 	else 
@@ -225,16 +225,8 @@ void Dialog::RemoveObject(const uint id) {
  * @param x - x coordinate.
  * @param y - y coordinate.
  */
-void Dialog::CreateSurfaceObject(const QString path, const int x, const int y) {	
-	QPixmap pix_map(path);
-	if (pix_map.isNull())
-		throw EvolvaException("Sprite could not have been loaded." 
-			"Aborting program.\nCheck if gui.xml is correct.");
-	
-	pix_map = pix_map.scaled(pixels_per_object_, pixels_per_object_, 
-				 Qt::IgnoreAspectRatio, 
-				 Qt::SmoothTransformation);
-	QGraphicsPixmapItem *rect = new QGraphicsPixmapItem(pix_map);
+void Dialog::CreateSurfaceObject(const QPixmap& pixmap, const int x, const int y) {		
+	QGraphicsPixmapItem *rect = new QGraphicsPixmapItem(pixmap);
 	if (rect == nullptr)//remove it?
 		throw EvolvaException("?");
 	scene->addItem(rect);
@@ -255,20 +247,13 @@ void Dialog::RemoveSurfaceObject(const int x, const int y) {
 	delete(item);	
 }
 
-void Dialog::ReplaceSurfaceObject(const QString path, const int x, const int y) {
+void Dialog::ReplaceSurfaceObject(const QPixmap& pixmap, const int x, const int y) {
 	QTransform test;
-	QPixmap pix_map(path);
-	if(pix_map.isNull())
-		throw EvolvaException("Sprite could not have been loaded." 
-			"Aborting program.\nCheck if gui.xml is correct.");
-	pix_map = pix_map.scaled(pixels_per_object_, pixels_per_object_,
-				 Qt::IgnoreAspectRatio,
-				 Qt::SmoothTransformation);
 	QGraphicsItem *item = scene->itemAt(CalculateX(x), CalculateY(y), test);
 	QGraphicsPixmapItem *pixmap_item = dynamic_cast<QGraphicsPixmapItem*>(item);
 	if (!pixmap_item)
 		throw EvolvaException("Dialog::ReplaceSurfaceObject internal error");
-	pixmap_item->setPixmap(pix_map);
+	pixmap_item->setPixmap(pixmap);
 }
 
 

@@ -22,7 +22,26 @@
 
 class Logic;
 
+class Pixmap {
+private:
+	uint pixels_per_object_;
+	QPixmap pixmap_;
+	uint sprite_cnt_;
+public:
+	Pixmap(const uint pixels_per_object) {
+		pixels_per_object_ = pixels_per_object;
+	}
 
+	void SetObject(QString path, uint sprite_cnt) {
+		pixmap_ = QPixmap(path);
+		pixmap_ = pixmap_.scaled(pixels_per_object_, pixels_per_object_, Qt::IgnoreAspectRatio,
+					 Qt::SmoothTransformation);
+		sprite_cnt_ = sprite_cnt;
+	}
+
+	const QPixmap& GetPixmap() { return pixmap_; }
+	uint GetSpriteCnt() { return sprite_cnt_; }
+};
 
 /** @brief
  * proxy between logic core (which is in second thread) and GUI (first/main thread, because
@@ -34,6 +53,8 @@ private:
 	static Application* instance_;
 
 	std::shared_ptr<Field> field_;
+	std::unordered_map<std::string, Pixmap> pixmaps_;
+
 	XmlIo gui_settings_;
 	XmlIo logic_settings_;
 	Dialog dialog_;
@@ -41,12 +62,15 @@ private:
 
 	QString GetObjectType(std::shared_ptr<const CellObject> object) const;
 	QString GetGroundType(FieldCell::Ground type) const;
+	const QPixmap& GetObjectPixmap(std::shared_ptr<const CellObject> object, uint* sprite_cnt) const;
+	const QPixmap& GetObjectPixmap(const FieldCell::Ground ground_type) const;
 	boost::format CreateStatistics(const int x, const int y) const;
 	void PrepareInitialObjects(CellObject::Type type);	
 	void PrepareInitialPlants();
 	Application(int& argc, char **argv);
 	void LogicInit();
-
+	void PixmapContainerInit();
+	void AddToPixmaps(std::string name);
 public:	
 	~Application();
 	void Init();

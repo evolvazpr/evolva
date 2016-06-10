@@ -29,22 +29,33 @@ void Application::LogicIteration() {
 	}
 }
 
-void Application::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
-	std::string type_s = GetObjectType(object).toStdString();
-	QString path = QString::fromStdString(gui_settings_[type_s]["path"]);
-	int sprite_cnt = gui_settings_[type_s]["sprite_cnt"];
-	dialog_.CreateObject(object->GetId(), path, sprite_cnt, x, y);
+const QPixmap& Application::GetObjectPixmap(std::shared_ptr<const CellObject> object, uint* sprite_cnt) {
+	std::string type = GetObjectType(object).toStdString();
+	Pixmap pixmap = pixmaps_[type];
+	*sprite_cnt = pixmap.GetSpriteCnt();
+	return pixmap.GetPixmap();	
 }
+
+const QPixmap& Application::GetObjectPixmap(const FieldCell::Ground ground_type) {
+	std::string type = GetGroundType(ground_type).toStdString();
+	Pixmap pixmap = pixmaps_[type];
+	return pixmap.GetPixmap();
+}
+
+void Application::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
+	uint sprite_cnt;
+	const QPixmap& pixmap = GetObjectPixmap(object, &sprite_cnt);
+	dialog_.CreateObject(object->GetId(), pixmap, sprite_cnt, x, y);
+}
+
 void Application::CreateSurfaceObject(const FieldCell::Ground ground_type, const int x, const int y) {
-	std::string type_s = GetGroundType(ground_type).toStdString();
-	QString path = QString::fromStdString(gui_settings_[type_s]["path"]);
-	dialog_.CreateSurfaceObject(path, x, y);
+	const QPixmap& pixmap = GetObjectPixmap(ground_type);
+	dialog_.CreateSurfaceObject(pixmap, x, y);
 }
 
 void Application::ReplaceSurfaceObject(const FieldCell::Ground ground_type, const int x, const int y) {
-	std::string type_s = GetGroundType(ground_type).toStdString();
-	QString path = QString::fromStdString(gui_settings_[type_s]["path"]);
-	dialog_.ReplaceSurfaceObject(path, x, y);
+	const QPixmap& pixmap = GetObjectPixmap(ground_type);
+	dialog_.ReplaceSurfaceObject(pixmap, x, y);
 }
 
 void Application::MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
@@ -162,7 +173,7 @@ void Application::PrepareInitialPlants() {
 }
 
 void Application::LogicInit() {
-	field_ = Field::GetInstance(logic_settings_["Field"]["width"],logic_settings_["Field"]["height"]);
+	field_ = Field::GetInstance(logic_settings_["Field"]["width"], logic_settings_["Field"]["height"]);
 	PrepareInitialObjects(CellObject::Type::HERBIVORE);
 	PrepareInitialObjects(CellObject::Type::CARNIVORE);	
 	PrepareInitialPlants();
@@ -172,8 +183,30 @@ void Application::LogicInit() {
 
 void Application::Init() {
 	ConnectSignals();
+	PixmapContainerInit();
 	dialog_.show();
 	LogicInit();	
+}
+
+void Application::AddToPixmaps(std::string name) {
+	std::string path;
+	uint spirte_cnt;
+	Pixmap pixmap(gui_settings_["Gui"]["pixels_per_object"]);
+	path = gui_settings_[name]["path"];
+	sprite_cnt = gui_settings_[name]["sprite_cnt"];
+	pixmap.SetObject(path, sprite_cnt);
+	pixmap_container_.insert({name, pixmap});
+}
+
+void Application::PixmapContainerInit() {
+	AddToPixmaps("carnivore");
+	AddToPixmaps("herbivore");
+	AddToPixmaps("carnivore_dead");
+	AddToPixmaps("herbivore_dead");
+	AddToPixmaps("tree");
+	AddToPixmaps("stone");
+	AddToPixmaps("grass");
+	AddToPixmaps("soil");
 }
 
 QString Application::GetObjectType(std::shared_ptr<const CellObject> object) const {

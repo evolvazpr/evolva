@@ -51,10 +51,10 @@ public:
 			const int pixels_per_object = 25);
 
 	virtual ~Dialog();
-	void CreateObject(const uint id, QString path, uint sprite_cnt, const int x, const int y);
-	void CreateSurfaceObject(const QString path, const int x, const int y);
+	void CreateObject(const uint id, const QPixmap& pixmap, uint sprite_cnt, const int x, const int y);
+	void CreateSurfaceObject(const QPixmap& pixmap, const int x, const int y);
 	void RemoveSurfaceObject(const int x, const int y);
-	void ReplaceSurfaceObject(const QString path, const int x, const int y);
+	void ReplaceSurfaceObject(const QPixmap& pixmap, const int x, const int y);
 	void MoveObject(const uint id, const int x, const int y);
 	void MoveObjectTo(const uint id, const int x, const int y);
 	void RemoveObject(const uint id);

@@ -34,7 +34,7 @@ protected:
 
 public:
 	SpriteObject(QObject* parent, const uint id, const qreal x, const qreal y, 
-		    QString path, const int sprites_cnt, const uint pixsize);
+		    const QPixmap& pixmap, const int sprites_cnt, const uint pixsize);
 	virtual ~SpriteObject();
 	void Move(const qreal x, const qreal y, const qreal steps_per_tick);
 	uint GetId();
