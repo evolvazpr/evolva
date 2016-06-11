@@ -27,8 +27,6 @@ Eatable::Eatable(const double default_energy, const double growth_a, const doubl
 Eatable::~Eatable() {
 }
 
-#include <iostream>
-
 void Eatable::Grow() {
 	if (++turns_ <= growth_treshold_) {
 		energy_ += (growth_a_ * turns_ * turns_ + growth_b_ * turns_ + growth_c_);
