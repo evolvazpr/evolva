@@ -31,6 +31,8 @@ private:
 	std::priority_queue<std::shared_ptr<Unit>, std::vector<std::shared_ptr<Unit>>, std::function<bool(std::shared_ptr<Unit>, std::shared_ptr<Unit>)>> queue_;
 	std::list<std::shared_ptr<Unit>> to_queue_;
 	bool new_cycle_;
+	CyclicQueue(const CyclicQueue&) = delete;
+	CyclicQueue& operaotor = (const CyclicQueue&) = delete;
 };
 
 #endif // _CYCLIC_QUEUE_HPP_
