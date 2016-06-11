@@ -38,12 +38,17 @@ protected:
 private:
 	const size_t id_;		//Unique object's identification number
 	std::weak_ptr<FieldCell> cell_;
+	CellObject(const CellObject&) = delete;
+	CellObject& operator = (const CellObject&) = delete;
 };
 
 class NonMovableObject : public CellObject {
 public:
 	NonMovableObject();
 	virtual ~NonMovableObject();
+private:
+	NonMovableObject(const NonMovableObject&) = delete;
+	NonMovableObject& operator = (const NonMovableObjectt&) = delete;
 };
 
 #include "Eatable.hpp"
@@ -56,17 +61,27 @@ public:
 	double Eat(double energy);
 protected:
 	double energy_;
+private:
+	Plant(const Plant&) = delete;
+	Plant& operator = (const Plant&) = delete;
 };
 
 class Tree : public Plant {
 public:
 	Tree(double energy);
 	virtual ~Tree();
+private:
+	Tree(const Tree&) = delete;
+	Tree& operator = (const Tree&) = delete;
 };
 
 class NonPlant : public NonMovableObject {
 public:
 	NonPlant();
+	virtual ~NonPlant();
+private:
+	NonPlant(const NonPlant&) = delete;
+	NonPlant& operator = (const NonPlant&) = delete;
 };
 
 class Flesh : public Eatable {
@@ -76,6 +91,8 @@ public:
 	inline bool IsCarnivore() const { return carnivore_; };
 private:
 	bool carnivore_;
+	Flesh(const Flesh&) = delete;
+	Flesh& operator = (const Flesh&) = delete;
 };
 
 #endif // _CELL_OBJECT_H_
