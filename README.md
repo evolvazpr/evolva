@@ -1,6 +1,5 @@
 ##Evolva - game of life
 
-
 URUCHAMIANIE NA LINUXIE: 
 Wymagane pakiety:
 

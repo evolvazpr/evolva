@@ -37,7 +37,6 @@ private:
 	uint steps_per_tick_;
 	uint count_of_rounds_;
 	
-	QMutex mutex_;
 	QGraphicsScene *scene;
 	const unsigned int width_;
 	const unsigned int height_;
