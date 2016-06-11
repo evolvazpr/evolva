@@ -57,9 +57,6 @@ class Plant : public Eatable {
 public:
 	Plant(const double energy);
 	virtual ~Plant();
-	inline double GetEnergy() const { return energy_; };
-protected:
-	double energy_;
 private:
 	Plant(const Plant&) = delete;
 	Plant& operator = (const Plant&) = delete;
@@ -67,20 +64,11 @@ private:
 
 class Tree : public Plant {
 public:
-	Tree(double energy);
+	Tree(const double energy);
 	virtual ~Tree();
 private:
 	Tree(const Tree&) = delete;
 	Tree& operator = (const Tree&) = delete;
-};
-
-class NonPlant : public NonMovableObject {
-public:
-	NonPlant();
-	virtual ~NonPlant();
-private:
-	NonPlant(const NonPlant&) = delete;
-	NonPlant& operator = (const NonPlant&) = delete;
 };
 
 class Flesh : public Eatable {
