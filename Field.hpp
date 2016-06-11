@@ -14,7 +14,6 @@ class FieldPimpl;
 class Statistics;
 
 class Field {
-friend class Tui;
 private:
 
 	std::unique_ptr<FieldPimpl> pimpl_;
