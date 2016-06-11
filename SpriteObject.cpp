@@ -18,21 +18,26 @@
  * @param pixsize - describes graphics cell size
  */
 
-SpriteObject::SpriteObject(QObject * parent, const uint id, const qreal x, const qreal y, 
-		          const QPixmap& pixmap, const int sprites_cnt, const uint pixsize) : 
-			  QObject(parent), QGraphicsPixmapItem(),
-		       	  id_(id), sprites_cnt_(sprites_cnt),
-			  pixsize_(pixsize)	
+SpriteObject::SpriteObject(QObject * parent, const uint pixsize) : 
+			  QObject(parent), QGraphicsPixmapItem(), pixsize_(pixsize)	
 {
-	actual_sprite_ = 0;
-	setPixmap(pixmap);	
 	dx_ = 0;
 	dy_ = 0;
+}
+
+void SpriteObject::SetObject(QObject* parent, const uint id, const qreal x, const qreal y, const QPixmap &pixmap, const int sprites_cnt) {
+	dx_ = 0;
+	dy_ = 0;
+	setParent(parent);
+	actual_sprite_ = 0;
+	setPixmap(pixmap);	
 	direction_ = 0;
 	actual_sprite_ = 0;
 	setPos(x, y);
 	setZValue(1);
 	steps_per_tick_ = 0;
+	id_ = id;
+	sprites_cnt_ = sprites_cnt;
 }
 
 /**
@@ -77,9 +82,6 @@ void SpriteObject::Move(const qreal dx, const qreal dy, const qreal steps_per_ti
 	} else {
 		dx_ = dx;
 		dy_ = dy;
-	
-		if ((!dx_) && (!dy_))
-			emit AnimationFinished();
 	}
 }
 
@@ -124,12 +126,10 @@ void SpriteObject::Animate() {
 	qreal y_coord = 0;
 	qreal angle = 0;
 	qreal dx = 0, dy = 0;
-	
-	if((!dx_) && (!dy_)) {
+	if (!steps_per_tick_) {
 		return;
-	} else if (steps_per_tick_ < qreal(1)) {
-		x_coord = CalculateCoord(&dx_, dx_, x());
-		y_coord = CalculateCoord(&dy_, dy_, y());
+	} if((!dx_) && (!dy_)) {
+		return;
 	} else {
 		angle = qAtan(qFabs((qreal)dx_)/qFabs((qreal)dy_));
 		dx = steps_per_tick_ * qSin(angle);

@@ -20,10 +20,10 @@ class SpriteObject : public QObject, public QGraphicsPixmapItem {
 	Q_OBJECT
 private:
 	qreal steps_per_tick_;
-	const int id_;
+	int id_;
 	qreal dx_;
 	qreal dy_;
-	const int sprites_cnt_;
+	int sprites_cnt_;
 	int actual_sprite_;
 	int direction_;
 	const uint pixsize_;
@@ -33,8 +33,10 @@ protected:
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) Q_DECL_OVERRIDE;
 
 public:
-	SpriteObject(QObject* parent, const uint id, const qreal x, const qreal y, 
-		    const QPixmap& pixmap, const int sprites_cnt, const uint pixsize);
+	SpriteObject(QObject* parent, const uint pixsize);
+	void SetObject(QObject* parent, const uint id, const qreal x, const qreal y,
+		  const QPixmap& pixmap, const int sprites_cnt);
+
 	virtual ~SpriteObject();
 	void Move(const qreal x, const qreal y, const qreal steps_per_tick);
 	uint GetId();

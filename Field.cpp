@@ -299,6 +299,7 @@ bool Field::IsCycleEnd() const {
 
 void Field::GrowPlants() {
 	// Algorithm is inefficient and will fail if a new ground type is added
+	FieldCell::Ground type;
 	Application *gui = Application::GetInstance();
 	const size_t width = GetWidth();
 	const size_t height = GetHeight();
@@ -339,8 +340,9 @@ void Field::GrowPlants() {
 				gui->ReplaceSurfaceObject(FieldCell::Ground::GRASS, i, j);
 			}
 			else {
-				GetCell(i, j)->SetGroundType(cells[i][j] == 1 ? FieldCell::Ground::GRASS : FieldCell::Ground::GROUND);
-				gui->ReplaceSurfaceObject(cells[i][j] == 1 ? FieldCell::Ground::GRASS : FieldCell::Ground::GROUND, i, j);
+				type = cells[i][j] == 1 ? FieldCell::Ground::GRASS : FieldCell::Ground::GROUND;
+				GetCell(i, j)->SetGroundType(type);
+				gui->ReplaceSurfaceObject(type, i, j);
 			}
 			cells[i][j] = 0;
 		}

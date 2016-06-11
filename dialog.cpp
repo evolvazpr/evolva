@@ -11,7 +11,7 @@
  */
 Dialog::Dialog(QWidget *parent, const int width, const int height, const int pixels_per_object) :
 	QDialog(parent), ui(new Ui::Dialog), animation_clock_(1000.0/33.0), 
-	pixels_per_object_(pixels_per_object), steps_per_tick_(5), count_of_rounds_(1),  width_(width), height_(height) { 
+	pixels_per_object_(pixels_per_object), width_(width), height_(height) { 
 	Qt::WindowFlags flags = Qt::WindowTitleHint | Qt::WindowSystemMenuHint;
 	flags |= Qt::WindowCloseButtonHint | Qt::WindowMinMaxButtonsHint;
 	
@@ -26,16 +26,11 @@ Dialog::Dialog(QWidget *parent, const int width, const int height, const int pix
 	ui->graphicsView->show();
 	animations_ = 0;
 	QDialog::setWindowFlags(flags);
-	timer_.start(animation_clock_);	
+	timer_.start(animation_clock_);
+	count_of_rounds_ = ui->lineEdit_rounds->text().toUInt();	
 	steps_per_tick_ = ui->lineEdit_steps->text().toUInt();
 }
 
-/**
- * @brief Deconstructor.
- */
-Dialog::~Dialog() {
-	delete ui;
-}
 
 /**
  * @brief pushButton action method.
@@ -55,19 +50,26 @@ void Dialog::on_pushButton_3_clicked() {
 
 void Dialog::on_pushButton_2_clicked() {
 	bool test;
-	const uint steps = ui->lineEdit_steps->text().toUInt(&test, 10);
+	uint steps = ui->lineEdit_steps->text().toUInt(&test, 10);
 	if (!test) {
 		QMessageBox::warning(this, tr("Evolva"), tr("Wrong input data. Only numerics are allowed."));	
 		return;
 	}
-	const uint rounds = ui->lineEdit_rounds->text().toUInt(&test, 10);
+	uint rounds = ui->lineEdit_rounds->text().toUInt(&test, 10);
 	if (!test) {
 		QMessageBox::warning(this, tr("Evolva"), tr("Wrong input data. Only numerics are allowed."));	
 		return;
 	}
+	
+	if (rounds > 1) {
+		steps = 0;
+		ui->lineEdit_steps->setText(QString("0"));
+	}
+
 	steps_per_tick_ = steps;
 	count_of_rounds_ = rounds;
 }
+
 /**
  * @brief Graphical x coordinate calculation.
  * @param x - field's x coordinate.
@@ -101,24 +103,36 @@ void Dialog::CreateObject(const uint id, const QPixmap& pixmap, uint sprite_cnt,
 	SpriteObject *sprite_object;
 	std::string obj_type;
 	QString sprite_path;
-	sprite_object = new SpriteObject(scene->parent(), id, x_pos, y_pos, 
-					pixmap, sprite_cnt, pixels_per_object_);
+	
+	if (sprite_object_pool_.isEmpty()) {
+		sprite_object = new SpriteObject(scene->parent(), pixels_per_object_);
+		
+		QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(AnimationFinished()), 
+				this, SLOT(AnimationFinished()));
+		QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(WasClicked(int, int)), this, 
+				SIGNAL(SpriteObjectClicked(int, int)));
+		QObject::connect(&timer_, SIGNAL(timeout()), dynamic_cast<QObject *>(sprite_object), 
+				SLOT(Animate()));
+	} else {
+		sprite_object = sprite_object_pool_.takeLast();
+	}
+
+	sprite_object->SetObject(scene->parent(), id, x_pos, y_pos, pixmap, sprite_cnt);
+	
 	if (animations_.fetchAndAddAcquire(0))
 		to_add_.push_back(sprite_object);
 	else 
 		scene->addItem(sprite_object);
-	
-	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(AnimationFinished()), 
-			this, SLOT(AnimationFinished()));
-	QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(WasClicked(int, int)), this, 
-			SIGNAL(SpriteObjectClicked(int, int)));
-	QObject::connect(&timer_, SIGNAL(timeout()), dynamic_cast<QObject *>(sprite_object), 
-			SLOT(Animate()));
 }
 
 void Dialog::AnimationFinished() {
 	QMutexLocker lock(&mutex_);
 	animations_.fetchAndAddAcquire(-1);
+	
+	/* TODO: Somewhere is bug!!! */
+	if (animations_.fetchAndAddAcquire(0) < 0)
+		animations_ = 0;
+
 	if (!animations_.fetchAndAddAcquire(0)) {
 		for (auto &it : to_add_) {
 			scene->addItem(it);
@@ -127,7 +141,17 @@ void Dialog::AnimationFinished() {
 
 		for (auto &it : to_remove_) {
 			scene->removeItem(it);
-			delete(it);
+			//delete(it);
+			
+			/*QObject::disconnect(dynamic_cast<QObject *>(it), SIGNAL(AnimationFinished()), 
+				this, SLOT(AnimationFinished()));
+			QObject::disconnect(dynamic_cast<QObject *>(it), SIGNAL(WasClicked(int, int)), this, 
+				SIGNAL(SpriteObjectClicked(int, int)));
+			QObject::disconnect(&timer_, SIGNAL(timeout()), dynamic_cast<QObject *>(it), 
+				SLOT(Animate()));*/
+			it->SetObject(nullptr, 0, 0, 0, QPixmap(), 0);
+			sprite_object_pool_.push_back(it);
+
 		}
 		to_remove_.clear();
 	}
@@ -169,15 +193,22 @@ SpriteObject* Dialog::SearchObject(const uint id) {
  * @param y - <b>realative field (not graphical) steps</b> in y direction to make.
  */
 void Dialog::MoveObject(const uint id, const int x, const int y) {
+	qreal dx, dy;
 	QMutexLocker lock(&mutex_);
 	SpriteObject *roundObject = SearchObject(id);
 	if (!roundObject) {
 		throw EvolvaException("Dialog::moveObject - object not found!\n");
 	}
-	if (!roundObject->IsMoving() && steps_per_tick_)
+	dx = CalculateX(x);
+	dy = CalculateY(y);
+
+	if ((!dx) && (!dy))
+		return;
+
+	if ((!roundObject->IsMoving()) && steps_per_tick_)
 		animations_.fetchAndAddAcquire(1);
 	
-	roundObject->Move(CalculateX(x), CalculateY(y), steps_per_tick_);	
+	roundObject->Move(dx, dy, steps_per_tick_);	
 }
 
 /**
@@ -200,7 +231,10 @@ void Dialog::MoveObjectTo(const uint id, const int x, const int y) {
 	dx = CalculateX(x) - x_old;
 	dy = CalculateY(y) - y_old;
 	
-	if (!roundObject->IsMoving() && (steps_per_tick_ > 1.0))
+	if ((!dx) && (!dy))
+		return;
+	
+	if ((!roundObject->IsMoving()) && steps_per_tick_)
 		animations_.fetchAndAddAcquire(1);
 
 	roundObject->Move(dx, dy, steps_per_tick_);
@@ -212,16 +246,26 @@ void Dialog::MoveObjectTo(const uint id, const int x, const int y) {
  */
 void Dialog::RemoveObject(const uint id) {
 	QMutexLocker lock(&mutex_);
-	SpriteObject *roundObject = SearchObject(id);
+	SpriteObject *sprite_object = SearchObject(id);
 
-	if (!roundObject)
+	if (!sprite_object)
 		throw EvolvaException("Dialog::removeObject - internal error!\n");		
 
 	if (animations_.fetchAndAddAcquire(0)) {
-		to_remove_.push_back(roundObject);
+		to_remove_.push_back(sprite_object);
 	} else {
-		scene->removeItem(roundObject);
-		delete(roundObject);
+		scene->removeItem(sprite_object);
+
+		/*QObject::disconnect(dynamic_cast<QObject *>(sprite_object), SIGNAL(AnimationFinished()), 
+				this, SLOT(AnimationFinished()));
+		QObject::disconnect(dynamic_cast<QObject *>(sprite_object), SIGNAL(WasClicked(int, int)), this, 
+				SIGNAL(SpriteObjectClicked(int, int)));
+		QObject::disconnect(&timer_, SIGNAL(timeout()), dynamic_cast<QObject *>(sprite_object), 
+				SLOT(Animate()));*/
+
+		//delete(sprite_object);
+		sprite_object->SetObject(nullptr, 0, 0, 0, QPixmap(), 0);
+		sprite_object_pool_.push_back(sprite_object);
 	}
 }
 
@@ -254,6 +298,13 @@ void Dialog::RemoveSurfaceObject(const int x, const int y) {
 	delete(item);	
 }
 
+
+/**
+ * @brief Surface sprite change.
+ * @param pixmap - sprite to set
+ * @param x - x coordinate.
+ * @param y - y coordinate.
+ */
 void Dialog::ReplaceSurfaceObject(const QPixmap& pixmap, const int x, const int y) {
 	QTransform test;
 	QGraphicsItem *item = scene->itemAt(CalculateX(x), CalculateY(y), test);
@@ -311,3 +362,15 @@ void Dialog::UpdateOverallStatistics() {
 	ui->lineEdit_escapes->setText(QString::fromStdString(std::to_string(escapes)));
 }
 
+Dialog::~Dialog() {
+	for (auto& it : to_add_) {
+		delete(it);
+	}
+	for (auto& it : to_remove_) {
+		delete(it);
+	}
+	for (auto& it : sprite_object_pool_) {
+		delete(it);
+	}
+	delete(ui);
+}

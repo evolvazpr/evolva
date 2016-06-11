@@ -41,8 +41,11 @@ private:
 	const unsigned int height_;
 	QTimer timer_;
 	QAtomicInt animations_;
+
 	QList<SpriteObject *> to_add_;
-	QList<SpriteObject *> to_remove_;	
+	QList<SpriteObject *> to_remove_;
+	QList<SpriteObject *> sprite_object_pool_;
+
 	SpriteObject* SearchObject(const uint id);
 	qreal CalculateX(const int x);
 	qreal CalculateY(const int y);
