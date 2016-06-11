@@ -54,5 +54,6 @@ $text += create_gui_setting
 
 $text+="</evolva>"
 
-cd ../tests
+cd ../executables
 $text | out-file "gui.xml" -Encoding ASCII
+echo "File gui.xml was written in executables directory"

@@ -50,8 +50,8 @@ FILE=`printf "%s\n%s" "$FILE" "</pixels_per_object>"`
 
 FILE+="</evolva>"
 
-cd ../tests
+cd ../executables
 
 echo -e "$FILE" > gui.xml
 
-echo "file gui.xml is located in \"tests\" directory"
+echo "file gui.xml is located in \"executables\" directory"

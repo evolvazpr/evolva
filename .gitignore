@@ -5,9 +5,7 @@ html
 *.pyc
 *.exe
 *.db
-*.png
-*.jpeg
-test
+
 test_XML
 test_qt_RoundObjects
 test_qt
@@ -28,11 +26,9 @@ test_FleshObject
 test_DialogProxy
 test_Application
 test_dialog_memLeak
-*tui
+
 evolva_gole_gui.pro.user
 evolva_gole_gui.pro.user*
 moc*
 ui_dialog.h
-gui.xml
-scripts/sprites/
-sprites/
+

@@ -1,0 +1,105 @@
+<evolva>
+<grass>
+<path>
+	../sprites/grass.png
+</path>
+<sprite_cnt>
+1
+</sprite_cnt>
+</grass>
+ 
+<water>
+<path>
+	../sprites/water.jpg
+</path>
+<sprite_cnt>
+1
+</sprite_cnt>
+</water>
+ 
+<sand>
+<path>
+	../sprites/sand.png
+</path>
+<sprite_cnt>
+1
+</sprite_cnt>
+</sand>
+ 
+<soil>
+<path>
+	../sprites/soil.png
+</path>
+<sprite_cnt>
+1
+</sprite_cnt>
+</soil>
+ 
+<tree>
+<path>
+	../sprites/tree.png
+</path>
+<sprite_cnt>
+1
+</sprite_cnt>
+</tree>
+ 
+<herbivore>
+<path>
+	../sprites/herbivore.png
+</path>
+<sprite_cnt>
+4
+</sprite_cnt>
+</herbivore>
+ 
+<carnivore>
+<path>
+	../sprites/carnivore.png
+</path>
+<sprite_cnt>
+4
+</sprite_cnt>
+</carnivore>
+ 
+<unit>
+<path>
+	../sprites/unit.png
+</path>
+<sprite_cnt>
+1
+</sprite_cnt>
+</unit>
+ 
+<stone>
+<path>
+	../sprites/stone.png
+</path>
+<sprite_cnt>
+1
+</sprite_cnt>
+</stone>
+ 
+<carnivore_dead>
+<path>
+	../sprites/carnivore_dead.png
+</path>
+<sprite_cnt>
+1
+</sprite_cnt>
+</carnivore_dead>
+ 
+<herbivore_dead>
+<path>
+	../sprites/herbivore_dead.png
+</path>
+<sprite_cnt>
+1
+</sprite_cnt>
+</herbivore_dead>
+<Gui>
+<pixels_per_object>
+25
+</pixels_per_object>
+</Gui>
+ </evolva>
