@@ -63,7 +63,7 @@ private:
 	bool disabled_;
 	
 	Unit(const Unit&) = delete;
-	operator = (const Unit&) = delete;
+	Unit& operator = (const Unit&) = delete;
 };
 
 #endif // _UNIT_HPP_
