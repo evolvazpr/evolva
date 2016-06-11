@@ -23,11 +23,6 @@ public:
 	/*< Take next step in queue. */
 	bool Next();
 	void Insert (std::shared_ptr<Unit> unit);
-	/*< Removes CURRENT element from the queue. */
-
-	/*< Sorts queue. It works like insertion sort with new empty queue using
-	provided Insortion method. After sorting, the new beggining is set.*/
-	/*< Returns is that end (beggining) of loop. */
 	bool IsEmpty() const;
 	bool IsNewCycle() const;
 	size_t GetQueueSize() const;
