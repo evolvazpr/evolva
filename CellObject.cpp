@@ -82,6 +82,9 @@ NonPlant::NonPlant() : NonMovableObject() {
 	SetType(Type::PLANT, false);
 }
 
+NonPlant::~NonPlant() {
+}
+
 // Flesh
 
 Flesh::Flesh(const double energy, const bool carnivore) : Eatable(energy, -5.24, 0.0, 0.0, -1) {
