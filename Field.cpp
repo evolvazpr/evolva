@@ -7,7 +7,6 @@
 #include <vector>
 #include <boost/multi_array.hpp>
 
-#include <iostream>
 #include <random>
 #include "Application.hpp"
 
