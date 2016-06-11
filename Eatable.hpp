@@ -22,6 +22,9 @@ protected:
 	double growth_b_;
 	double growth_c_;
 	size_t growth_treshold_;
+private:
+	Eatable(const Eatable&) = delete;
+	Eatable& operator = (const Eatable&) = delete;
 };
 
 #endif //_EATABLE_HPP_
