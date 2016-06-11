@@ -1,6 +1,5 @@
 #include "../Field.hpp"
 #include "../CellObject.hpp"
-#include "../Tui.hpp"
 #include "../DnaGenerator.hpp"
 #include "../Unit.hpp"
 #include <iostream>

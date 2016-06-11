@@ -27,6 +27,7 @@ test_qt_logWindow
 test_FleshObject
 test_DialogProxy
 test_Application
+test_dialog_memLeak
 *tui
 evolva_gole_gui.pro.user
 evolva_gole_gui.pro.user*
