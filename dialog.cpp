@@ -1,171 +1,82 @@
 #include "dialog.hpp"
 #include "ui_dialog.h"
-
-/**
- * @brief INCREMENT_PER_TICK static global variable. Parameter to set speed of animation.
- */
-static const qreal INCREMENT_PER_TICK = 5;
-
-/**
- * @brief ANIMATION_CLOCK static global variable. Parameter to setup freqency of animation (FPS or whatever).
- */
-static const qreal ANIMATION_CLOCK = 1000/33;
-
-/**
- * @brief FIELD_SIZE temporary?
- */
-static const uint FIELD_SIZE = 50;
-
-/**
- * @brief RoundObject constructor.
- * @param id - object's id.
- * @param x - object's graphical x coordinate (it is not field coordinate!).
- * To calculate graphical coordinates use Dialog::calculateX method.
- * @param y - object's graphical y coordinate (it is not field coordinate!).
- * To calculate graphical coordinates use Dialog::calculateY method.
- * @param radius - object's radius.
- * To calculate graphical radius use Dialog::calculateRadius method.
- * @param scene - pointer to scene.
- * @param timer - pointer to timer. It is needed, because on each move there is
- * established connection between timer signal timout() and RoundObject slot animate() (to animate or whatever).
- */
-RoundObject::RoundObject(const uint id, const int x, const int y, const uint radius, QGraphicsScene *scene, QTimer *timer) : QObject(scene->parent()),
-	QGraphicsEllipseItem(x, y, radius, radius), id_(id), timer_(timer) {
-		scene->addItem(this);
-	}
-
-/**
- * @brief RoundObject's deconstructor.
- */
-RoundObject::~RoundObject() {
-}
-
-/**
- * @brief Object move method.
- *
- * It makes connection of timer's signals and object animate method.
- *
- * @param dx - how many steps in pixels to take into x direction.
- * @param dy - how many steps in pixels to take into y direction.
- */
-void RoundObject::move(const int dx, const int dy) {
-	dx_ = dx;
-	dy_ = dy;
-	QObject::connect(timer_, SIGNAL(timeout()), this, SLOT(animate()));
-}
-
-/**
- * @brief Method to obtain id number.
- * @return object's id number.
- */
-uint RoundObject::id() {
-	return id_;
-}
-
-/**
- * @brief Centerpiece of animation.
- *
- * This method is called when timer emits signal timeout().
- * It updates steps (dx, dy) that object must do, and updates
- * graphical coordinates of object. If there is no steps to perform,
- * method disconnects timer from this method.
- */
-void RoundObject::animate() {
-	int dx;
-	int dy;
-	int x_coord;
-	int y_coord;
-
-	/* Some calculations */
-	dx = dx_;
-	dy = dy_;
-	if ((!dx) && (!dy))
-		return;
-	if (dx > 0) {
-		if (dx >= INCREMENT_PER_TICK) {
-			dx -= INCREMENT_PER_TICK;
-			x_coord = x() + INCREMENT_PER_TICK;
-		} else {
-			x_coord = x() + dx;
-			dx = 0;
-		}
-	} else if (dx < 0) {
-		if (std::abs(dx) >= INCREMENT_PER_TICK) {
-			dx += INCREMENT_PER_TICK;
-			x_coord = x() - INCREMENT_PER_TICK;
-		} else {
-			x_coord = x() + dx;
-			dx = 0;
-		}
-	} else {
-		x_coord = x();
-	}
-
-	if (dy > 0) {
-		if (dy >= INCREMENT_PER_TICK) {
-			dy -= INCREMENT_PER_TICK;
-			y_coord = y() + INCREMENT_PER_TICK;
-		} else {
-			y_coord = y() + dy;
-			dy = 0;
-		}
-	} else if (dy < 0) {
-		if (std::abs(dy) >= INCREMENT_PER_TICK) {
-			dy += INCREMENT_PER_TICK;
-			y_coord = y() - INCREMENT_PER_TICK;
-		} else {
-			y_coord = y() + dy;
-			dy = 0;
-		}
-	} else {
-		y_coord = y();
-	}
-	/* End of some calculations */
-
-	setPos(x_coord, y_coord);
-	dx_ = dx;
-	dy_ = dy;
-	if((!dx) && (!dy))
-		QObject::disconnect(timer_, SIGNAL(timeout()), this, SLOT(animate()));
-}
+#include "Field.hpp"
+#include "EvolvaException.hpp"
+#include "Unit.hpp"
+#include "Statistics.hpp"
 
 /**
  * @brief Constructor.
  * @param parent - parent for Qt API (no need to call delete thanks to it).
  */
-Dialog::Dialog(QWidget *parent) :
-	QDialog(parent),
-	ui(new Ui::Dialog), width_(FIELD_SIZE), height_(FIELD_SIZE) {
-	QRect rect;
+Dialog::Dialog(QWidget *parent, const int width, const int height, const int pixels_per_object) :
+	QDialog(parent), ui(new Ui::Dialog), animation_clock_(1000.0/33.0), 
+	pixels_per_object_(pixels_per_object), width_(width), height_(height) { 
+	Qt::WindowFlags flags = Qt::WindowTitleHint | Qt::WindowSystemMenuHint;
+	flags |= Qt::WindowCloseButtonHint | Qt::WindowMinMaxButtonsHint;
+	
 	ui->setupUi(this);
 	scene = new QGraphicsScene();
 	ui->graphicsView->setScene(scene);
-
-//	rect = ui->graphicsView->sceneRect();
-//	std::cout << rect.x() << rect.y() << rect.height() << std::endl;
-	//scene->setSceneRect(rect.x(), rect.y(), rect.height()-4, rect.height()-4);
-	scene->setSceneRect(0, 0, 300, 300);
+	scene->setSceneRect(0, 0, width_ * pixels_per_object_, height_ * pixels_per_object_);
+	ui->graphicsView->centerOn(scene->sceneRect().center());
+	ui->graphicsView->setCacheMode(QGraphicsView::CacheNone);
 	ui->graphicsView->setRenderHint(QPainter::Antialiasing);
+	ui->graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 	ui->graphicsView->show();
+	animations_ = 0;
+	QDialog::setWindowFlags(flags);
+	timer_.start(animation_clock_);
+	count_of_rounds_ = ui->lineEdit_rounds->text().toUInt();	
+	steps_per_tick_ = ui->lineEdit_steps->text().toUInt();
 }
+
 
 /**
- * @brief Deconstructor.
+ * @brief pushButton action method.
+ * Method called when "Kolejna tura" button was clicked.
  */
-Dialog::~Dialog() {
-	delete ui;
+void Dialog::on_pushButton_clicked() {
+	if (animations_)
+		return;
+	emit NextLogicIteration();
 }
 
-void Dialog::on_pushButton_clicked() {          //what happens when we click the "Kolejna tura" button
-
+void Dialog::on_pushButton_3_clicked() {
+	if (animations_)
+		return;
+	emit MoveToTheEndOfRound(count_of_rounds_);	
 }
+
+void Dialog::on_pushButton_2_clicked() {
+	bool test;
+	uint steps = ui->lineEdit_steps->text().toUInt(&test, 10);
+	if (!test) {
+		QMessageBox::warning(this, tr("Evolva"), tr("Wrong input data. Only numerics are allowed."));	
+		return;
+	}
+	uint rounds = ui->lineEdit_rounds->text().toUInt(&test, 10);
+	if (!test) {
+		QMessageBox::warning(this, tr("Evolva"), tr("Wrong input data. Only numerics are allowed."));	
+		return;
+	}
+	
+	if (rounds > 1) {
+		steps = 0;
+		ui->lineEdit_steps->setText(QString("0"));
+	}
+
+	steps_per_tick_ = steps;
+	count_of_rounds_ = rounds;
+}
+
 /**
  * @brief Graphical x coordinate calculation.
  * @param x - field's x coordinate.
  * @return  - graphical x coordinate.
  */
-int Dialog::calculateX(const int x) {
-	return (qreal)x / (qreal)width_ * scene->width();
+qreal Dialog::CalculateX(const int x) {
+	return qFloor(((qreal)x) / ((qreal)width_ )* scene->width() + 0.5);
 }
 
 /**
@@ -173,93 +84,293 @@ int Dialog::calculateX(const int x) {
  * @param y - field's y coordinate.
  * @return  - graphical y coordinate.
  */
-int Dialog::calculateY(const int y) {
-	return (qreal)y / (qreal)height_ * scene->height();
+qreal Dialog::CalculateY(const int y) {
+	return qFloor(((qreal)y) / ((qreal)height_) * scene->height() + 0.5);
 }
 
-/**
- * @brief Graphical radius coordinate calculation.
- * @return
- */
-uint Dialog::calculateRadius() {
-	return  scene->height()/height_;
-}
 
 /**
  * @brief RoundObject object creation.
+ * To get better scalability GetTypeName method was created, but it is not the best idea.
  * @param id - object's id.
  * @param x - field's x coordinate of object.
  * @param y - field's y coordinate of object.
  */
-void Dialog::createObject(const uint id, const int x, const int y) {
-	int x_pos = calculateX(x);
-	int y_pos = calculateY(y);
-	int radius =  calculateRadius();
-	new RoundObject(id, x_pos, y_pos, radius, scene, &timer);
+void Dialog::CreateObject(const uint id, const QPixmap& pixmap, uint sprite_cnt, const int x, const int y) {
+	QMutexLocker lock(&mutex_);
+	qreal x_pos = CalculateX(x);
+	qreal y_pos = CalculateY(y);
+	SpriteObject *sprite_object;
+	std::string obj_type;
+	QString sprite_path;
+	
+	if (sprite_object_pool_.isEmpty()) {
+		sprite_object = new SpriteObject(scene->parent(), pixels_per_object_);
+		
+		QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(AnimationFinished()), 
+				this, SLOT(AnimationFinished()));
+		QObject::connect(dynamic_cast<QObject *>(sprite_object), SIGNAL(WasClicked(int, int)), this, 
+				SIGNAL(SpriteObjectClicked(int, int)));
+		QObject::connect(&timer_, SIGNAL(timeout()), dynamic_cast<QObject *>(sprite_object), 
+				SLOT(Animate()));
+	} else {
+		sprite_object = sprite_object_pool_.takeLast();
+	}
+
+	sprite_object->SetObject(scene->parent(), id, x_pos, y_pos, pixmap, sprite_cnt);
+	
+	if (animations_.fetchAndAddAcquire(0))
+		to_add_.push_back(sprite_object);
+	else 
+		scene->addItem(sprite_object);
+}
+
+void Dialog::AnimationFinished() {
+	QMutexLocker lock(&mutex_);
+	animations_.fetchAndAddAcquire(-1);
+	
+	/* TODO: Somewhere is bug!!! */
+	if (animations_.fetchAndAddAcquire(0) < 0)
+		animations_ = 0;
+
+	if (!animations_.fetchAndAddAcquire(0)) {
+		for (auto &it : to_add_) {
+			scene->addItem(it);
+		}
+		to_add_.clear();
+
+		for (auto &it : to_remove_) {
+			scene->removeItem(it);
+			//delete(it);
+			
+			/*QObject::disconnect(dynamic_cast<QObject *>(it), SIGNAL(AnimationFinished()), 
+				this, SLOT(AnimationFinished()));
+			QObject::disconnect(dynamic_cast<QObject *>(it), SIGNAL(WasClicked(int, int)), this, 
+				SIGNAL(SpriteObjectClicked(int, int)));
+			QObject::disconnect(&timer_, SIGNAL(timeout()), dynamic_cast<QObject *>(it), 
+				SLOT(Animate()));*/
+			it->SetObject(nullptr, 0, 0, 0, QPixmap(), 0);
+			sprite_object_pool_.push_back(it);
+
+		}
+		to_remove_.clear();
+	}
 }
 
 /**
- * @brief RoundObject object search method.
+ * @brief SpriteObject object search method.
  * @param id - object's id.
- * @return pointer to RoundObject. If there is RoundObject with passed id, nullptr is returned.
+ * @return pointer to SpriteObject. If there is no SpriteObject with passed id, nullptr is returned.
  */
-RoundObject* Dialog::searchObject(const uint id) {
+SpriteObject* Dialog::SearchObject(const uint id) {
 	QList<QGraphicsItem *> obj_list = scene->items();
-	RoundObject *ptr;
-	for (auto it : obj_list) {
-		ptr = dynamic_cast<RoundObject *>(it);
-		if (ptr) {
-			if(ptr->id() == id)
+	SpriteObject *ptr;
+	for (auto &it : obj_list) {
+		if (it->type() != QGraphicsPixmapItem::Type) {
+			ptr = dynamic_cast<SpriteObject *>(it); //How to not to cast?
+			if (ptr == nullptr)
+				throw EvolvaException("Dialog::SearchObject! IT SHOULD NOT OCCURE!");
+			if(ptr->GetId() == id)
 				return ptr;
 		}
 	}
+	
+	for (auto &ptr : to_add_) {
+		if (ptr->GetId() == id) {
+			return ptr;
+		}
+	}
+
 	return nullptr;
 }
 
 /**
- * @brief Move object method with relative coordinates.
+ * @brief Move object by relative coordinates (in other words - move with (x, y) steps somewhere).
  *
  * By relative coordinates it is meant to be in relation to present object's position.
- * @param id - id of RoundObject which will be moved.
+ * @param object - shared_ptr to object which will be moved.
  * @param x - <b>realative field (not graphical) steps</b> in x direction to make.
  * @param y - <b>realative field (not graphical) steps</b> in y direction to make.
  */
-void Dialog::moveObject(const uint id, const int x, const int y) {
-	RoundObject *object = searchObject(id);
-	if (!object) return; //TODO: throw exception
-	if(!timer.isActive())
-		timer.start(ANIMATION_CLOCK);
-	object->move(calculateX(x), calculateY(y));
+void Dialog::MoveObject(const uint id, const int x, const int y) {
+	qreal dx, dy;
+	QMutexLocker lock(&mutex_);
+	SpriteObject *roundObject = SearchObject(id);
+	if (!roundObject) {
+		throw EvolvaException("Dialog::moveObject - object not found!\n");
+	}
+	dx = CalculateX(x);
+	dy = CalculateY(y);
+
+	if ((!dx) && (!dy))
+		return;
+
+	if ((!roundObject->IsMoving()) && steps_per_tick_)
+		animations_.fetchAndAddAcquire(1);
+	
+	roundObject->Move(dx, dy, steps_per_tick_);	
 }
 
 /**
  * @brief Move object method to specific field's coordinate.
- * @param id - id of RoundObject that will be moved.
+ * @param object - shared_ptr of object that will be moved.
  * @param x - <b>real field's x coordinate</b> in which RoundObject will be placed.
  * @param y - <b>real field's y coordinate</b> in which RoundObject will be placed.
  */
-void Dialog::moveObjectTo(const uint id, const int x, const int y) {
-	RoundObject *object = searchObject(id);
+void Dialog::MoveObjectTo(const uint id, const int x, const int y) {
+	QMutexLocker lock(&mutex_);
+	SpriteObject *roundObject = SearchObject(id);
 	int x_old, y_old, dx, dy;
-	if (!object) return; //TODO: throw exception
-	x_old = object->x();
-	y_old = object->y();
-	dx = calculateX(x) - x_old;
-	dy = calculateY(y) - y_old;
-	if(!timer.isActive())
-		timer.start(ANIMATION_CLOCK);
-	object->move(dx, dy);
+	if (!roundObject) {
+		throw EvolvaException("Dialog::moveObjectTo - object not found!\n");
+	}
+
+	x_old = roundObject->x();
+	y_old = roundObject->y();
+
+	dx = CalculateX(x) - x_old;
+	dy = CalculateY(y) - y_old;
+	
+	if ((!dx) && (!dy))
+		return;
+	
+	if ((!roundObject->IsMoving()) && steps_per_tick_)
+		animations_.fetchAndAddAcquire(1);
+
+	roundObject->Move(dx, dy, steps_per_tick_);
 }
 
 /**
- * @brief Remove (delete) specific RoundObject.
- * @param id - id of RoundObject to be deleted.
+ * @brief Remove (delete) specific SpriteObject.
+ * @param object - shared_ptr to object which will be deleted from GUI.
  */
-void Dialog::removeObject(const uint id) {
-	RoundObject *object = searchObject(id);
-	if (!object) return; //TODO: throw exception
-	scene->removeItem(object);
-	delete(object);
+void Dialog::RemoveObject(const uint id) {
+	QMutexLocker lock(&mutex_);
+	SpriteObject *sprite_object = SearchObject(id);
+
+	if (!sprite_object)
+		throw EvolvaException("Dialog::removeObject - internal error!\n");		
+
+	if (animations_.fetchAndAddAcquire(0)) {
+		to_remove_.push_back(sprite_object);
+	} else {
+		scene->removeItem(sprite_object);
+
+		/*QObject::disconnect(dynamic_cast<QObject *>(sprite_object), SIGNAL(AnimationFinished()), 
+				this, SLOT(AnimationFinished()));
+		QObject::disconnect(dynamic_cast<QObject *>(sprite_object), SIGNAL(WasClicked(int, int)), this, 
+				SIGNAL(SpriteObjectClicked(int, int)));
+		QObject::disconnect(&timer_, SIGNAL(timeout()), dynamic_cast<QObject *>(sprite_object), 
+				SLOT(Animate()));*/
+
+		//delete(sprite_object);
+		sprite_object->SetObject(nullptr, 0, 0, 0, QPixmap(), 0);
+		sprite_object_pool_.push_back(sprite_object);
+	}
+}
+
+/**
+ * @brief Creation of graphic surface.
+ *	
+ * @param surface_type - Type of surface to create.
+ * @param x - x coordinate.
+ * @param y - y coordinate.
+ */
+void Dialog::CreateSurfaceObject(const QPixmap& pixmap, const int x, const int y) {		
+	QGraphicsPixmapItem *rect = new QGraphicsPixmapItem(pixmap);
+	if (rect == nullptr)//remove it?
+		throw EvolvaException("?");
+	scene->addItem(rect);
+	rect->setOffset(CalculateX(x), CalculateY(y));
+}
+
+/**
+ * @brief Deletion of graphic surface.
+ * @param x - x coordinate.
+ * @param y - y coordinate.
+ */
+void Dialog::RemoveSurfaceObject(const int x, const int y) {
+	QTransform test;
+	QGraphicsItem *item = scene->itemAt(CalculateX(x), CalculateY(y), test);
+	if (!item)
+		return;
+	scene->removeItem(item);
+	delete(item);	
 }
 
 
+/**
+ * @brief Surface sprite change.
+ * @param pixmap - sprite to set
+ * @param x - x coordinate.
+ * @param y - y coordinate.
+ */
+void Dialog::ReplaceSurfaceObject(const QPixmap& pixmap, const int x, const int y) {
+	QTransform test;
+	QGraphicsItem *item = scene->itemAt(CalculateX(x), CalculateY(y), test);
+	QGraphicsPixmapItem *pixmap_item = dynamic_cast<QGraphicsPixmapItem*>(item);
+	if (!pixmap_item)
+		throw EvolvaException("Dialog::ReplaceSurfaceObject internal error");
+	pixmap_item->setPixmap(pixmap);
+}
+
+
+/**
+ * @brief Method to append text to log window.
+ * @param text - text to append.
+ */
+void Dialog::UpdateStats(const QString text) {
+	ui->stats_textWindow->setPlainText(text);
+}
+
+/**
+ * @brief Method called when sprite object was clicked. 
+ *
+ * Method is invoked because of connection between SpriteObject Qt signal and this Qt slot.
+ * Method used for text insertion into stats window. 
+ *
+ * @param x - x coordinate of sprite object.
+ * @param y - y coordinate of sprite object.
+ */
+void Dialog::UpdateLog(const QString text) {
+	QScrollBar *sb = ui->log_textWindow->verticalScrollBar();
+	ui->log_textWindow->insertPlainText(text);
+	sb->setValue(sb->maximum());	
+}
+
+
+/** Method violates "program to interface" paradigm */
+void Dialog::UpdateOverallStatistics() {
+	std::shared_ptr<Field> field = Field::GetInstance();
+	size_t carnies = field->stats_->carnivore_.Get();
+	size_t herbis = field->stats_->herbivore_.Get();
+	size_t omnis = field->stats_->omnivore_.Get();
+	size_t disabled = field->stats_->disabled_.Get();
+	size_t trees = field->stats_->tree_.Get();
+	size_t flesh = field->stats_->flesh_.Get();
+	size_t miscarries = field->stats_->miscarry_.Get();
+	size_t fights = field->stats_->fight_.Get();
+	size_t escapes = field->stats_->escape_.Get();
+	ui->lineEdit_carnies->setText(QString::fromStdString(std::to_string(carnies)));
+	ui->lineEdit_herbis->setText(QString::fromStdString(std::to_string(herbis)));
+	ui->lineEdit_omnis->setText(QString::fromStdString(std::to_string(omnis)));
+	ui->lineEdit_disabled->setText(QString::fromStdString(std::to_string(disabled)));
+	ui->lineEdit_trees->setText(QString::fromStdString(std::to_string(trees)));
+	ui->lineEdit_flesh->setText(QString::fromStdString(std::to_string(flesh)));
+	ui->lineEdit_miscarries->setText(QString::fromStdString(std::to_string(miscarries)));
+	ui->lineEdit_fights->setText(QString::fromStdString(std::to_string(fights)));
+	ui->lineEdit_escapes->setText(QString::fromStdString(std::to_string(escapes)));
+}
+
+Dialog::~Dialog() {
+	for (auto& it : to_add_) {
+		delete(it);
+	}
+	for (auto& it : to_remove_) {
+		delete(it);
+	}
+	for (auto& it : sprite_object_pool_) {
+		delete(it);
+	}
+	delete(ui);
+}

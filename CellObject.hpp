@@ -8,51 +8,37 @@
 class Field;
 
 class CellObject : public std::enable_shared_from_this<CellObject> {
+friend class Field;
+friend class FieldCell;
 public:
-	bool types_[8];
 	enum class Type : unsigned char {
 		MOVABLE = 0,
 		NON_MOVABLE,
-		PLANT = 1,
+		PLANT,
 		NON_PLANT,
-		FLESH = 2,
-		UNIT = 3,
-		CARNIVORE = 4,
-		HERBIVORE = 5,
-		CREATURE = 6
+		FLESH,
+		UNIT,
+		CARNIVORE,
+		HERBIVORE,
+		RESERVED,
+		EATABLE,
+		TREE
 	}; //enum describes type of object. Right now used only by TUI.
 	//! TODO: type variable is not a good choice - we have to remove this and find another solution
 	CellObject();
 	CellObject(const size_t id);
+	virtual ~CellObject();
 	inline size_t GetId() const { return id_; }
-	virtual ~CellObject() = 0;
-	friend class Field;
-	friend class FieldCell;
 	bool GetType(const Type type) const;
-	inline size_t GetX() const { return cell_.lock()->GetX(); }; //?
+	inline size_t GetX() const { return cell_.lock()->GetX(); };
 	inline size_t GetY() const { return cell_.lock()->GetY(); };
 protected:
 	void SetType(const Type bit, const bool value);
+	bool types_[11];
 private:
 	const size_t id_;		//Unique object's identification number
 	std::weak_ptr<FieldCell> cell_;
 };
-
-class MovableObject : public CellObject {
-friend class Tui;
-public:
-	MovableObject();
-	virtual bool Move(const int x, const int y, const bool trim = false);
-	inline bool IsRemoved() const { return removed_; };
-	virtual ~MovableObject();
-//	MovableObject();
-	virtual double GetMovePriority() const;
-	/*< Operator <= uses for sorting. It is used in custom class CyclingQueue. */
-	inline bool operator <= (const MovableObject &object) const { return this->GetMovePriority() <= object.GetMovePriority(); }; ///uninline
-protected:
-	bool removed_;
-};
-
 
 class NonMovableObject : public CellObject {
 public:
@@ -60,12 +46,14 @@ public:
 	virtual ~NonMovableObject();
 };
 
-class Plant : public NonMovableObject {
+#include "Eatable.hpp"
+
+class Plant : public Eatable {
 public:
+	Plant(const double energy);
+	virtual ~Plant();
 	inline double GetEnergy() const { return energy_; };
 	double Eat(double energy);
-	Plant();
-	virtual ~Plant();
 protected:
 	double energy_;
 };
@@ -74,8 +62,6 @@ class Tree : public Plant {
 public:
 	Tree(double energy);
 	virtual ~Tree();
-private:
-	double default_energy_;
 };
 
 class NonPlant : public NonMovableObject {
@@ -83,12 +69,13 @@ public:
 	NonPlant();
 };
 
-class Creature : public MovableObject {
+class Flesh : public Eatable {
 public:
-	Creature();
+	Flesh(const double energy, const bool carnivore);
+	virtual ~Flesh();
+	inline bool IsCarnivore() const { return carnivore_; };
+private:
+	bool carnivore_;
 };
 
-class Flesh : public NonMovableObject {
-};
-
-#endif //_CELL_OBJECT_H_
+#endif // _CELL_OBJECT_H_

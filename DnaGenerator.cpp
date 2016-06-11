@@ -2,7 +2,6 @@
 #include "DnaGenerator.hpp"
 
 std::shared_ptr<DnaCode> DnaGenerator::Generate() const {
-	std::shared_ptr<Field> field = Field::GetInstance();
 	std::shared_ptr<DnaCode> dna = std::make_shared<DnaCode>();
 	// Variability is deviation for normal distribution.
 	// It is good to keep it in reasonable values so

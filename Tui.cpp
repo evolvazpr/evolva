@@ -21,13 +21,17 @@ void Tui::PrintField() {
 				std::cout << "  ";
 			}
 			else {
-				std::weak_ptr<CellObject> object = field->GetCell(i, j)->GetObject();
-				CellObject *fg = object.lock().get();
-				if (object.lock()->GetType(CellObject::Type::MOVABLE)) {
-					if (object.lock()->GetId() <= 9) std::cout << object.lock()->GetId() << object.lock()->GetId();
-					else std::cout << "@@";
+			//	std::weak_ptr<CellObject> object = field->GetCell(i, j)->GetObject();
+			//	CellObject *p = object.lock().get();
+				auto p = field->GetCell(i, j)->GetObject();
+				if (p->GetType(CellObject::Type::UNIT)) {
+					if (p->GetType(CellObject::Type::HERBIVORE)) std::cout << "VV";
+					else if (p->GetType(CellObject::Type::CARNIVORE)) std::cout << "CC";
+					else std::cout << "UU";
 				}
-				else std::cout << "##";
+				else if (p->GetType(CellObject::Type::TREE)) std::cout << "!!";
+				else if (p->GetType(CellObject::Type::FLESH)) std::cout << "##";
+				else std::cout << "--";
 			}
 		}
 		std::cout << "|\n";
@@ -39,7 +43,7 @@ void Tui::PrintField() {
 	}
 	DrawHorizontalLine();
 }
-
+/*
 void Tui::PresentFieldCell(const size_t x, const size_t y) {
 	std::cout << "Presenting cell:\n";
 	std::cout << "Coordinates: x = " << x << ", " << y << ".\n";
@@ -52,9 +56,9 @@ void Tui::PresentCellObject(const std::shared_ptr<CellObject> object) {
 	std::cout << "Coordiantes: x = " << object->GetX() << ", y = " << object->GetY() << ".\n";
 }
 
-void Tui::PresentCellObject(const std::shared_ptr<MovableObject> object) {
+void Tui::PresentCellObject(const std::shared_ptr<Unit> object) {
 	std::cout << "Presenting moveable object:\n";
-	PresentCellObject(static_cast<std::shared_ptr<CellObject>>(object));
+	PresentCellObject(std::static_pointer_cast<CellObject>(object));
 	std::cout << "Move priority: " << object->GetMovePriority() << "\n\n";
 }
 
@@ -63,4 +67,4 @@ void Tui::PresentCellObject(const std::shared_ptr<NonMovableObject> object) {
 	PresentCellObject(static_cast<std::shared_ptr<CellObject>>(object));
 	std::cout << std::endl;
 }
-
+/**/

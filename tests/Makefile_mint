@@ -10,7 +10,8 @@ CXXFLAGS      = -m64 -pipe -std=c++11 -O2 -Wall -Wextra -D_REENTRANT -fPIE $(DEF
 INCPATH       = -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I../../evolva -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtConcurrent -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I /usr/include/boost/ -I.. -I.
 LINK          = g++
 LFLAGS        = -m64 -std=c++11 -Wl,-O1
-LIBS          = $(SUBLIBS) -L/usr/X11R6/lib64 -lQt5Widgets -lQt5Concurrent -lQt5Gui -lQt5Core -lGL -lpthread 
+LIBS          = $(SUBLIBS) -L/usr/X11R6/lib64 -lQt5Widgets -lQt5Concurrent -lQt5Gui -lQt5Core -lGL -lpthread
+LIBS 	      += -lboost_unit_test_framework 
 AR            = ar cqs
 RANLIB        = 
 QMAKE         = /usr/lib/x86_64-linux-gnu/qt5/bin/qmake
@@ -37,6 +38,10 @@ SOURCES       += $(wildcard ../tinyxml/*.cpp)
 
 ifeq (,$(findstring ../moc_dialog.cpp, $(SOURCES)))
 	SOURCES += ../moc_dialog.cpp
+endif
+
+ifeq (,$(findstring ../moc_SpriteObject.cpp, $(SOURCES)))
+	SOURCES += ../moc_SpriteObject.cpp
 endif
 
 EXECUTABLE_SOURCES = $(wildcard *.cpp)
@@ -86,11 +91,16 @@ check: first
 
 compiler_rcc_make_all:
 compiler_rcc_clean:
-compiler_moc_header_make_all: ../moc_dialog.cpp
+compiler_moc_header_make_all: ../moc_dialog.cpp ../moc_SpriteObject.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) ../moc_dialog.cpp ../moc_dialog.o
+	-$(DEL_FILE) ../moc_dialog.cpp ../moc_dialog.o ../moc_SpriteObject.cpp ../moc_SpriteObject.o
+
 ../moc_dialog.cpp: ../dialog.hpp
 	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) $(INCPATH) -I/usr/include/c++/4.8 -I/usr/include/x86_64-linux-gnu/c++/4.8 -I/usr/include/c++/4.8/backward -I/usr/lib/gcc/x86_64-linux-gnu/4.8/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../dialog.hpp -o ../moc_dialog.cpp
+
+../moc_SpriteObject.cpp: ../SpriteObject.hpp
+	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) $(INCPATH) -I/usr/include/c++/4.8 -I/usr/include/x86_64-linux-gnu/c++/4.8 -I/usr/include/c++/4.8/backward -I/usr/lib/gcc/x86_64-linux-gnu/4.8/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../SpriteObject.hpp -o ../moc_SpriteObject.cpp
+
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
