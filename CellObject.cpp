@@ -44,7 +44,7 @@ NonMovableObject::~NonMovableObject() {
 
 // Plant
 
-Plant::Plant(const double energy) : Eatable(0, -7.0, 28.0, 35.0, 5) {
+Plant::Plant(const double energy) : Eatable(energy, -7.0, 28.0, 35.0, 5) {
 	SetType(Type::PLANT, true);
 }
 
@@ -55,8 +55,6 @@ Plant::~Plant() {
 
 Tree::Tree(const double energy) : Plant(energy) {
 	SetType(Type::TREE, true);
-	default_energy_ = energy;
-	energy_ = default_energy_;
 	field->stats_->tree_++;
 }
 
