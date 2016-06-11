@@ -23,11 +23,6 @@ public:
 	/*< Take next step in queue. */
 	bool Next();
 	void Insert (std::shared_ptr<Unit> unit);
-	/*< Removes CURRENT element from the queue. */
-
-	/*< Sorts queue. It works like insertion sort with new empty queue using
-	provided Insortion method. After sorting, the new beggining is set.*/
-	/*< Returns is that end (beggining) of loop. */
 	bool IsEmpty() const;
 	bool IsNewCycle() const;
 	size_t GetQueueSize() const;
@@ -36,6 +31,8 @@ private:
 	std::priority_queue<std::shared_ptr<Unit>, std::vector<std::shared_ptr<Unit>>, std::function<bool(std::shared_ptr<Unit>, std::shared_ptr<Unit>)>> queue_;
 	std::list<std::shared_ptr<Unit>> to_queue_;
 	bool new_cycle_;
+	CyclicQueue(const CyclicQueue&) = delete;
+	CyclicQueue& operaotor = (const CyclicQueue&) = delete;
 };
 
 #endif // _CYCLIC_QUEUE_HPP_

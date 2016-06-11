@@ -6,7 +6,6 @@
 
 class Unit : public DnaUnit, public CellObject {
 friend class Field;
-friend class Tui;
 public:
 	/*< Constructor */
 	Unit();
@@ -24,6 +23,7 @@ public:
 	double GetMovePriority() const;
 	/*< Same as GetMovePriority(). */
 	bool operator <= (const std::shared_ptr<Unit> object) const;
+	
 private:
 	/*< Updates current status, checks death time. */
 	void Update();
@@ -61,6 +61,9 @@ private:
 	size_t death_reason_;
 	bool omnivore_;
 	bool disabled_;
+	
+	Unit(const Unit&) = delete;
+	Unit& operator = (const Unit&) = delete;
 };
 
 #endif // _UNIT_HPP_

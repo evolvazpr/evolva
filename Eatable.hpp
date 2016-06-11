@@ -18,10 +18,13 @@ protected:
 	// growth = default_energy * (a * turns^2 + b * turns + c)
 	// Growth affects amount of energy. Can be negative.
 	// growth_treshold is the end point of growth
-    double growth_a_;
+	double growth_a_;
 	double growth_b_;
 	double growth_c_;
 	size_t growth_treshold_;
+private:
+	Eatable(const Eatable&) = delete;
+	Eatable& operator = (const Eatable&) = delete;
 };
 
 #endif //_EATABLE_HPP_

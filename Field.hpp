@@ -14,7 +14,6 @@ class FieldPimpl;
 class Statistics;
 
 class Field {
-friend class Tui;
 private:
 
 	std::unique_ptr<FieldPimpl> pimpl_;
@@ -36,6 +35,7 @@ private:
 	const bool new_grass_[9];
 	const bool keep_tree_[9];
 	const bool new_tree_[9];
+	bool new_turn_;
 public:
 	inline const size_t GetFfid() const { return ++ffid_; };
 	static std::shared_ptr<Field> GetInstance(const size_t x = 0, const size_t y = 0);
@@ -63,10 +63,8 @@ public:
 	bool IsCycleEnd() const;
 	void GrowPlants();
 	void MakeGrass();
-	void f2();
 	std::shared_ptr<Statistics> stats_;
 	inline bool IsNewTurn() const { return new_turn_; };
-	bool new_turn_;
 };
 
 extern std::shared_ptr<Field> field;

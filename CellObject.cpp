@@ -51,20 +51,9 @@ Plant::Plant(const double energy) : Eatable(0, -7.0, 28.0, 35.0, 5) {
 Plant::~Plant() {
 }
 
-double Plant::Eat(double energy) {
-	if (energy_ - energy <= 0.0) {
-		field->KillNmo(std::static_pointer_cast<NonMovableObject>(shared_from_this())); // IT IS non movable
-		return energy_; // no need to set energy to 0, because it is already killed
-	}
-	else {
-		energy_ -= energy;
-		return energy;
-	}
-}
-
 // Tree
 
-Tree::Tree(double energy) : Plant(energy) {
+Tree::Tree(const double energy) : Plant(energy) {
 	SetType(Type::TREE, true);
 	default_energy_ = energy;
 	energy_ = default_energy_;
@@ -73,13 +62,6 @@ Tree::Tree(double energy) : Plant(energy) {
 
 Tree::~Tree() {
 	field->stats_->tree_--;
-}
-
-// NonPlant
-
-
-NonPlant::NonPlant() : NonMovableObject() {
-	SetType(Type::PLANT, false);
 }
 
 // Flesh
