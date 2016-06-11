@@ -1,12 +1,8 @@
 #include "../Field.hpp"
 #include "../CellObject.hpp"
 #include "../Tui.hpp"
-#define private public
-#define protected public
 #include "../DnaGenerator.hpp"
 #include "../Unit.hpp"
-#undef protected
-#undef private
 #include <iostream>
 #include <stdio.h>
 

@@ -1,9 +1,4 @@
 #include "dialog.hpp"
-#include "ui_dialog.h"
-#include "Field.hpp"
-#include "EvolvaException.hpp"
-#include "Unit.hpp"
-#include "Statistics.hpp"
 
 /**
  * @brief Constructor.
@@ -34,21 +29,29 @@ Dialog::Dialog(QWidget *parent, const int width, const int height, const int pix
 
 /**
  * @brief pushButton action method.
- * Method called when "Kolejna tura" button was clicked.
+ * Method called when action of single unit button was clicked.
  */
-void Dialog::on_pushButton_clicked() {
+void Dialog::on_pushButton_move_clicked() {
 	if (animations_)
 		return;
 	emit NextLogicIteration();
 }
 
-void Dialog::on_pushButton_3_clicked() {
+/**
+ * @brief pushButton action method.
+ * Method called when perform actions untill end of round button was clicked.
+ */
+void Dialog::on_pushButton_round_clicked() {
 	if (animations_)
 		return;
 	emit MoveToTheEndOfRound(count_of_rounds_);	
 }
 
-void Dialog::on_pushButton_2_clicked() {
+/**
+ * @brief pushButton action method.
+ * Method called when apply settings button was clicked.
+ */
+void Dialog::on_pushButton_settings_clicked() {
 	bool test;
 	uint steps = ui->lineEdit_steps->text().toUInt(&test, 10);
 	if (!test) {
@@ -75,7 +78,7 @@ void Dialog::on_pushButton_2_clicked() {
  * @param x - field's x coordinate.
  * @return  - graphical x coordinate.
  */
-qreal Dialog::CalculateX(const int x) {
+qreal Dialog::CalculateX(const int x) const {
 	return qFloor(((qreal)x) / ((qreal)width_ )* scene->width() + 0.5);
 }
 
@@ -84,14 +87,14 @@ qreal Dialog::CalculateX(const int x) {
  * @param y - field's y coordinate.
  * @return  - graphical y coordinate.
  */
-qreal Dialog::CalculateY(const int y) {
+qreal Dialog::CalculateY(const int y) const {
 	return qFloor(((qreal)y) / ((qreal)height_) * scene->height() + 0.5);
 }
 
 
 /**
- * @brief RoundObject object creation.
- * To get better scalability GetTypeName method was created, but it is not the best idea.
+ * @brief SpriteObject object creation.
+ * It uses objects pool to get a litter faster app.
  * @param id - object's id.
  * @param x - field's x coordinate of object.
  * @param y - field's y coordinate of object.
@@ -125,34 +128,26 @@ void Dialog::CreateObject(const uint id, const QPixmap& pixmap, uint sprite_cnt,
 		scene->addItem(sprite_object);
 }
 
+/**
+ * @brief method called when animation has finished (SpriteObject emits signal of finish)
+ */
 void Dialog::AnimationFinished() {
 	QMutexLocker lock(&mutex_);
 	animations_.fetchAndAddAcquire(-1);
 	
-	/* TODO: Somewhere is bug!!! */
-	if (animations_.fetchAndAddAcquire(0) < 0)
-		animations_ = 0;
-
 	if (!animations_.fetchAndAddAcquire(0)) {
 		for (auto &it : to_add_) {
 			scene->addItem(it);
 		}
+
 		to_add_.clear();
 
 		for (auto &it : to_remove_) {
 			scene->removeItem(it);
-			//delete(it);
-			
-			/*QObject::disconnect(dynamic_cast<QObject *>(it), SIGNAL(AnimationFinished()), 
-				this, SLOT(AnimationFinished()));
-			QObject::disconnect(dynamic_cast<QObject *>(it), SIGNAL(WasClicked(int, int)), this, 
-				SIGNAL(SpriteObjectClicked(int, int)));
-			QObject::disconnect(&timer_, SIGNAL(timeout()), dynamic_cast<QObject *>(it), 
-				SLOT(Animate()));*/
 			it->SetObject(nullptr, 0, 0, 0, QPixmap(), 0);
 			sprite_object_pool_.push_back(it);
-
 		}
+
 		to_remove_.clear();
 	}
 }
@@ -162,7 +157,7 @@ void Dialog::AnimationFinished() {
  * @param id - object's id.
  * @return pointer to SpriteObject. If there is no SpriteObject with passed id, nullptr is returned.
  */
-SpriteObject* Dialog::SearchObject(const uint id) {
+SpriteObject* Dialog::SearchObject(const uint id) const {
 	QList<QGraphicsItem *> obj_list = scene->items();
 	SpriteObject *ptr;
 	for (auto &it : obj_list) {
@@ -213,7 +208,7 @@ void Dialog::MoveObject(const uint id, const int x, const int y) {
 
 /**
  * @brief Move object method to specific field's coordinate.
- * @param object - shared_ptr of object that will be moved.
+ * @param id - id of object that will be moved.
  * @param x - <b>real field's x coordinate</b> in which RoundObject will be placed.
  * @param y - <b>real field's y coordinate</b> in which RoundObject will be placed.
  */
@@ -241,8 +236,8 @@ void Dialog::MoveObjectTo(const uint id, const int x, const int y) {
 }
 
 /**
- * @brief Remove (delete) specific SpriteObject.
- * @param object - shared_ptr to object which will be deleted from GUI.
+ * @brief Remove specific SpriteObject.
+ * @param id - id of object which will be deleted from GUI.
  */
 void Dialog::RemoveObject(const uint id) {
 	QMutexLocker lock(&mutex_);
@@ -255,15 +250,6 @@ void Dialog::RemoveObject(const uint id) {
 		to_remove_.push_back(sprite_object);
 	} else {
 		scene->removeItem(sprite_object);
-
-		/*QObject::disconnect(dynamic_cast<QObject *>(sprite_object), SIGNAL(AnimationFinished()), 
-				this, SLOT(AnimationFinished()));
-		QObject::disconnect(dynamic_cast<QObject *>(sprite_object), SIGNAL(WasClicked(int, int)), this, 
-				SIGNAL(SpriteObjectClicked(int, int)));
-		QObject::disconnect(&timer_, SIGNAL(timeout()), dynamic_cast<QObject *>(sprite_object), 
-				SLOT(Animate()));*/
-
-		//delete(sprite_object);
 		sprite_object->SetObject(nullptr, 0, 0, 0, QPixmap(), 0);
 		sprite_object_pool_.push_back(sprite_object);
 	}
@@ -272,7 +258,7 @@ void Dialog::RemoveObject(const uint id) {
 /**
  * @brief Creation of graphic surface.
  *	
- * @param surface_type - Type of surface to create.
+ * @param pixmap - pixmap of surface.
  * @param x - x coordinate.
  * @param y - y coordinate.
  */
@@ -300,10 +286,11 @@ void Dialog::RemoveSurfaceObject(const int x, const int y) {
 
 
 /**
- * @brief Surface sprite change.
+ * @brief Surface sprite replace.
  * @param pixmap - sprite to set
  * @param x - x coordinate.
  * @param y - y coordinate.
+ * Using Remove and CreateSurfaceObject was bad in meaning of speed.
  */
 void Dialog::ReplaceSurfaceObject(const QPixmap& pixmap, const int x, const int y) {
 	QTransform test;
@@ -312,15 +299,6 @@ void Dialog::ReplaceSurfaceObject(const QPixmap& pixmap, const int x, const int 
 	if (!pixmap_item)
 		throw EvolvaException("Dialog::ReplaceSurfaceObject internal error");
 	pixmap_item->setPixmap(pixmap);
-}
-
-
-/**
- * @brief Method to append text to log window.
- * @param text - text to append.
- */
-void Dialog::UpdateStats(const QString text) {
-	ui->stats_textWindow->setPlainText(text);
 }
 
 /**
@@ -332,14 +310,20 @@ void Dialog::UpdateStats(const QString text) {
  * @param x - x coordinate of sprite object.
  * @param y - y coordinate of sprite object.
  */
+void Dialog::UpdateStats(const QString text) {
+	ui->stats_textWindow->setPlainText(text);
+}
+
+/**
+ * @brief Method to append text to log window.
+ * @param text - text to append.
+ */
 void Dialog::UpdateLog(const QString text) {
 	QScrollBar *sb = ui->log_textWindow->verticalScrollBar();
 	ui->log_textWindow->insertPlainText(text);
 	sb->setValue(sb->maximum());	
 }
 
-
-/** Method violates "program to interface" paradigm */
 void Dialog::UpdateOverallStatistics() {
 	std::shared_ptr<Field> field = Field::GetInstance();
 	size_t carnies = field->stats_->carnivore_.Get();
@@ -362,6 +346,9 @@ void Dialog::UpdateOverallStatistics() {
 	ui->lineEdit_escapes->setText(QString::fromStdString(std::to_string(escapes)));
 }
 
+/**
+ * @brief There was a problem with std::shared_ptr. 
+ */
 Dialog::~Dialog() {
 	for (auto& it : to_add_) {
 		delete(it);

@@ -1,12 +1,8 @@
 #include "../Field.hpp"
 #include "../CellObject.hpp"
 #include "../Tui.hpp"
-#define private public
-#define protected public
 #include "../DnaGenerator.hpp"
 #include "../Unit.hpp"
-#undef protected
-#undef private
 #include <iostream>
 #include <stdio.h>
 
@@ -48,15 +44,8 @@ BOOST_AUTO_TEST_CASE(kill)
 	u[0] = std::make_shared<Unit>(gen.Generate());
 	u[1] = std::make_shared<Unit>(gen.Generate());
 
-	u[0]->energy_ = 200.0;
-	u[0]->death_ = 10000;
-	u[0]->dna_["normal_weight"] = 220.0;
 	BOOST_CHECK(field->InsertObject(u[0], 6, 6) == true);
-	u[1]->energy_ = 200.0;
-	u[1]->death_ = 10000;
-	u[1]->dna_["normal_weight"] = 200.0;
 	BOOST_CHECK(field->InsertObject(u[1], 7, 7) == true);
-
 
 	std::shared_ptr<Tree> tree = std::make_shared<Tree>(50.0);
 	BOOST_CHECK(field->InsertNmo(tree, 0, 0) == true);

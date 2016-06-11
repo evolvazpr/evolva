@@ -39,8 +39,8 @@ public:
 
 	virtual ~SpriteObject();
 	void Move(const qreal x, const qreal y, const qreal steps_per_tick);
-	uint GetId();
-	bool IsMoving();
+	uint GetId() const;
+	bool IsMoving() const;
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 		           QWidget *wdiget) Q_DECL_OVERRIDE;
 	virtual QRectF boundingRect() const Q_DECL_OVERRIDE;

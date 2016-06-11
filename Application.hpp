@@ -1,27 +1,26 @@
 #ifndef _APPLICATION_H_
 #define _APPLICATION_H_
 #include <QApplication>
-#include <memory>
+#include <QMessageBox>
+#include <boost/format.hpp>
+#include <boost/tokenizer.hpp>
 
 #include "Field.hpp"
 #include "CellObject.hpp"
-#include "Tui.hpp"
-#define private public
-#define protected public
 #include "DnaGenerator.hpp"
 #include "Unit.hpp"
-#undef protected
-#undef private
 #include "CyclicQueue.hpp"
 #include "dialog.hpp"
-#include <boost/format.hpp>
-#include <QThread>
 #include "XmlIo.hpp"
-#include <QMessageBox>
-#include <boost/tokenizer.hpp>
 
-class Logic;
 
+/**
+ * @brief Prototype class
+ *
+ * Object of this class contains all sprites used by GUI.
+ * It was introduced to improve speed of GUI. Without it, every
+ * graphics object creation needed to load sprite from external file.
+ */
 class Pixmap {
 private:
 	uint pixels_per_object_;
@@ -37,9 +36,7 @@ public:
 	uint GetSpriteCnt() const;
 };
 
-/** @brief
- * proxy between logic core (which is in second thread) and GUI (first/main thread, because
- * this is how qt works if I have understood documentation properly).
+/** @brief Class which connects GUI and logic
  */
 class Application : public QApplication {
 	Q_OBJECT
@@ -65,7 +62,7 @@ private:
 	void LogicInit();
 	void PixmapContainerInit();
 	void AddToPixmaps(std::string name);
-	void UpdateStatistics();
+
 public:	
 	~Application();
 	void Init(bool logic);
@@ -99,5 +96,6 @@ template <class T> Application& Application::operator <<(const T object) {
 	UpdateLog(QString::fromStdString(text));
 	return *this;
 }
+
 #endif 
 

@@ -1,12 +1,7 @@
 #include "../Field.hpp"
 #include "../CellObject.hpp"
-#include "../Tui.hpp"
-#define private public
-#define protected public
 #include "../DnaGenerator.hpp"
 #include "../Unit.hpp"
-#undef protected
-#undef private
 #include <iostream>
 #include <stdio.h>
 
@@ -68,9 +63,7 @@ BOOST_AUTO_TEST_CASE(kill)
 
 	std::shared_ptr<Unit> u;
 	u = std::make_shared<Unit>(gen.Generate());
-	u->energy_ = 200.0;
-	u->death_ = 10000;
-	u->dna_["normal_weight"] = 220.0;
+
 	BOOST_CHECK(field->InsertObject(u, 6, 6) == true);
 	
 	BOOST_CHECK(field->GetCell(6, 6)->GetObject()->GetType(CellObject::Type::FLESH) == false);

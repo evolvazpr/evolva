@@ -32,12 +32,18 @@ const QPixmap& Pixmap::GetPixmap() const { return pixmap_; }
 uint Pixmap::GetSpriteCnt() const { return sprite_cnt_; }
 
 
-Application::Application(int& argc, char **argv) : QApplication(argc, argv), gui_settings_("gui.xml"), logic_settings_("logic.xml"), dialog_(nullptr, logic_settings_["Field"]["width"], 
-						   logic_settings_["Field"]["height"], gui_settings_["Gui"]["pixels_per_object"] )  
+Application::Application(int& argc, char **argv) : QApplication(argc, argv), gui_settings_("gui.xml"), logic_settings_("logic.xml"), 
+						   dialog_(nullptr, logic_settings_["Field"]["width"], logic_settings_["Field"]["height"],
+						   gui_settings_["Gui"]["pixels_per_object"] )  
 {}
 
 Application* Application::instance_ = nullptr;
 
+/** 
+ * @brief: method to get instance of application.
+ * It was needed to make this as a singleton, because in Field there was need to get
+ * handler to object of this class.
+ */
 Application* Application::GetInstance(int argc, char **argv) {
 	
 	struct make_shared_enabler : public Application {
@@ -51,6 +57,9 @@ Application* Application::GetInstance(int argc, char **argv) {
 	return instance_;
 }
 
+/**
+ * @brief: method called from dialog when button is clicked. 
+ */
 void Application::LogicIteration() {
 	if(!field_->Next()) {
 		QMessageBox::information(nullptr, tr("Evolva"), tr("Simulation has finished."));
@@ -59,45 +68,92 @@ void Application::LogicIteration() {
 	dialog_.UpdateOverallStatistics();
 }
 
+/**
+ * @brief: method to get sprite.
+ */
 const QPixmap& Application::GetObjectPixmap(std::shared_ptr<const CellObject> object, uint* sprite_cnt) const {
 	const std::string type = GetObjectType(object).toStdString();
 	*sprite_cnt = pixmaps_.at(type).GetSpriteCnt();
 	return pixmaps_.at(type).GetPixmap();	
 }
 
+/**
+ * @brief: method to get sprite.
+ */
 const QPixmap& Application::GetObjectPixmap(const FieldCell::Ground ground_type) const {
 	const std::string type = GetGroundType(ground_type).toStdString();
 	return pixmaps_.at(type).GetPixmap();
 }
 
+/**
+ * @brief: Method creates graphical representation of object.
+ * @param object
+ * @param x
+ * @param y
+ */
 void Application::CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
 	uint sprite_cnt;
 	const QPixmap& pixmap = GetObjectPixmap(object, &sprite_cnt);
 	dialog_.CreateObject(object->GetId(), pixmap, sprite_cnt, x, y);
 }
 
+
+/**
+ * @brief: Method creates graphical representation of surface.
+ * @param ground_type
+ * @param x
+ * @param y
+ */
 void Application::CreateSurfaceObject(const FieldCell::Ground ground_type, const int x, const int y) {
 	const QPixmap& pixmap = GetObjectPixmap(ground_type);
 	dialog_.CreateSurfaceObject(pixmap, x, y);
 }
 
+/**
+ * @brief: Method replaces surface types and updates gui. Used to speed up update of grass/soil.
+ * @param ground_type
+ * @param x
+ * @param y
+ */
 void Application::ReplaceSurfaceObject(const FieldCell::Ground ground_type, const int x, const int y) {
 	const QPixmap& pixmap = GetObjectPixmap(ground_type);
 	dialog_.ReplaceSurfaceObject(pixmap, x, y);
 }
 
+/**
+ * @brief: Proxy method between logic and gui to move object to specific destiny.
+ * @param object
+ * @param x
+ * @param y
+ */
 void Application::MoveObject(std::shared_ptr<const CellObject> object, const int x, const int y) {
 	dialog_.MoveObject(object->GetId(), x, y);
 }
 
+/**
+ * @brief: Proxy method between logic and gui. x and y are relative coordinates.
+ * @param object
+ * @param x
+ * @param y
+ */
 void Application::MoveObjectTo(std::shared_ptr<const CellObject> object, const int x, const int y) {
 	dialog_.MoveObjectTo(object->GetId(), x, y);
 }
 
+/**
+ * @brief: Proxy method between logic and gui. Removes object from field.
+ * @param object
+ */
 void Application::RemoveObject(std::shared_ptr<const CellObject> object) {
 	dialog_.RemoveObject(object->GetId());
 }
 
+/**
+ * @brief: Method which prepares one of a race.
+ * It loads settings rom logic.xml file. This file must be in the same directory as
+ * the executable!!!
+ * @param type - type of object to prepare.
+ */
 void Application::PrepareInitialObjects(CellObject::Type type) {
 	typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 	
@@ -165,6 +221,10 @@ void Application::PrepareInitialObjects(CellObject::Type type) {
 	}
 }
 
+/**
+ * @brief: Method prepares plants. It loads data from logic.xml file! This file must be in the same
+ * directory as the executable!
+ */
 void Application::PrepareInitialPlants() {
 	typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 	bool test;
@@ -211,6 +271,11 @@ void Application::LogicInit() {
 	field->Play();
 }
 
+/**
+ * @brief Method to initalize program.
+ * @param logic - if true - initalizes also logic. If false - logic (Field, all units, trees, surface of field
+ * is not initalized).
+ */
 void Application::Init(bool logic) {
 	ConnectSignals();
 	PixmapContainerInit();
@@ -273,18 +338,10 @@ QString Application::GetGroundType(FieldCell::Ground type) const {
 	return surface;
 }
 
-void Application::UpdateStatistics() {
-	std::cout << std::setw(16) << "carnies: " << field->stats_->carnivore_.Get() << "";
-	std::cout << std::setw(16) << "herbis: " << field->stats_->herbivore_.Get() << "";
-	std::cout << std::setw(16) << "omnis: " << field->stats_->omnivore_.Get() << "\n";
-	std::cout << std::setw(16) << "disabled: " << field->stats_->disabled_.Get() << "";
-	std::cout << std::setw(16) << "trees: " << field->stats_->tree_.Get() << "";
-	std::cout << std::setw(16) << "flesh: " << field->stats_->flesh_.Get() << "\n";
-	std::cout << std::setw(16) << "miscarries: " << field->stats_->miscarry_.GetSum() << "";
-	std::cout << std::setw(16) << "fights: " << field->stats_->fight_.GetSum() << "";
-	std::cout << std::setw(16) << "escapes: " << field->stats_->escape_.GetSum() << "\n";
-}
-
+/**
+ * @brief Method called from dialog, via next round(s) button.
+ * @param rounds - repetition of method.
+ */
 void Application::MoveLogicToEndOfRound(uint rounds) {
 	for (uint i = 0; i < rounds; i++) {
 		do {
@@ -297,6 +354,9 @@ void Application::MoveLogicToEndOfRound(uint rounds) {
 	dialog_.UpdateOverallStatistics();
 }
 
+/**
+ * @brief proxy method between logic and gui.
+ */
 void Application::RemoveSurfaceObject(const int x, const int y) {
 	dialog_.RemoveSurfaceObject(x, y);
 }
@@ -307,6 +367,9 @@ void Application::ConnectSignals() {
 	connect(&dialog_, SIGNAL(MoveToTheEndOfRound(uint)), this, SLOT(MoveLogicToEndOfRound(uint)));
 }
 
+/**
+ * @brief proxy method between logic and gui to update log window.
+ */
 void Application::UpdateLog(const QString text) {
 	dialog_.UpdateLog(text);
 }
@@ -358,6 +421,11 @@ boost::format Application::CreateStatistics(const int x, const int y) const {
 	return form;
 }
 
+/**
+ * @brief method called by dialog, when sprite object was clicked. It fills stats window.
+ * @param x - x position of object.
+ * @param y - y position of object.
+ */
 void Application::SpriteObjectClicked(int x, int y) {
 	boost::format format = CreateStatistics(x, y);
 	dialog_.UpdateStats(QString::fromStdString(format.str()));

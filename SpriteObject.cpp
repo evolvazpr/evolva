@@ -4,6 +4,18 @@
 
 /**
  * @brief SpriteObject constructor.
+ * @param pixsize - describes graphics cell size
+ */
+
+SpriteObject::SpriteObject(QObject * parent, const uint pixsize) : 
+			  QObject(parent), QGraphicsPixmapItem(), pixsize_(pixsize)	
+{
+	dx_ = 0;
+	dy_ = 0;
+}
+
+/** 
+ * @brief Method sets objects properties
  * @param id - object's id.
  * @param x - object's graphical x coordinate (it is not field coordinate!).
  * To calculate graphical coordinates use Dialog::calculateX method.
@@ -15,16 +27,7 @@
  * @param timer - pointer to timer. It is needed, because on each move there is
  * established connection between timer signal timout() and SpriteObject slot animate().
  * @param sprites_cnt - describes dimension of sprite's matrix.
- * @param pixsize - describes graphics cell size
  */
-
-SpriteObject::SpriteObject(QObject * parent, const uint pixsize) : 
-			  QObject(parent), QGraphicsPixmapItem(), pixsize_(pixsize)	
-{
-	dx_ = 0;
-	dy_ = 0;
-}
-
 void SpriteObject::SetObject(QObject* parent, const uint id, const qreal x, const qreal y, const QPixmap &pixmap, const int sprites_cnt) {
 	dx_ = 0;
 	dy_ = 0;
@@ -68,8 +71,7 @@ SpriteObject::~SpriteObject() {
  *
  * @param dx - how many steps in pixels to take into x direction.
  * @param dy - how many steps in pixels to take into y direction.
- * @param steps_per_tick - how many steps to perform in single move. If 0 - move to destiny in
- * one timer timeout.
+ * @param steps_per_tick - how many steps to perform in single move. If 0 - move to destiny in this call.
  */
 void SpriteObject::Move(const qreal dx, const qreal dy, const qreal steps_per_tick) {
 	qreal x_coord = 0;
@@ -89,13 +91,13 @@ void SpriteObject::Move(const qreal dx, const qreal dy, const qreal steps_per_ti
  * @brief Method to obtain id number.
  * @return object's id number.
  */
-uint SpriteObject::GetId() {
+uint SpriteObject::GetId() const {
 	return id_;
 }
 
 
 /**
- * @brief meta-method used by Animate() method to get new position of object.
+ * @brief Method used by Animate() method to get new position of object.
  * @param lasts - describes distance to final place of object.
  * @param increment - describes single size of step, which is made per animate() call.
  * @param actual_cord - describes actual coordinate of graphic object.
@@ -175,8 +177,7 @@ void SpriteObject::Animate() {
  *
  * @ret returns true if animation is on-going, false if not.
  */  
-bool SpriteObject::IsMoving()
-{
+bool SpriteObject::IsMoving() const {
 	bool ret = false;
 		if (dx_ || dy_)
 			ret = true;

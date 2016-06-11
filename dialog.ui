@@ -188,7 +188,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_2">
+        <widget class="QPushButton" name="pushButton_settings">
          <property name="text">
           <string>Apply</string>
          </property>
@@ -489,14 +489,14 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
-      <widget class="QPushButton" name="pushButton_3">
+      <widget class="QPushButton" name="pushButton_round">
        <property name="text">
         <string>Next round(s)</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="pushButton_move">
        <property name="text">
         <string>Single action of next unit</string>
        </property>
