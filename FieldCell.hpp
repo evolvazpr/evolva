@@ -32,7 +32,7 @@ public:
 	inline void SetGroundType(Ground ground) { ground_ = ground; };
 private:
 	FieldCell(const FieldCell&) = delete;
-	operator = (const FieldCell&) = delete;
+	FieldCell& operator = (const FieldCell&) = delete;
 	std::shared_ptr<CellObject> object_;
 	Ground ground_;
 	size_t x_;

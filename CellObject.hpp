@@ -48,7 +48,7 @@ public:
 	virtual ~NonMovableObject();
 private:
 	NonMovableObject(const NonMovableObject&) = delete;
-	NonMovableObject& operator = (const NonMovableObjectt&) = delete;
+	NonMovableObject& operator = (const NonMovableObject&) = delete;
 };
 
 #include "Eatable.hpp"

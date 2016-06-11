@@ -32,7 +32,7 @@ private:
 	std::list<std::shared_ptr<Unit>> to_queue_;
 	bool new_cycle_;
 	CyclicQueue(const CyclicQueue&) = delete;
-	CyclicQueue& operaotor = (const CyclicQueue&) = delete;
+	CyclicQueue& operator = (const CyclicQueue&) = delete;
 };
 
 #endif // _CYCLIC_QUEUE_HPP_

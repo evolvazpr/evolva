@@ -22,7 +22,7 @@ public:
 	std::shared_ptr<DnaCode> Mating(const std::shared_ptr<const DnaCode> dna_in) const;
 private:
 	DnaUnit(const DnaUnit&) = delete;
-	DnaUnit& operaotor = (const DnaUnit&) = delete;
+	DnaUnit& operator = (const DnaUnit&) = delete;
 };
 
 #endif // _DNA_UNIT_HPP_
