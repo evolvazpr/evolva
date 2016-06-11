@@ -1,115 +1,74 @@
 #include "CyclicQueue.hpp"
 #include "CellObject.hpp"
+#include "Unit.hpp"
+#include "EvolvaException.hpp"
 
-bool CyclicQueue::Next() {
-	if (empty()) return (end_ = true); // ?
-	++position_;
-	end_ = false;
-	while (!empty()) {
-		if (position_ == end()) {
-			position_ = begin();
-			end_ = true;
-		}
-		if ((*position_)->IsRemoved()) Remove();
-		else return end_;
-	}
-	return end_;
+CyclicQueue::CyclicQueue() : queue_([](std::shared_ptr<Unit> u1, std::shared_ptr<Unit> u2) -> bool { return u1->GetMovePriority() < u2->GetMovePriority(); }) {
+	new_cycle_ = true;
 }
 
-void CyclicQueue::Begin() {
-	position_ = begin();
-	end_ = false;
-}
-
-void CyclicQueue::Begin(CyclicQueue::iterator beggining) {
-//	splice_after(before_begin(), *this, beggining, end());
-	Begin();
+CyclicQueue::~CyclicQueue() {
 }
 
 #include <iostream>
 
-void CyclicQueue::Insortion(std::shared_ptr<MovableObject> new_object) {
-	std::cout << "cq size bf: " << size() << "\n";
-	if (empty()) {
-		push_back(new_object);
-		position_ = begin();
-		std::cout << "cq size af: " << size() << "\n";
-		return;
+bool CyclicQueue::Next() {
+	if (queue_.empty()) {
+		return false;
 	}
-	bool inserted = false;
-	for (iterator i = begin(); i != end(); ++i) {
-		if (!new_object->operator <= (**i)) {
-			insert(i, new_object);
-			inserted = true;
-			break;
+	std::shared_ptr<Unit> unit = queue_.top();
+	queue_.pop();
+	if (unit->IsAlive()) {
+		to_queue_.push_back(unit);
+	}
+	if (queue_.empty()) {
+		new_cycle_ = true;
+		Repush();
+		if (queue_.empty()) {
+			return false;
 		}
-	}
-	if (!inserted) push_back(new_object);
-	std::cout << "cq size af: " << size() << "\n";
-	auto address = &(*position_);
-	position_ = begin();
-	int i = 0;
-	for (; ; ++i) {
-		if (position_ == end()) break;
-		else ++position_;
-	}
-	position_ = begin();
-	std::cout << "real size: " << i << "\n";
-	while (1) {
-		auto b = &(*position_);
-		if (b != address) ++position_;
-		else break;
-	}
-
-/*
-	iterator j = before_begin();
-	for (iterator i = begin(); i != end(); ++i) {
-		if (!new_object->operator <= (**i)) {
-			if (j == position_) {
-				insert(j, new_object);
-				++(--position_);
-			}
-	/*		else if (j == previous_position_) {
-				previous_position_ = insert_after(j, new_object);
-			}
-			else /**insert_after(j, new_object);
-			return;
+		else {
+			return true;
 		}
-		j = i;
-	}
-	insert_after(j, new_object); // dobrze?/**/
-}
-
-void CyclicQueue::Remove() {
-	if (end_) {
-		erase(begin());
-		position_ = begin();
 	}
 	else {
-		auto previous_position = position_;
-		--previous_position;
-		erase(position_);
-		position_ = previous_position;
-		++position_;
+		new_cycle_ = false;
+		return true;
 	}
 }
 
-void CyclicQueue::Sort() {
-	if(empty()) return;
-	CyclicQueue queue;
-	Begin();
-	do {
-		std::shared_ptr<MovableObject> object = *position_;
-		queue.Insortion(object);
-	} while(!Next());
-	clear();
-	operator = (queue);
+bool CyclicQueue::IsEmpty() const {
+	return to_queue_.empty() && queue_.empty();
 }
-/*
-CyclicQueue::CyclicQueue(const CyclicQueue &object) : list(object) {
-	end_ = object.end_;
-	std::advance(previous_position_, std::distance(object.begin(), object.previous_position_);
-	std::advance(position_, std::distance(object.begin(), object.position_);
-	std::advance(pushed_end_, std::distance(object.begin(), object.pushed_end_);
+
+bool CyclicQueue::IsNewCycle() const {
+	return new_cycle_;
 }
-/**/
+
+void CyclicQueue::Repush() {
+	for (auto i = to_queue_.begin(); i != to_queue_.end(); ++i) {
+		queue_.push(*i);
+	}
+	to_queue_.clear();
+}
+
+void CyclicQueue::Insert(std::shared_ptr<Unit> unit) {
+	to_queue_.push_back(unit);
+}
+
+std::shared_ptr<Unit> CyclicQueue::Get() {
+	if(queue_.empty()) {
+		return nullptr;
+	}
+	else {
+		return queue_.top();
+	}
+}
+
+size_t CyclicQueue::GetQueueSize() const {
+	return queue_.size();
+}
+
+size_t CyclicQueue::GetQueueBufferSize() const {
+	return to_queue_.size();
+}

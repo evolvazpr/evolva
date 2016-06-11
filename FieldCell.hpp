@@ -16,21 +16,23 @@ public:
 	FieldCell() = delete;
 	FieldCell(const size_t x, const size_t y);
 	virtual ~FieldCell();
-	std::shared_ptr<CellObject> SetObject(std::shared_ptr<CellObject> object);
+	bool SetObject(std::shared_ptr<CellObject> object);
 	inline std::shared_ptr<CellObject> GetObject() { return object_; };
 	std::shared_ptr<Unit> GetUnit();
 	std::shared_ptr<NonMovableObject> GetNmo(); //UNSAFE :(
-	inline std::shared_ptr<CellObject> RemoveObject() { return SetObject(nullptr); };
+	inline bool RemoveObject() { return SetObject(nullptr); };
 	inline bool IsEmpty() const { return (object_ == nullptr); };
 	inline size_t GetX() const { return x_; };
 	inline size_t GetY() const { return y_; };
 	enum class Ground : unsigned char {
 		GROUND = 0,
-		WATER,
 		GRASS,
-		ROCK
 	};
+	inline Ground GetGroundType() const { return ground_; };
+	inline void SetGroundType(Ground ground) { ground_ = ground; };
 private:
+	FieldCell(const FieldCell&) = delete;
+	FieldCell& operator = (const FieldCell&) = delete;
 	std::shared_ptr<CellObject> object_;
 	Ground ground_;
 	size_t x_;
