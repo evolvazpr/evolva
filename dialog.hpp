@@ -33,6 +33,7 @@ private:
 	const qreal animation_clock_;
 	const uint pixels_per_object_;
 	uint steps_per_tick_;
+	uint count_of_rounds_;
 	
 	QMutex mutex_;
 	QGraphicsScene *scene;
@@ -70,7 +71,7 @@ private slots:
 	void AnimationFinished();
 signals:
 	void NextLogicIteration();
-	void MoveToTheEndOfRound();
+	void MoveToTheEndOfRound(uint rounds);
 	void SpriteObjectClicked(int x, int y);
 };
 

@@ -84,7 +84,7 @@ public:
 public slots:
 	void SpriteObjectClicked(int x, int y);
 	void LogicIteration();
-	void MoveLogicToEndOfRound();
+	void MoveLogicToEndOfRound(uint rounds);
 };
 
 /**

@@ -25,9 +25,6 @@ SpriteObject::SpriteObject(QObject * parent, const uint id, const qreal x, const
 			  pixsize_(pixsize)	
 {
 	actual_sprite_ = 0;
-/*	QPixmap pixmap(sprite_path);
-	pixmap = pixmap.scaled(pixsize_ * sprites_cnt_, pixsize_ * sprites_cnt_, Qt::IgnoreAspectRatio, 
-			       Qt::SmoothTransformation);*/
 	setPixmap(pixmap);	
 	dx_ = 0;
 	dy_ = 0;
@@ -70,12 +67,20 @@ SpriteObject::~SpriteObject() {
  * one timer timeout.
  */
 void SpriteObject::Move(const qreal dx, const qreal dy, const qreal steps_per_tick) {
+	qreal x_coord = 0;
+	qreal y_coord = 0;
 	steps_per_tick_ = steps_per_tick;
-	dx_ = dx;
-	dy_ = dy;
-
-	if ((!dx_) && (!dy_))
-		emit AnimationFinished();
+	if (steps_per_tick_ < 1.0) {
+			x_coord = x() + dx;
+			y_coord = y() + dy;	
+			setPos(x_coord, y_coord);
+	} else {
+		dx_ = dx;
+		dy_ = dy;
+	
+		if ((!dx_) && (!dy_))
+			emit AnimationFinished();
+	}
 }
 
 /**

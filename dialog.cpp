@@ -11,7 +11,7 @@
  */
 Dialog::Dialog(QWidget *parent, const int width, const int height, const int pixels_per_object) :
 	QDialog(parent), ui(new Ui::Dialog), animation_clock_(1000.0/33.0), 
-	pixels_per_object_(pixels_per_object), steps_per_tick_(5.0),  width_(width), height_(height) { 
+	pixels_per_object_(pixels_per_object), steps_per_tick_(5), count_of_rounds_(1),  width_(width), height_(height) { 
 	Qt::WindowFlags flags = Qt::WindowTitleHint | Qt::WindowSystemMenuHint;
 	flags |= Qt::WindowCloseButtonHint | Qt::WindowMinMaxButtonsHint;
 	
@@ -50,7 +50,7 @@ void Dialog::on_pushButton_clicked() {
 void Dialog::on_pushButton_3_clicked() {
 	if (animations_)
 		return;
-	emit MoveToTheEndOfRound();	
+	emit MoveToTheEndOfRound(count_of_rounds_);	
 }
 
 void Dialog::on_pushButton_2_clicked() {
@@ -60,7 +60,13 @@ void Dialog::on_pushButton_2_clicked() {
 		QMessageBox::warning(this, tr("Evolva"), tr("Wrong input data. Only numerics are allowed."));	
 		return;
 	}
+	const uint rounds = ui->lineEdit_rounds->text().toUInt(&test, 10);
+	if (!test) {
+		QMessageBox::warning(this, tr("Evolva"), tr("Wrong input data. Only numerics are allowed."));	
+		return;
+	}
 	steps_per_tick_ = steps;
+	count_of_rounds_ = rounds;
 }
 /**
  * @brief Graphical x coordinate calculation.
@@ -168,7 +174,7 @@ void Dialog::MoveObject(const uint id, const int x, const int y) {
 	if (!roundObject) {
 		throw EvolvaException("Dialog::moveObject - object not found!\n");
 	}
-	if (!roundObject->IsMoving())
+	if (!roundObject->IsMoving() && steps_per_tick_)
 		animations_.fetchAndAddAcquire(1);
 	
 	roundObject->Move(CalculateX(x), CalculateY(y), steps_per_tick_);	
@@ -194,7 +200,7 @@ void Dialog::MoveObjectTo(const uint id, const int x, const int y) {
 	dx = CalculateX(x) - x_old;
 	dy = CalculateY(y) - y_old;
 	
-	if (!roundObject->IsMoving())
+	if (!roundObject->IsMoving() && (steps_per_tick_ > 1.0))
 		animations_.fetchAndAddAcquire(1);
 
 	roundObject->Move(dx, dy, steps_per_tick_);

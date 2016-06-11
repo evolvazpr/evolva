@@ -285,14 +285,15 @@ void Application::UpdateStatistics() {
 	std::cout << std::setw(16) << "escapes: " << field->stats_->escape_.GetSum() << "\n";
 }
 
-void Application::MoveLogicToEndOfRound() {
-	do {
-		if(!field_->Next()) {
-			QMessageBox::information(nullptr, tr("Evolva"), tr("Simulation has finished."));
-			exit();
-		}
-	} while (!field_->IsNewTurn());	
-
+void Application::MoveLogicToEndOfRound(uint rounds) {
+	for (uint i = 0; i < rounds; i++) {
+		do {
+			if(!field_->Next()) {
+				QMessageBox::information(nullptr, tr("Evolva"), tr("Simulation has finished."));
+				exit();
+			}
+		} while (!field_->IsNewTurn());	
+	}
 	dialog_.UpdateOverallStatistics();
 }
 
@@ -303,7 +304,7 @@ void Application::RemoveSurfaceObject(const int x, const int y) {
 void Application::ConnectSignals() {
 	connect(&dialog_, SIGNAL(NextLogicIteration()), this, SLOT(LogicIteration()));
 	connect(&dialog_, SIGNAL(SpriteObjectClicked(int , int)), this, SLOT(SpriteObjectClicked(int , int)));
-	connect(&dialog_, SIGNAL(MoveToTheEndOfRound()), this, SLOT(MoveLogicToEndOfRound()));
+	connect(&dialog_, SIGNAL(MoveToTheEndOfRound(uint)), this, SLOT(MoveLogicToEndOfRound(uint)));
 }
 
 void Application::UpdateLog(const QString text) {
