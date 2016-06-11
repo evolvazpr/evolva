@@ -41,7 +41,6 @@ public:
 	bool IsRelativeEmpty(const int x, const int y) const; // works in foreach
 	std::shared_ptr<Cell> GetRelativeCellConst(const int x, const int y) const;
 
-//private:
 	bool foreach_started_;
 	int size_;
 	Sense() = delete;
