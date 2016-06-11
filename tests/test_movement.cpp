@@ -12,7 +12,7 @@
 
 #include "../CyclicQueue.hpp"
 #include <memory>
-#include <QApplication>
+#include "../Application.hpp"
 
 #include "../dialog.hpp"
 #define BOOST_TEST_DYN_LINK
@@ -20,39 +20,19 @@
 
 #include <boost/test/unit_test.hpp>
 
-#ifdef OS_WINDOWS
-#include <windows.h>
-#define sleep(ms) Sleep(ms)
-#endif 
-
 /**
  * This is a unit test for object movement. It checks if 
  * movement and "collision" detection works.
  */
 
-void MoveObjects(std::shared_ptr <Unit> u[])
+BOOST_AUTO_TEST_CASE(movement)
 {
-	Tui tui;
-	tui.PrintField();	
-	sleep(1);
-	BOOST_CHECK(field->MoveObject(u[0], -1, -1, 1) == true);
-	tui.PrintField();
-	sleep(1);
-	BOOST_CHECK(field->MoveObject(u[1], -2, -2, 1) == false);
-	BOOST_CHECK(field->MoveObject(u[1], 1, 1, 1) == true);
-	tui.PrintField();
-	sleep(1);
-	BOOST_CHECK(field->MoveObjectTo(u[0], 0, 0, 1) == false);
-	BOOST_CHECK(field->MoveObjectTo(u[0], 1, 1, 1) == true);
-	tui.PrintField();
-	sleep(1);
-	BOOST_CHECK(field->MoveObjectTo(u[1], 1, 1, 1) == false);
-	BOOST_CHECK(field->MoveObjectTo(u[1], 0, 5, 1) == true);
-	tui.PrintField();
-}
-
-void Test() {
-	field = Field::GetInstance(10, 10);
+	int argc = 1;
+	char *argv[2];
+	argv[0] = (char *)"insert"; //only for QApplication creation
+	Application *a = Application::GetInstance(argc, argv);
+	a->Init(0);
+	std::shared_ptr<Field> field = Field::GetInstance(10, 10);
 	std::shared_ptr<DnaCode> dna_ptr = std::make_shared<DnaCode>();
 	DnaCode &dna = *dna_ptr;
 	dna["intelligence"] = 45.0;
@@ -97,8 +77,6 @@ void Test() {
 	u[1]->dna_["normal_weight"] = 200.0;
 	BOOST_CHECK(field->InsertObject(u[1], 7, 7) == true);
 
-
-
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(50.0), 0, 0) == true);
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(80.0), 0, 9) == true);
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(20.0), 9, 0) == true);
@@ -106,16 +84,13 @@ void Test() {
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(500.0), 1, 0) == true);
 	BOOST_CHECK(field->InsertNmo(std::make_shared<Tree>(100.0), 1, 0) == false);
 
-	MoveObjects(u);
-}
+	BOOST_CHECK(field->MoveObject(u[0], -1, -1, 1) == true);
+	BOOST_CHECK(field->MoveObject(u[1], -2, -2, 1) == false);
+	BOOST_CHECK(field->MoveObject(u[1], 1, 1, 1) == true);
+	BOOST_CHECK(field->MoveObjectTo(u[0], 0, 0, 1) == false);
+	BOOST_CHECK(field->MoveObjectTo(u[0], 1, 1, 1) == true);
+	BOOST_CHECK(field->MoveObjectTo(u[1], 1, 1, 1) == false);
+	BOOST_CHECK(field->MoveObjectTo(u[1], 0, 5, 1) == true);
 
-BOOST_AUTO_TEST_CASE(movement)
-{
-	int argc = 1;
-	char *argv[2];
-	argv[0] = (char *)"insert"; //only for QApplication creation
-	QApplication a(argc, argv);
-	Dialog::GetInstance();
-	Test();
-
+	delete(a);
 }

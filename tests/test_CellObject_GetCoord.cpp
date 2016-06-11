@@ -9,7 +9,7 @@
 #undef private
 #include <iostream>
 #include <stdio.h>
-
+#include "../Application.hpp"
 #include "../CyclicQueue.hpp"
 #include <memory>
 #include <QApplication>
@@ -29,10 +29,8 @@ BOOST_AUTO_TEST_CASE(GetCoord)
 	int argc = 1;
 	char *argv[2];
 	argv[0] = (char *)"insert";
-	QApplication a(argc, argv); //only for QApplication creation
-	Dialog* w = Dialog::GetInstance(nullptr, 10, 10);
-	(void)w;
-
+	Application *a = Application::GetInstance(argc, argv); //only for QApplication creation
+	a->Init(0);
 	field = Field::GetInstance(10, 10); 
 	//somewhere is defined global std::shared_ptr<Field> field.
 	//I think this global should be removed. (Konrad Gotfryd)
@@ -61,4 +59,5 @@ BOOST_AUTO_TEST_CASE(GetCoord)
 	BOOST_CHECK(t[0]->GetY() == 1);
 	BOOST_CHECK(t[1]->GetX() == 1);
 	BOOST_CHECK(t[1]->GetY() == 9);
+	delete(a);
 }

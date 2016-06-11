@@ -65,9 +65,10 @@ private:
 	void LogicInit();
 	void PixmapContainerInit();
 	void AddToPixmaps(std::string name);
+	void UpdateStatistics();
 public:	
 	~Application();
-	void Init();
+	void Init(bool logic);
 
 	void CreateObject(std::shared_ptr<const CellObject> object, const int x, const int y);
 	void CreateSurfaceObject(const FieldCell::Ground ground_type, const int x, const int y);

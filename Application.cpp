@@ -1,6 +1,9 @@
 #include "Application.hpp"
 #include <iostream>
 #include <QMetaType>
+#include <iomanip>
+#include "Statistics.hpp"
+
 
 Pixmap::Pixmap(const uint pixels_per_object) {
 		pixels_per_object_ = pixels_per_object;
@@ -29,8 +32,8 @@ const QPixmap& Pixmap::GetPixmap() const { return pixmap_; }
 uint Pixmap::GetSpriteCnt() const { return sprite_cnt_; }
 
 
-Application::Application(int& argc, char **argv) : QApplication(argc, argv), gui_settings_("gui.xml"), logic_settings_("logic.xml"), dialog_(nullptr, logic_settings_["Field"]["width"], logic_settings_["Field"]["height"],
-							   gui_settings_["Gui"]["pixels_per_object"] )  
+Application::Application(int& argc, char **argv) : QApplication(argc, argv), gui_settings_("gui.xml"), logic_settings_("logic.xml"), dialog_(nullptr, logic_settings_["Field"]["width"], 
+						   logic_settings_["Field"]["height"], gui_settings_["Gui"]["pixels_per_object"] )  
 {}
 
 Application* Application::instance_ = nullptr;
@@ -53,6 +56,7 @@ void Application::LogicIteration() {
 		QMessageBox::information(nullptr, tr("Evolva"), tr("Simulation has finished."));
 		exit();
 	}
+	dialog_.UpdateOverallStatistics();
 }
 
 const QPixmap& Application::GetObjectPixmap(std::shared_ptr<const CellObject> object, uint* sprite_cnt) const {
@@ -202,15 +206,18 @@ void Application::LogicInit() {
 	PrepareInitialObjects(CellObject::Type::HERBIVORE);
 	PrepareInitialObjects(CellObject::Type::CARNIVORE);	
 	PrepareInitialPlants();
+	dialog_.UpdateOverallStatistics();
 	field->BeginCycle();
 	field->Play();
 }
 
-void Application::Init() {
+void Application::Init(bool logic) {
 	ConnectSignals();
 	PixmapContainerInit();
-	dialog_.show();
-	LogicInit();	
+	if (logic) {
+		dialog_.show();
+		LogicInit();
+	}	
 }
 
 void Application::AddToPixmaps(std::string name) {
@@ -266,6 +273,18 @@ QString Application::GetGroundType(FieldCell::Ground type) const {
 	return surface;
 }
 
+void Application::UpdateStatistics() {
+	std::cout << std::setw(16) << "carnies: " << field->stats_->carnivore_.Get() << "";
+	std::cout << std::setw(16) << "herbis: " << field->stats_->herbivore_.Get() << "";
+	std::cout << std::setw(16) << "omnis: " << field->stats_->omnivore_.Get() << "\n";
+	std::cout << std::setw(16) << "disabled: " << field->stats_->disabled_.Get() << "";
+	std::cout << std::setw(16) << "trees: " << field->stats_->tree_.Get() << "";
+	std::cout << std::setw(16) << "flesh: " << field->stats_->flesh_.Get() << "\n";
+	std::cout << std::setw(16) << "miscarries: " << field->stats_->miscarry_.GetSum() << "";
+	std::cout << std::setw(16) << "fights: " << field->stats_->fight_.GetSum() << "";
+	std::cout << std::setw(16) << "escapes: " << field->stats_->escape_.GetSum() << "\n";
+}
+
 void Application::MoveLogicToEndOfRound() {
 	do {
 		if(!field_->Next()) {
@@ -273,6 +292,8 @@ void Application::MoveLogicToEndOfRound() {
 			exit();
 		}
 	} while (!field_->IsNewTurn());	
+
+	dialog_.UpdateOverallStatistics();
 }
 
 void Application::RemoveSurfaceObject(const int x, const int y) {

@@ -61,6 +61,8 @@ public:
 	void UpdateStats(const QString text);
 	void UpdateLog(const QString text); 
 	qreal GetStepsPerTick();
+	void UpdateOverallStatistics();
+
 private slots:
 	void on_pushButton_clicked();
 	void on_pushButton_2_clicked();

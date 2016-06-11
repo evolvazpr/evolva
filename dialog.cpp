@@ -3,6 +3,7 @@
 #include "Field.hpp"
 #include "EvolvaException.hpp"
 #include "Unit.hpp"
+#include "Statistics.hpp"
 
 /**
  * @brief Constructor.
@@ -278,5 +279,29 @@ void Dialog::UpdateLog(const QString text) {
 	QScrollBar *sb = ui->log_textWindow->verticalScrollBar();
 	ui->log_textWindow->insertPlainText(text);
 	sb->setValue(sb->maximum());	
+}
+
+
+/** Method violates "program to interface" paradigm */
+void Dialog::UpdateOverallStatistics() {
+	std::shared_ptr<Field> field = Field::GetInstance();
+	size_t carnies = field->stats_->carnivore_.Get();
+	size_t herbis = field->stats_->herbivore_.Get();
+	size_t omnis = field->stats_->omnivore_.Get();
+	size_t disabled = field->stats_->disabled_.Get();
+	size_t trees = field->stats_->tree_.Get();
+	size_t flesh = field->stats_->flesh_.Get();
+	size_t miscarries = field->stats_->miscarry_.Get();
+	size_t fights = field->stats_->fight_.Get();
+	size_t escapes = field->stats_->escape_.Get();
+	ui->lineEdit_carnies->setText(QString::fromStdString(std::to_string(carnies)));
+	ui->lineEdit_herbis->setText(QString::fromStdString(std::to_string(herbis)));
+	ui->lineEdit_omnis->setText(QString::fromStdString(std::to_string(omnis)));
+	ui->lineEdit_disabled->setText(QString::fromStdString(std::to_string(disabled)));
+	ui->lineEdit_trees->setText(QString::fromStdString(std::to_string(trees)));
+	ui->lineEdit_flesh->setText(QString::fromStdString(std::to_string(flesh)));
+	ui->lineEdit_miscarries->setText(QString::fromStdString(std::to_string(miscarries)));
+	ui->lineEdit_fights->setText(QString::fromStdString(std::to_string(fights)));
+	ui->lineEdit_escapes->setText(QString::fromStdString(std::to_string(escapes)));
 }
 

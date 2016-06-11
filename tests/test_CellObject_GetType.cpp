@@ -12,7 +12,7 @@
 
 #include "../CyclicQueue.hpp"
 #include <memory>
-#include <QApplication>
+#include "Application.hpp"
 
 #include "../dialog.hpp"
 #define BOOST_TEST_DYN_LINK
@@ -48,6 +48,17 @@ void DnaInit(DnaCode &dna)
 }
 
 void EvolvaInit() {
+
+}
+
+BOOST_AUTO_TEST_CASE(GetType)
+{
+	int argc = 1;
+	char *argv[2];
+	argv[0] = (char *)"insert";
+	Application *a = Application::GetInstance(argc, argv); //only for QApplication creation
+	a->Init(0);
+	
 	field = Field::GetInstance(10, 10);
 	std::shared_ptr<DnaCode> dna_herb_ptr = std::make_shared<DnaCode>();
 	std::shared_ptr<DnaCode> dna_carn_ptr = std::make_shared<DnaCode>();
@@ -80,7 +91,6 @@ void EvolvaInit() {
 	BOOST_CHECK(field->InsertObject(t[0], 0, 1) == true);
 	BOOST_CHECK(field->InsertObject(t[1], 1, 9) == true);
 
-	BOOST_CHECK(u[0]->GetType(CellObject::Type::MOVABLE) == true);
 	BOOST_CHECK(u[0]->GetType(CellObject::Type::NON_MOVABLE) == false);
 	BOOST_CHECK(u[0]->GetType(CellObject::Type::PLANT) == false);
 	BOOST_CHECK(u[0]->GetType(CellObject::Type::NON_PLANT) == false);
@@ -89,7 +99,6 @@ void EvolvaInit() {
 	BOOST_CHECK(u[0]->GetType(CellObject::Type::CARNIVORE) == false);
 	BOOST_CHECK(u[0]->GetType(CellObject::Type::HERBIVORE) == true);
 
-	BOOST_CHECK(u[1]->GetType(CellObject::Type::MOVABLE) == true);
 	BOOST_CHECK(u[1]->GetType(CellObject::Type::NON_MOVABLE) == false);
 	BOOST_CHECK(u[1]->GetType(CellObject::Type::PLANT) == false);
 	BOOST_CHECK(u[1]->GetType(CellObject::Type::NON_PLANT) == false);
@@ -115,14 +124,6 @@ void EvolvaInit() {
 	BOOST_CHECK(t[1]->GetType(CellObject::Type::UNIT) == false);
 	BOOST_CHECK(t[1]->GetType(CellObject::Type::CARNIVORE) == false);
 	BOOST_CHECK(t[1]->GetType(CellObject::Type::HERBIVORE) == false);
-}
-
-BOOST_AUTO_TEST_CASE(GetType)
-{
-	int argc = 1;
-	char *argv[2];
-	argv[0] = (char *)"insert";
-	QApplication a(argc, argv); //only for QApplication creation
-	Dialog::GetInstance(); //no need to get Instance, right now only initalization
-	EvolvaInit();
+	
+	delete(a);
 }
