@@ -32,7 +32,7 @@ Dialog::Dialog(QWidget *parent, const int width, const int height, const int pix
  * Method called when action of single unit button was clicked.
  */
 void Dialog::on_pushButton_move_clicked() {
-	if (animations_)
+	if (animations_.fetchAndAddAcquire(0))
 		return;
 	emit NextLogicIteration();
 }
@@ -42,7 +42,7 @@ void Dialog::on_pushButton_move_clicked() {
  * Method called when perform actions untill end of round button was clicked.
  */
 void Dialog::on_pushButton_round_clicked() {
-	if (animations_)
+	if (animations_.fetchAndAddAcquire(0))
 		return;
 	emit MoveToTheEndOfRound(count_of_rounds_);	
 }
@@ -100,7 +100,7 @@ qreal Dialog::CalculateY(const int y) const {
  * @param y - field's y coordinate of object.
  */
 void Dialog::CreateObject(const uint id, const QPixmap& pixmap, uint sprite_cnt, const int x, const int y) {
-	QMutexLocker lock(&mutex_);
+//	QMutexLocker lock(&mutex_);
 	qreal x_pos = CalculateX(x);
 	qreal y_pos = CalculateY(y);
 	SpriteObject *sprite_object;
@@ -132,7 +132,7 @@ void Dialog::CreateObject(const uint id, const QPixmap& pixmap, uint sprite_cnt,
  * @brief method called when animation has finished (SpriteObject emits signal of finish)
  */
 void Dialog::AnimationFinished() {
-	QMutexLocker lock(&mutex_);
+//	QMutexLocker lock(&mutex_);
 	animations_.fetchAndAddAcquire(-1);
 	
 	if (!animations_.fetchAndAddAcquire(0)) {
@@ -189,7 +189,7 @@ SpriteObject* Dialog::SearchObject(const uint id) const {
  */
 void Dialog::MoveObject(const uint id, const int x, const int y) {
 	qreal dx, dy;
-	QMutexLocker lock(&mutex_);
+//	QMutexLocker lock(&mutex_);
 	SpriteObject *roundObject = SearchObject(id);
 	if (!roundObject) {
 		throw EvolvaException("Dialog::moveObject - object not found!\n");
@@ -213,7 +213,7 @@ void Dialog::MoveObject(const uint id, const int x, const int y) {
  * @param y - <b>real field's y coordinate</b> in which RoundObject will be placed.
  */
 void Dialog::MoveObjectTo(const uint id, const int x, const int y) {
-	QMutexLocker lock(&mutex_);
+//	QMutexLocker lock(&mutex_);
 	SpriteObject *roundObject = SearchObject(id);
 	int x_old, y_old, dx, dy;
 	if (!roundObject) {
@@ -240,7 +240,7 @@ void Dialog::MoveObjectTo(const uint id, const int x, const int y) {
  * @param id - id of object which will be deleted from GUI.
  */
 void Dialog::RemoveObject(const uint id) {
-	QMutexLocker lock(&mutex_);
+//	QMutexLocker lock(&mutex_);
 	SpriteObject *sprite_object = SearchObject(id);
 
 	if (!sprite_object)

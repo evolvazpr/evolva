@@ -45,7 +45,7 @@ int print_end() {
 }
 
 int main(void) {
-	int ret;
+	int ret = 0;
 	try {
 		double test;
 		
