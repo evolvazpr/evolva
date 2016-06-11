@@ -58,7 +58,6 @@ public:
 	Plant(const double energy);
 	virtual ~Plant();
 	inline double GetEnergy() const { return energy_; };
-	double Eat(double energy);
 protected:
 	double energy_;
 private:
