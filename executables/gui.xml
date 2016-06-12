@@ -1,7 +1,7 @@
 <evolva>
 <grass>
 <path>
-/home/mint/evolva/sprites/grass.png
+/home/konrad/Programming/linux/workspace/evolva/sprites/grass.png
 </path>
 <sprite_cnt>
 1
@@ -10,7 +10,7 @@
  
 <water>
 <path>
-/home/mint/evolva/sprites/water.jpg
+/home/konrad/Programming/linux/workspace/evolva/sprites/water.jpg
 </path>
 <sprite_cnt>
 1
@@ -19,7 +19,7 @@
  
 <sand>
 <path>
-/home/mint/evolva/sprites/sand.png
+/home/konrad/Programming/linux/workspace/evolva/sprites/sand.png
 </path>
 <sprite_cnt>
 1
@@ -28,7 +28,7 @@
  
 <soil>
 <path>
-/home/mint/evolva/sprites/soil.png
+/home/konrad/Programming/linux/workspace/evolva/sprites/soil.png
 </path>
 <sprite_cnt>
 1
@@ -37,7 +37,7 @@
  
 <tree>
 <path>
-/home/mint/evolva/sprites/tree.png
+/home/konrad/Programming/linux/workspace/evolva/sprites/tree.png
 </path>
 <sprite_cnt>
 1
@@ -46,7 +46,7 @@
  
 <herbivore>
 <path>
-/home/mint/evolva/sprites/herbivore.png
+/home/konrad/Programming/linux/workspace/evolva/sprites/herbivore.png
 </path>
 <sprite_cnt>
 4
@@ -55,7 +55,7 @@
  
 <carnivore>
 <path>
-/home/mint/evolva/sprites/carnivore.png
+/home/konrad/Programming/linux/workspace/evolva/sprites/carnivore.png
 </path>
 <sprite_cnt>
 4
@@ -64,7 +64,7 @@
  
 <unit>
 <path>
-/home/mint/evolva/sprites/unit.png
+/home/konrad/Programming/linux/workspace/evolva/sprites/unit.png
 </path>
 <sprite_cnt>
 1
@@ -73,7 +73,7 @@
  
 <stone>
 <path>
-/home/mint/evolva/sprites/stone.png
+/home/konrad/Programming/linux/workspace/evolva/sprites/stone.png
 </path>
 <sprite_cnt>
 1
@@ -82,7 +82,7 @@
  
 <carnivore_dead>
 <path>
-/home/mint/evolva/sprites/carnivore_dead.png
+/home/konrad/Programming/linux/workspace/evolva/sprites/carnivore_dead.png
 </path>
 <sprite_cnt>
 1
@@ -91,7 +91,7 @@
  
 <herbivore_dead>
 <path>
-/home/mint/evolva/sprites/herbivore_dead.png
+/home/konrad/Programming/linux/workspace/evolva/sprites/herbivore_dead.png
 </path>
 <sprite_cnt>
 1
