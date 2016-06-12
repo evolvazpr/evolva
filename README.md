@@ -19,6 +19,8 @@ Celem kompilacji plików wykonywalnych i uruchomienia ich na systemie Linux Mint
 
 * Upewnić się, że pliki sprite zawarte są w katalogu sprites/. Jeśl nie - uruchomić skrypt scripts/generate_gui_xml.sh. 
  
+* Uruchomić program
+
 Plik logic.xml jest od razu dołączony do projektu. Plik gui.xml jest dołączony, jak również może zostać wygenerowany oddzielnie (scripts/generate\_gui\_xml.sh). Podczas generacji skrypt ściąga pliki sprite i tworzy plik xml. 
 
 ##URUCHAMIANIE NA WINDOWSIE: 
