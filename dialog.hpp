@@ -31,7 +31,7 @@ class Dialog : public QDialog
 
 private:
 	Ui::Dialog *ui;
-	
+		
 	const qreal animation_clock_;
 	const uint pixels_per_object_;
 	uint steps_per_tick_;
@@ -43,9 +43,12 @@ private:
 	QTimer timer_;
 	QAtomicInt animations_;
 
-	QList<SpriteObject *> to_add_;
-	QList<SpriteObject *> to_remove_;
-	QList<SpriteObject *> sprite_object_pool_;
+	QVector<SpriteObject *> actual_;
+	QVector<SpriteObject *> to_add_;
+	QVector<SpriteObject *> to_remove_;
+	QVector<SpriteObject *> sprite_object_pool_;
+	
+	QVector<QGraphicsPixmapItem *> surface_objects_;
 
 	SpriteObject* SearchObject(const uint id) const;
 	qreal CalculateX(const int x) const;

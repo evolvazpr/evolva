@@ -51,7 +51,7 @@ void SpriteObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 	QPixmap pmap = pixmap();
 	QRectF target(0, 0, pixsize_, pixsize_);
 	QRectF source(actual_sprite_ * pixsize_, pixsize_ * direction_, pixsize_, pixsize_);
-	
+	painter->setClipRect(option->exposedRect);	
 	painter->drawPixmap(target, pmap, source);
 	(void)option;			//silencing "not used parameter" warning.
 	(void)widget;			//silencing "not used parameter" warning.

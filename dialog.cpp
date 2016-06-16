@@ -24,6 +24,12 @@ Dialog::Dialog(QWidget *parent, const int width, const int height, const int pix
 	timer_.start(animation_clock_);
 	count_of_rounds_ = ui->lineEdit_rounds->text().toUInt();	
 	steps_per_tick_ = ui->lineEdit_steps->text().toUInt();
+
+	for (uint i = 0; i < width_; ++i) {
+		for (uint j = 0; j < height_; ++j) {
+			surface_objects_.push_back(nullptr);
+		}
+	}
 }
 
 
@@ -121,10 +127,12 @@ void Dialog::CreateObject(const uint id, const QPixmap& pixmap, uint sprite_cnt,
 
 	sprite_object->SetObject(scene->parent(), id, x_pos, y_pos, pixmap, sprite_cnt);
 	
-	if (animations_.fetchAndAddAcquire(0))
+	if (animations_.fetchAndAddAcquire(0)) {
 		to_add_.push_back(sprite_object);
-	else 
+	} else {
 		scene->addItem(sprite_object);
+		actual_.push_back(sprite_object);
+	}
 }
 
 /**
@@ -136,6 +144,7 @@ void Dialog::AnimationFinished() {
 	if (!animations_.fetchAndAddAcquire(0)) {
 		for (auto &it : to_add_) {
 			scene->addItem(it);
+			actual_.push_back(it);
 		}
 
 		to_add_.clear();
@@ -143,6 +152,7 @@ void Dialog::AnimationFinished() {
 		for (auto &it : to_remove_) {
 			scene->removeItem(it);
 			it->SetObject(nullptr, 0, 0, 0, QPixmap(), 0);
+			actual_.removeOne(it);
 			sprite_object_pool_.push_back(it);
 		}
 
@@ -156,16 +166,9 @@ void Dialog::AnimationFinished() {
  * @return pointer to SpriteObject. If there is no SpriteObject with passed id, nullptr is returned.
  */
 SpriteObject* Dialog::SearchObject(const uint id) const {
-	QList<QGraphicsItem *> obj_list = scene->items();
-	SpriteObject *ptr;
-	for (auto &it : obj_list) {
-		if (it->type() != QGraphicsPixmapItem::Type) {
-			ptr = dynamic_cast<SpriteObject *>(it); //How to not to cast?
-			if (ptr == nullptr)
-				throw EvolvaException("Dialog::SearchObject! IT SHOULD NOT OCCURE!");
+	for (auto &ptr : actual_) {
 			if(ptr->GetId() == id)
 				return ptr;
-		}
 	}
 	
 	for (auto &ptr : to_add_) {
@@ -173,7 +176,6 @@ SpriteObject* Dialog::SearchObject(const uint id) const {
 			return ptr;
 		}
 	}
-
 	return nullptr;
 }
 
@@ -245,6 +247,7 @@ void Dialog::RemoveObject(const uint id) {
 		to_remove_.push_back(sprite_object);
 	} else {
 		scene->removeItem(sprite_object);
+		actual_.removeOne(sprite_object);
 		sprite_object->SetObject(nullptr, 0, 0, 0, QPixmap(), 0);
 		sprite_object_pool_.push_back(sprite_object);
 	}
@@ -262,6 +265,7 @@ void Dialog::CreateSurfaceObject(const QPixmap& pixmap, const int x, const int y
 	if (rect == nullptr)//remove it?
 		throw EvolvaException("?");
 	scene->addItem(rect);
+	surface_objects_[x + y*width_] = rect;
 	rect->setOffset(CalculateX(x), CalculateY(y));
 }
 
@@ -288,12 +292,10 @@ void Dialog::RemoveSurfaceObject(const int x, const int y) {
  * Using Remove and CreateSurfaceObject was bad in meaning of speed.
  */
 void Dialog::ReplaceSurfaceObject(const QPixmap& pixmap, const int x, const int y) {
-	QTransform test;
-	QGraphicsItem *item = scene->itemAt(CalculateX(x), CalculateY(y), test);
-	QGraphicsPixmapItem *pixmap_item = dynamic_cast<QGraphicsPixmapItem*>(item);
-	if (!pixmap_item)
+	QGraphicsPixmapItem *item = surface_objects_[y*width_ + x];
+	if (!item)
 		throw EvolvaException("Dialog::ReplaceSurfaceObject internal error");
-	pixmap_item->setPixmap(pixmap);
+	item->setPixmap(pixmap);
 }
 
 /**
